@@ -1,0 +1,13 @@
+{
+  "name": "tracerivms",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite",
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "https://api.example.com"
+    }
+  ]
+}

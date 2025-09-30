@@ -1,0 +1,610 @@
+<template>
+  <ion-page>
+   
+    <ion-content>
+      <div ref="mapContainer" id="map" style="height: 100%;"></div>
+
+      <!-- Pass the vehicleObject directly to InfoBox, and only display it if vehicleObject is present -->
+      <InfoBox v-if="vehicleObject" :vehicleData="vehicleObject" />
+
+          <ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
+            <ion-fab-button ref="fabButton" @click="toggleFab">
+          <ion-icon :icon="fabIcon" style="color: white;"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-list side="top">
+          <!-- Each FAB button with icon on the left and label on the right -->
+          <div class="fab-item" @click="navigateToPage(1)">
+            <img src="\ic_btn_search_landmark.png" class="fab-image" />
+            <ion-label class="fab-label">Get direction to landmark</ion-label>
+          </div>
+
+          <div class="fab-item" @click="navigateToPage(2)">
+            <img src="\ic_btn_search_closest_vehicle.png"  class="fab-image" />
+            <ion-label class="fab-label">Get direction to another vehicle</ion-label>
+          </div>
+
+          <div class="fab-item" @click="navigateToPage(3)">
+            <img src="\filter_layer.png"  class="fab-image" />
+            <ion-label class="fab-label">Change Map</ion-label>
+          </div>
+        </ion-fab-list>
+      </ion-fab>
+    </ion-content>
+  </ion-page>
+</template>
+
+<script lang="ts">
+import InfoBox from '@/components/InfoBoxGroupMap.vue';
+import InfowindowgroupMap from '@/components/InfoWindowGroupMarker.vue';
+import { showToastMessage } from '@/services/toast'; 
+
+import {
+  IonButtons,
+  IonBackButton,
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonFab,
+  IonFabButton,
+  IonFabList,
+  IonIcon,
+  IonLabel,
+  onIonViewWillEnter  // Import necessary lifecycle hooks from Ionic
+} from '@ionic/vue';
+import { defineComponent, onMounted } from 'vue';
+import { ref, onUnmounted } from 'vue';
+import Constants from '@/common/constants';
+import axios from 'axios';
+import { useRouter ,useRoute} from 'vue-router';
+import { createApp } from 'vue';
+import storage from '@/services/storagefile';
+
+
+import {
+  chevronUpCircle,
+  colorPalette,
+  globe,
+} from 'ionicons/icons';
+import { onBeforeRouteLeave } from 'vue-router';
+import { Loader } from "@googlemaps/js-api-loader";
+import { add, close } from 'ionicons/icons'; // Import your icons
+import { watch } from 'vue';
+import { loadingController } from '@ionic/vue';
+import { App } from '@capacitor/app';
+
+
+
+
+export default defineComponent({
+  components: {
+    IonContent,
+    IonHeader,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+    IonButtons,
+    IonBackButton,
+    InfoBox,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonIcon,
+    IonLabel,
+    InfowindowgroupMap
+  },
+  props: {
+    vehicleId: {
+      type: String,
+      required: true
+    },
+    vehicleName: {
+      type: String,
+      required: true
+    },
+    groupname:{
+        type: String,
+    }
+
+  },
+  setup(props) {
+
+    const route = useRoute();
+    const router = useRouter();
+
+
+    const isFabOpen = ref(false);
+    const fabIcon = ref(add);
+    
+    const intervalId=ref('30000');
+    let vehicle_id: any;
+    const fabButton = ref(null);
+
+
+    localStorage.setItem('Dir_lat', '');
+    localStorage.setItem('Dir_lon', '');
+    localStorage.setItem('Dir_vehName', '');
+    localStorage.setItem('landmark_lat', '');
+    localStorage.setItem('landmark_lng', '');
+
+    const mapRef = ref<google.maps.Map | null>(null);
+    let newMap: google.maps.Map | null = null;
+
+    const vehicleObject = ref(null);
+    const mapContainer = ref(null);
+    const directionsServiceUrl = `https://maps.googleapis.com/maps/api/directions/json`;
+
+    const polylineRef = ref<google.maps.Polyline | null>(null);
+
+    let oldPath = '';
+
+
+
+    
+    // Function to fetch directions
+    const getDirections = async (destLat: number, destLon: number) => {
+      console.log('Directions API Response');
+
+      if (!mapRef.value || !vehicleObject.value) {
+        console.error('Map or vehicle object is not initialized');
+        return;
+      }
+
+      // Clear existing polyline if present
+      if (polylineRef.value) {
+        polylineRef.value.setMap(null); // Remove the existing polyline from the map
+        polylineRef.value = null; // Clear the reference
+      }
+
+      const origin = { lat: vehicleObject.value.lat, lng: vehicleObject.value.lon };
+      const destination = { lat: destLat, lng: destLon };
+
+
+       // Create and present loading indicator
+  const loading = await loadingController.create({
+    message: 'Loading directions...',
+    spinner: 'circles',
+  });
+
+  await loading.present();
+      try {
+        const response = await axios.get(directionsServiceUrl, {
+          params: {
+            origin: `${origin.lat},${origin.lng}`,
+            destination: `${destination.lat},${destination.lng}`,
+            key: Constants.Google_map_API,
+          },
+        });
+
+
+        if (response.data.status === 'OK' && response.data.routes.length > 0) {
+          const route = response.data.routes[0].overview_polyline.points;
+          const decodedPath = google.maps.geometry.encoding.decodePath(route);
+
+          // Check if decodedPath is valid
+          console.log('Decoded Path:', decodedPath);
+
+          if (decodedPath) {
+            polylineRef.value = new google.maps.Polyline({
+              path: decodedPath,
+              geodesic: true,
+              strokeColor: '#FF0000',
+              strokeOpacity: 1.0,
+              strokeWeight: 5,
+            });
+
+            polylineRef.value.setMap(mapRef.value); // Add the polyline to the map
+            moveCameraToLocation(origin.lat, origin.lng, 16);
+          }
+        } else {
+          showToastMessage("No route found");
+
+          console.error('No route found or status not OK');
+        }
+      } catch (error) {
+        console.error('Error fetching directions:', error);
+      }finally {
+    // Dismiss loading indicator
+    await loading.dismiss();
+  }
+    };
+
+    // Move camera to specific location
+    const moveCameraToLocation = (lat: number, lon: number, zoomno: number) => {
+
+      if (mapRef.value) {
+        mapRef.value?.setCenter(new google.maps.LatLng(lat, lon));
+        mapRef.value?.setZoom(zoomno);
+        console.log("searchland",lat+" "+lon);
+
+      } else {
+        console.error('Map not initialized');
+      }
+    };
+
+
+    const  toggleFab = () => {
+      isFabOpen.value = !isFabOpen.value;
+      fabIcon.value = isFabOpen.value ? close : add; // Update icon based on FAB state
+    };
+
+      const RunData=async (vehicleObject:any)=>{
+      
+      // console.log("DisplayData",vehicleObject);
+      //if (!mapRef.value && mapContainer.value) {
+                
+                const initialLat = parseFloat(vehicleObject.lat);
+                const initialLong = parseFloat(vehicleObject.lon);
+                const initialZoom = 16;
+                const initialCenter = { lat: initialLat, lng: initialLong };
+                const storedMapType = localStorage.getItem('groupmapType') || 'roadmap';
+
+              
+                const loader = new Loader({
+                apiKey: await Constants.getGoogleMapAPI(),
+                version: "beta", // Ensure you're using the beta version for AdvancedMarkerElement
+                libraries: ['geometry', 'places'] // Include necessary libraries
+              });
+                      
+              loader.load().then(() => {
+          // Now the google object is available
+          console.log('Google Maps API loaded');
+
+                newMap = new google.maps.Map(mapContainer.value, {
+                  center: initialCenter,
+                  zoom: initialZoom,
+                  mapTypeId: storedMapType,
+                  zoomControl: true,
+                  mapTypeControl: false, // Disable Map/Satellite control
+                fullscreenControl: false, // Disable fullscreen control (ESC button)
+                streetViewControl: false, // Disable the Pegman/Street View control
+
+
+                });
+
+                mapRef.value = newMap;
+            
+                            // Create custom controls for navigator and map icons
+                            const controlContainer = document.createElement('div');
+                          controlContainer.style.position = 'absolute';
+                          controlContainer.style.right = '20px';
+                          controlContainer.style.bottom = '100px'; // Adjust to position it below the zoom controls
+                          controlContainer.style.display = 'flex';
+                          controlContainer.style.gap = '10px'; // Add spacing between the icons
+                          controlContainer.style.alignItems = 'center';
+                          controlContainer.style.background = 'white'; // Optional: to match the background of the buttons
+                          controlContainer.style.borderRadius = '5px'; // Optional: rounded corners
+                          controlContainer.style.padding = '5px'; // Optional: add some padding
+
+                          // Add the map icon
+                          const mapControlDiv = document.createElement('div');
+                          mapControlDiv.innerHTML = `
+                            <button style="background: transparent; border: none;">
+                              <img src="/pin.png" alt="Map" width="40" height="40">
+                            </button>`;
+                          mapControlDiv.style.display = 'none'; // Initially hidden
+
+                          // Add the navigator icon
+                          const navControlDiv = document.createElement('div');
+                          navControlDiv.innerHTML = `
+                            <button style="background: transparent; border: none;">
+                              <img src="/navigation.png" alt="Navigator" width="40" height="40">
+                            </button>`;
+                          navControlDiv.style.display = 'none'; // Initially hidden
+
+                          // Append the icons to the container
+                          controlContainer.appendChild(navControlDiv);
+                          controlContainer.appendChild(mapControlDiv);
+
+                          // Append the container to the map controls
+                          newMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
+
+
+
+
+                const markerColor = vehicleObject.sts_colr || '#FF0000'; // Default to red if no color is provided
+
+                // Create a custom marker icon
+                const markerIcon = {
+                  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,  // Use circle as the marker shape
+                  fillColor: markerColor,               // Use the vehicle status color
+                  fillOpacity: 1,
+                  strokeWeight: 0,
+                  scale: 5,                             // Reduce the size by adjusting the scale (e.g., 5)
+                };
+
+
+                const marker = new google.maps.Marker ({
+                  position: initialCenter,
+                  map: newMap,
+                  icon: markerIcon,  // Set the custom icon
+
+                });
+
+                        
+
+                            const infoWindow = new google.maps.InfoWindow();
+
+                    // Create a new div to mount your Vue component
+                    const infoWindowContainer = document.createElement('div');
+
+                    // Use Vue's createApp to mount the InfoBox component inside the div
+                    const app = createApp(InfowindowgroupMap, { vehicleData: vehicleObject });
+                    app.mount(infoWindowContainer);
+
+                    // Set the infoWindow's content to the container with the Vue component
+                    infoWindow.setContent(infoWindowContainer);
+
+
+                // Add click event to the marker to show info window
+                marker.addListener('click', () => {
+                         
+                      // Show the custom controls when the marker is clicked
+                                  navControlDiv.style.display = 'block';
+                                  mapControlDiv.style.display = 'block';
+
+                                  // Log latitude and longitude
+                                  const lat = marker.getPosition().lat();
+                                  const lng = marker.getPosition().lng();
+                                  console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+
+                                  // Add click event listeners to controls to perform desired actions
+                                  navControlDiv.addEventListener('click', () => {
+                                    window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                                  });
+
+                                  mapControlDiv.addEventListener('click', () => {
+                                    window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                                  });
+
+                      infoWindow.open({
+                            anchor: marker,
+                            map: newMap,
+                          
+                          });
+
+                   });
+
+
+
+                      }).catch((e) => {
+            console.error('Error loading Google Maps API:', e);
+          });
+
+       // }     
+      
+    };
+
+      
+    // FAB button click handling
+    const navigateToPage = (pageName: number) => {
+
+  
+      if (fabButton.value) {
+        fabButton.value.$el?.click(); // Access the native element and trigger a click
+      }
+
+        localStorage.removeItem('Dir_lat');
+                localStorage.removeItem('Dir_lon');
+
+                localStorage.removeItem('landmark_lat');
+                localStorage.removeItem('landmark_lng');
+
+        // Clear polyline
+
+      if (polylineRef.value) {
+        polylineRef.value.setMap(null); // Remove the existing polyline from the map
+        polylineRef.value = null; // Clear the reference
+      }
+
+      if (pageName === 1) {
+        // Navigate to search landmark page
+        router.push('/searchland');
+      } else if (pageName === 2) {
+        // Navigate to another vehicle direction page
+        router.push('/groupsearchvehiclemap');
+      } else if (pageName === 3) {
+        // Navigate to map layer change page
+        router.push('/groupmaplayer');
+      }
+
+       // Close the FAB list and toggle the icon to 'add' when navigating
+          isFabOpen.value = false;
+          fabIcon.value = add;
+    };
+
+
+          // Automatically close FAB on any route change
+          router.beforeEach((to, from, next) => {
+             // Close the FAB list and toggle the icon to 'add' when navigating
+         
+            oldPath = from.fullPath; // Store the previous path
+
+    
+          next(); // Proceed to the next route
+        });
+
+        
+   
+      
+    onIonViewWillEnter(async () => {
+
+      const Group=localStorage.getItem("SelectGroup");
+        console.log("Group",Group);
+      const vehicleData = localStorage.getItem('selectedVeh');
+      const VehicleValue = vehicleData;
+
+      if(VehicleValue)
+    {
+      vehicleObject.value=JSON.parse(VehicleValue);
+      vehicle_id=vehicleObject.value.veh_id;
+
+      await RunData(vehicleObject.value);
+    }
+
+
+
+      intervalId.value = setInterval( async () => {
+               const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
+
+                                  
+                                      const matchingGroups = storedValues.filter(groupPage => groupPage.group === Group);
+                                      if (matchingGroups.length > 0) {
+
+                                        console.log('Parsed storedValues:', matchingGroups);
+
+                                          const matchingVehdata = matchingGroups[0].veh_arr.filter(vehobject => vehobject.veh_id === vehicle_id);
+                                          
+                                          localStorage.setItem('selectedVeh', JSON.stringify(matchingVehdata[0]));
+
+
+                                          vehicleObject.value = matchingVehdata.length > 0 ? matchingVehdata[0] : null;
+
+                                          if (vehicleObject.value) {
+                                              RunData(vehicleObject.value);
+                                          }
+                                      }
+                                   
+              },35000); // 30000 ms = 30 seconds
+
+          console.log('Old path:', oldPath);
+
+             if (oldPath === '/groupsearchvehiclemap') {
+                  
+              
+                    const dirLat = localStorage.getItem('Dir_lat');
+                  const dirLon = localStorage.getItem('Dir_lon');
+
+                  console.log("displayDataaWrong",dirLat+" "+dirLon);
+
+                    getDirections(parseFloat(dirLat), parseFloat(dirLon));
+                  
+                  } 
+                
+                if (oldPath === '/searchland') {
+                 
+                      const land_dirLat= localStorage.getItem("landmark_lat");
+                    const land_dirLng= localStorage.getItem("landmark_lng");
+
+
+                      moveCameraToLocation(parseFloat(land_dirLat), parseFloat(land_dirLng),10);
+                    
+ 
+                } 
+                
+                 if (oldPath === '/groupmaplayer') {
+                 
+                  if(mapRef.value)
+                {
+                  mapRef.value?.setMapTypeId(localStorage.getItem('groupmapType') || 'roadmap');
+                }else{
+                  console.log("Failed to map ref")
+                }
+
+                }
+
+
+                
+            
+
+
+    });
+
+
+    onMounted(()=>{
+      
+    });
+
+
+    // Clean up on component unmount
+    onUnmounted(() => {
+      if (mapRef.value) {
+        mapRef.value = null;
+      }
+      clearInterval(intervalId.value)
+    
+    });
+
+
+    return {
+       vehicleId: props.vehicleId,
+      vehicleName: props.vehicleName,
+      groupname:props.groupname,
+      mapContainer,
+      vehicleObject,
+      chevronUpCircle,
+      colorPalette,
+      globe,
+      navigateToPage,
+      getDirections,
+      moveCameraToLocation,
+      fabButton,
+      isFabOpen,toggleFab,
+      fabIcon,
+      intervalId,
+      RunData,
+    };
+  },
+
+
+
+
+
+
+});
+</script>
+
+<style>
+.fab-image{
+  height: 32px;
+  width: 32px;
+}
+
+.fab-item {
+
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-right: 40px; /* Add padding to the right to avoid text being cut off */
+  overflow: hidden; /* Prevent overflow issues */
+}
+
+.fab-label {
+  margin-left: 5px;
+
+  font-size: 14px;
+  color: white;
+  background-color:rgb(45, 44, 44);
+  padding: 4px 4px 4px 4px;
+  border-radius: 4px;
+  white-space: nowrap;       /* Prevent the label from breaking into a new line */
+  /* Remove or increase max-width if needed */
+  max-width: 250px;          /* Increase max-width to fit longer text */
+  overflow: visible;         /* Allow text to extend */
+  text-overflow: initial;    /* Remove ellipsis */
+}
+
+
+.fab-icon {
+  font-size: 24px;
+  color: red;
+}
+
+/* Reduce the size of the close button for the InfoWindow */
+.gm-ui-hover-effect {
+  width: 30px !important;    /* Adjust the width */
+  height: 30px !important;   /* Adjust the height */
+  right: 5px !important;     /* Adjust the position if needed */
+  top: 5px !important;       /* Adjust the position if needed */
+  
+}
+.gm-ui-hover-effect > img {
+  width: 100% !important;    /* Make sure the image inside the button scales accordingly */
+  height: 100% !important;
+}
+
+
+</style>

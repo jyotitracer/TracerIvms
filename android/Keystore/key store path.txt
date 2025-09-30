@@ -1,0 +1,5 @@
+key store path- C:\Users\Lems\IonicProjects\MainProjects\TracerIvms\android\Keystore\
+password - ivms123
+alias -  key0
+password - ivms123
+orgnization- lems

@@ -1,0 +1,33 @@
+/* global.css or global.scss */
+
+
+  ion-toolbar ,ion-toolbar,ion-header
+  {
+    --background: #f31212; /* Set the background color of the header */
+  }
+  
+  ion-title {
+    color: white !important; /* Set the text color of the title */
+  }
+  
+  ion-buttons ion-back-button {
+    --color: white; /* Set the color of the back button */
+  }
+  
+  ion-buttons ion-menu-button {
+    --color: white; /* Set the color of the menu button */
+  }
+
+  ion-toggle {
+    --handle-background-checked: red; /* The color of the toggle handle */
+    --background-checked: red; /* The color of the background when the toggle is selected */
+  }
+
+  ion-list{
+    --background: #fff; /* Set the background color of the header */
+
+  }
+
+ 
+
+  
