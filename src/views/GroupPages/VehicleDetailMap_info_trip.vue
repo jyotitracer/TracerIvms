@@ -134,13 +134,6 @@ export default defineComponent({
       window.location.reload(); // Force reload after going back
     }, 100);
     router.back();
-
-  //     if (router.options.history.state.back) {
-  //   router.back();
-  // } else {
-  //   router.push("/home"); // fallback if no history
-  // }
-
   };
 
 
@@ -151,15 +144,15 @@ export default defineComponent({
 
 
       selectTab('map');
-       App.addListener('backButton', ({ canGoBack }) => {
-           goBack();
-          }).then(listener => {
-            backButtonListener = listener;
-          });
+      //  App.addListener('backButton', ({ canGoBack }) => {
+      //      goBack();
+      //     }).then(listener => {
+      //       backButtonListener = listener;
+      //     });
 
     });
     onUnmounted(()=>{
-      App.removeAllListeners();
+   //   App.removeAllListeners();
 
     });
 
