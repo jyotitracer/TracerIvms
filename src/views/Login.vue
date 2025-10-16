@@ -32,7 +32,7 @@
         <ion-input 
           label="Username" 
           label-placement="floating" 
-          v-model="username" 
+          v-model="usernamefield" 
           type="text" 
           required 
           style="color: #000; background-color: #fff;">
@@ -81,6 +81,7 @@ import { showToast,showToastMessage } from '@/services/toast';
 import router from '@/router/index'; // Assuming your router file is named router.js
 import useNetwork from '@/services/networkService'; // Import the network service
 import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
+import { username, selectedPage,isFuelEnabled } from "@/services/userstate"; // Import the global state
 
 export default {
   components: {
@@ -90,7 +91,7 @@ export default {
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
-    const username = ref('');
+    const usernamefield = ref('');
     const password = ref('');
    // const showToast = ref(false);
     const toastMessage = ref('');
@@ -145,7 +146,7 @@ export default {
             loading.present(); // Show loading
 
             const params = {
-              username: username.value,
+              username: usernamefield.value,
               password: password.value,
               app_type: '2',
               mob_platform: devicePlatform.value,
@@ -161,6 +162,7 @@ export default {
             return ReqGetDoaminName(params)
               .then((response) => {
                 const responseJson = response.data;
+
 
                 if (response.status === 200) {
                   //toastMessage.value = responseJson.message;
@@ -215,6 +217,15 @@ export default {
               if (response.status === 200) {
                 toastMessage.value = responseJson.message;
 
+                      if (responseJson?.username) {
+                        username.value = responseJson.username;
+                      }
+
+                      console.log("responseJson?.isFuel",responseJson?.isFuel);
+                      if(responseJson?.isFuel)
+                      {
+                        isFuelEnabled.value=responseJson.isFuel;
+                      }
                 return Promise.all([
                   storeData('login_data', responseJson),
                   storeData('IsLoginAlready', true)
@@ -305,7 +316,7 @@ export default {
     });
 
     return {
-      username,
+      usernamefield,
       password,
       showToastMessage,
             showToast,

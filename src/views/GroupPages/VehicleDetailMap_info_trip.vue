@@ -62,7 +62,12 @@ import {
   IonContent, IonTabBar, IonTabButton, IonTabs, 
   IonLabel, IonIcon, IonPage, IonButton, 
   IonButtons, IonHeader, IonTitle, IonToolbar, 
-  IonRouterOutlet 
+  IonRouterOutlet, 
+  useIonRouter,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+  onIonViewDidLeave,
+  useBackButton
 } from '@ionic/vue';
 import { useRouter ,useRoute} from 'vue-router';
 import { location,informationCircle, documentAttach, list, listSharp, arrowBack} from 'ionicons/icons';
@@ -117,8 +122,9 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    const backPressedOnce = ref(false);
-    let backButtonListener: PluginListenerHandle | undefined;
+    const ionRouter = useIonRouter();
+
+    let backButtonListener: any;
 
 
 
@@ -130,6 +136,9 @@ export default defineComponent({
 
 
     const goBack = () => {
+
+    
+
     setTimeout(() => {
       window.location.reload(); // Force reload after going back
     }, 100);
@@ -138,21 +147,37 @@ export default defineComponent({
 
 
        // Listen for hardware back button
-    onMounted(() => {
+    onMounted(async () => {
       
       initNetworkListener();
-
-
       selectTab('map');
-      //  App.addListener('backButton', ({ canGoBack }) => {
-      //      goBack();
-      //     }).then(listener => {
-      //       backButtonListener = listener;
-      //     });
 
-    });
+
+
+      // Method 1 — Ionic’s built-in listener
+        useBackButton(9999, (processNextHandler) => {
+      
+                                goBack();
+                                
+
+        });
+
+        // OR Method 2 — Capacitor’s App listener (more control)
+        backButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
+         
+
+                          //  showToastMessage("app back");
+
+        });
+            
+     
+  });
+
+
+
+    
     onUnmounted(()=>{
-   //   App.removeAllListeners();
+        if (backButtonListener) backButtonListener.remove();
 
     });
 

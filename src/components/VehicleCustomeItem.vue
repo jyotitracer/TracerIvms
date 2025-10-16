@@ -54,7 +54,7 @@
       
       <!-- Third Row: Fuel and Status Update -->
       <ion-row>
-        <ion-col size="6" class="fuel">
+        <ion-col size="6" class="fuel" v-if="vehicle.fuel_flag === 1">
           <img :src="getFuel" alt="fuel icon" class="icon-img" />
           <span>{{ fuelDisplay }}</span>
         </ion-col>

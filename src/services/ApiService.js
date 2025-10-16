@@ -75,8 +75,9 @@ const ReqLogin_withoutTok = (postData, controller, command) => {
        return axios.post(Domain_Name + controller + "/" + command, postData)
     })
   .then(response => {
+          console.log("response", command + " " + response);
+
     if (response.status === 200) {
-      console.log("response", command + " " + response.data);
       return response;
     } else if (response.status === 204) {
       showToastMessage("Data Not Available");

@@ -17,13 +17,13 @@
        <div v-if="showTooltip" class="tooltip">
         <div class="tooltip-section" @click="takeTour(pageId)">
           <!-- Icon from Code -->
-          <img src="\ic_star_disable.png" alt="star icon" class="tooltip-icon" />
+          <img src="\ic_tour_data.png" alt="star icon" class="tooltip-icon" />
           <!-- Text -->
           <span class="tooltip-text">Take a Tour</span>
         </div>
         <div class="tooltip-section" @click="shareScreen">
           <!-- Icon from Code -->
-          <img src="\ic_star_disable.png" alt="star icon" class="tooltip-icon" />
+          <img src="\ic_share_data.png" alt="star icon" class="tooltip-icon" />
           <!-- Text -->
           <span class="tooltip-text">Share Screen</span>
         </div>

@@ -20,12 +20,12 @@
       </ion-content>
     </ion-menu>
     <ion-router-outlet id="main-content" style="background-color: white;"></ion-router-outlet>
-    <ion-toast :isOpen="showToast" :message="toastMessage" />
+    <!-- <ion-toast :isOpen="showToast" :message="toastMessage" /> -->
   </ion-app>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted ,watch} from 'vue';
+import { defineComponent, ref, onMounted ,watch, computed} from 'vue';
 import {
   IonApp,
   IonMenu,
@@ -52,7 +52,7 @@ import { fetchData } from '@/services/ApiService';
 import Constants from '@/common/constants';
 import { Network } from '@capacitor/network';
 import { showToast,showToastMessage } from '@/services/toast'; // Custom toast utility
-import { username, selectedPage } from '@/services/userstate'; // Import the global state
+import { username, selectedPage,isFuelEnabled } from '@/services/userstate'; // Import the global state
 
 
 
@@ -101,8 +101,8 @@ export default defineComponent({
     }
   },
   setup() {
-    const IsFuelEnable = ref(1);
-    const showToast = ref(false);
+  //  const IsFuelEnable = ref(1);
+    // const showToast = ref(false);
     const toastMessage = ref('');
     const pages = ref([
 
@@ -118,20 +118,28 @@ export default defineComponent({
       { title: 'Logout', route: '/logout', iosIcon: logOutOutline, mdIcon: logOutSharp,pageid:'10'  }
     ]);
 
-    const filteredPages = ref(pages.value);
+   // const filteredPages = ref(pages.value);
 
 
     onMounted(async () => {
       try {
         const loginResponse = await storage.get('login_data');
-        IsFuelEnable.value = loginResponse.isFuel;
-        filteredPages.value = IsFuelEnable.value === 1 ? pages.value : pages.value.filter(page => page.title !== 'Fuel Report');
+        if(loginResponse)
+        isFuelEnabled.value = loginResponse?.isFuel;
+      
       } catch (error) {
         console.error('Error fetching login data:', error);
       }
       requestPermission();
       listenForNotifications();
     });
+
+     // ✅ Use computed for auto refresh
+ const filteredPages = computed(() => {
+    return isFuelEnabled.value === 1
+      ? pages.value
+      : pages.value.filter(p => p.title !== 'Fuel Report');
+  });
 
     const requestPermission = async () => {
       const result = await PushNotifications.requestPermissions();
@@ -261,11 +269,12 @@ export default defineComponent({
       filteredPages,
       navigateToPage,
       closeMenu,
-      showToast,
+      // showToast,
       toastMessage
     };
   }
 });
+
 </script>
 
 <style>

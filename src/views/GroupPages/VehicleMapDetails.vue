@@ -430,15 +430,34 @@ export default defineComponent({
       
     onIonViewWillEnter(async () => {
 
-      const Group=localStorage.getItem("SelectGroup");
-        console.log("Group",Group);
+     
       const vehicleData = localStorage.getItem('selectedVeh');
-      const VehicleValue = vehicleData;
 
-      if(VehicleValue)
+
+      if(vehicleData)
     {
-      vehicleObject.value=JSON.parse(VehicleValue);
-      vehicle_id=vehicleObject.value.veh_id;
+      const VehicleValue =JSON.parse(vehicleData);
+            vehicle_id=VehicleValue.veh_id;
+
+        const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
+              // 3️⃣ Find the group data matching the current group name
+          const matchingGroups = storedValues.filter(
+            (grouparray) => grouparray.group === 'All Group'
+          );
+      
+      
+          // 4️⃣ Extract the group's vehicles
+         const allGroupVehicles = matchingGroups[0].veh_arr || [];
+
+
+          // 5️⃣ Filter only vehicles whose veh_id exists in favorites
+        const filteredVehicles = allGroupVehicles.filter(vehicle =>
+          VehicleValue.veh_ID.includes(vehicle.veh_ID)
+        );
+
+        console.log("filteredVehicles",filteredVehicles[0]);
+
+      vehicleObject.value=filteredVehicles[0];
 
       await RunData(vehicleObject.value);
     }

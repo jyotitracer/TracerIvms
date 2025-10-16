@@ -553,7 +553,7 @@ export default defineComponent({
         }
       });
     };
-    const callMapInit=()=>{
+    const callMapInit= async ()=>{
      
 
   const initialLat = 19.0760; // Corrected latitude
@@ -563,7 +563,7 @@ export default defineComponent({
   const storedMapType = localStorage.getItem('groupmapType') || 'roadmap';
 
   const loader = new Loader({
-                apiKey: Constants.Google_map_API,
+                apiKey: await Constants.getGoogleMapAPI(),
                 version: "beta", // Ensure you're using the beta version for AdvancedMarkerElement
                 libraries: ['geometry', 'places'] // Include necessary libraries
               });

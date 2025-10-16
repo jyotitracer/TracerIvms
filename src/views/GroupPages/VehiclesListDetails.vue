@@ -68,6 +68,10 @@ import storage from '@/services/storagefile';
 import Constants from '@/common/constants';
 import { Share } from '@capacitor/share';
 import useNetwork from '@/services/networkService'; // Import the network service
+import { showToast,showToastMessage } from '@/services/toast'; // Custom toast utility
+import { App } from '@capacitor/app';
+import { onIonViewWillEnter, onIonViewDidEnter, onIonViewWillLeave, onIonViewDidLeave } from '@ionic/vue';
+import { useBackButton } from '@ionic/vue';
 
 
 export default defineComponent({
@@ -102,7 +106,9 @@ export default defineComponent({
     const showActionSheet = ref(false);
     const actionSheetButtons = ref([]);
     const favorites = ref([]);
-      let i=1;
+    let i=1;
+    let backButtonListener;
+
      
 
     // Function to add a new item to the favorites array
@@ -197,15 +203,45 @@ export default defineComponent({
       await loadFavorites(); // Load favorites when the component is mounted
       await fetchData(); // Fetch data on mount
 
+
      intervalId.value = setInterval(() => {
         fetchData();
       }, 30000); // 30000 ms = 30 seconds
+
+
+
+  //       // Method 1 — Ionic’s built-in listener
+  // useBackButton(9999, (processNextHandler) => {
+  //   console.log('🚫 Hardware back button pressed — default action prevented');
+  //   // Do nothing (completely block back)
+  // });
+
+  // // OR Method 2 — Capacitor’s App listener (more control)
+  // backButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
+  //   console.log('🚫 Hardware back button pressed — blocking default');
+  //   // Simply return without navigating back
+  //   // e.g., you could show a toast instead
+  // });
+
+
+    });
+    onUnmounted(()=>{
+      if (backButtonListener) {
+        backButtonListener.remove();
+      }
     });
 
-    onUnmounted(() => {
-     // clearInterval(intervalId.value)
 
-    });
+            onIonViewWillLeave(async () => {
+  
+                    if (showActionSheet.value) {
+                          // Close ActionSheet if open
+                          showActionSheet.value = false;
+                          return; // Stop further back navigation
+                        }
+                
+});
+
 
     const navigateToPage = (vehicle,veh_id, veh_no,group) => {
       //console.log("displayData",JSON.stringify(vehicle));
@@ -229,6 +265,11 @@ export default defineComponent({
 };
 
     const goBack = () => {
+       // ✅ If the ActionSheet is open, close it first
+  if (showActionSheet.value) {
+    showActionSheet.value = false;
+    return; // stop here, don’t navigate back yet
+  }
       router.back();
     };
 
@@ -268,7 +309,7 @@ export default defineComponent({
             const uri = `http://maps.google.com/maps?q=${vehicle.lat},${vehicle.lon}`;
             const vehicle_no = `Vehicle Number: ${vehicle.veh_no}`;
             const current_sts = `Vehicle Current Status: ${vehicle.sts_str}`;
-            const vehicle_date_time = `Date and Time: ${vehicle.update_time}`;
+            const vehicle_date_time = `Date and Time: ${vehicle.rec_dt}`;
             const subj = `\n${vehicle_no}\n${current_sts}\n${vehicle_date_time}`;
             const finalUri = uri + subj;
 

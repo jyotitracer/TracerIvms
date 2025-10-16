@@ -67,7 +67,7 @@
   <style scoped>
   .info-box {
     position: absolute;
-    top: 10px; /* Adjust as needed */
+    top: 20px; /* Adjust as needed */
     right: 5px; /* Adjust as needed */
     background-color: white;
     border-radius: 8px;

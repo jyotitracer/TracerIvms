@@ -1043,12 +1043,12 @@ let markerId2: google.maps.Marker | null
 
   if (type === 'from') {
     selectedDateTime.value = fromDateTime.value
-      ? formatISO(new Date(fromDateTime.value))
-      : formatISO(new Date());
+      ? new Date(fromDateTime.value)
+      : new Date();
   } else {
     selectedDateTime.value = toDateTime.value
-      ? formatISO(new Date(toDateTime.value))
-      : formatISO(new Date());
+      ? new Date(toDateTime.value)
+      : new Date();
   }
 
   isDateTimePickerVisible.value = true;

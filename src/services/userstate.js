@@ -11,5 +11,7 @@ export const selectedPage = ref({
     data:''
   });
 
+  export const isFuelEnabled=ref(0);
+
 
   

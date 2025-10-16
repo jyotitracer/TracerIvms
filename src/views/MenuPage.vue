@@ -24,13 +24,13 @@
       <div v-if="showTooltip" class="tooltip">
         <div class="tooltip-section" @click="takeTour(pageId)">
           <!-- Icon from Code -->
-          <img src="\ic_star_disable.png" alt="star icon" class="tooltip-icon" />
+          <img src="\ic_tour_data.png" alt="star icon" class="tooltip-icon" />
           <!-- Text -->
           <span class="tooltip-text">Take a Tour</span>
         </div>
         <div class="tooltip-section" @click="shareScreen">
           <!-- Icon from Code -->
-          <img src="\ic_star_disable.png" alt="star icon" class="tooltip-icon" />
+          <img src="\ic_share_data.png" alt="star icon" class="tooltip-icon" />
           <!-- Text -->
           <span class="tooltip-text">Share Screen</span>
         </div>
@@ -78,7 +78,7 @@ import { Share } from "@capacitor/share";
 import { GroupIntervalRefresh } from "@/services/GrouprefreshService";
 import { useRouter, useRoute } from "vue-router";
 
-import { username, selectedPage } from "@/services/userstate"; // Import the global state
+import { username, selectedPage,isFuelEnabled } from "@/services/userstate"; // Import the global state
 import { App } from "@capacitor/app";
 import type { PluginListenerHandle } from "@capacitor/core";
 
@@ -218,6 +218,7 @@ const handleBackButton = async () => {
       callMenuPage();
       GroupIntervalRefresh();
       initNetworkListener();
+
     });
 
     onUnmounted(() => {
@@ -263,6 +264,12 @@ const handleBackButton = async () => {
       if (data?.username) {
         username.value = data.username;
       }
+
+      if(data?.isFuel)
+      {
+        isFuelEnabled.value=data.isFuel;
+      }
+
     };
 
     return {
