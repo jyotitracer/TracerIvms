@@ -548,8 +548,7 @@
     import InfoBoxNearestVeh from '@/components/InfoBoxNearestVeh.vue';
     import InfoBoxSummaryTrip from '@/components/InfoBoxSummeryTrip.vue';
     import { IonContent, IonFab, IonFabButton, IonFabList, IonHeader, IonIcon, IonTitle, IonToolbar,IonLabel,
-      loadingController,IonProgressBar,IonRange,IonCheckbox, 
-      useBackButton} from '@ionic/vue';
+      loadingController,IonProgressBar,IonRange,IonCheckbox, useBackButton} from '@ionic/vue';
     import {  chevronUpCircle,    colorPalette,    globe, playCircle, pauseCircle, star, close, closeCircle } from 'ionicons/icons';
     import router from '@/router/index'; // Assuming your router file is named router.js
     import{MapIntervalRefresh,stopInterval1Min} from '@/services/MaprefreshService';
@@ -564,11 +563,11 @@
     import { Loader } from "@googlemaps/js-api-loader";
     import InfoWindowMapMarker from '@/components/InfoWindowMapMarker.vue';
     import InfoWindowDorMarker from '@/components/InfoWindowDotMarker.vue';
-
     import { createApp } from 'vue';
     import { format, startOfDay ,formatISO} from 'date-fns';
-  import { IonButton, IonModal, IonDatetime, IonGrid, IonCol, IonItem, IonRow } from '@ionic/vue';
-  import {  selectedPage } from '@/services/userstate'; // Import the global state
+    import { IonButton, IonModal, IonDatetime, IonGrid, IonCol, IonItem, IonRow } from '@ionic/vue';
+    import {  selectedPage } from '@/services/userstate'; // Import the global state
+    import { loadGoogleMaps } from '@/services/googleMapsLoader';
     import * as tz from "date-fns-tz";
 
   
@@ -595,10 +594,10 @@
           const isMapBusyWithRoute=ref(false);
           const items = ref([]);
           const historyarray = ref([]);
-          
-  let markerMovingIcon: google.maps.Marker | null
-let markerId1: google.maps.Marker | null
-let markerId2: google.maps.Marker | null
+                  
+          let markerMovingIcon: google.maps.Marker | null
+          let markerId1: google.maps.Marker | null
+          let markerId2: google.maps.Marker | null
 
   
           const intervalRunning1Min = ref(false);
@@ -613,40 +612,27 @@ let markerId2: google.maps.Marker | null
           const ishowPath=ref(false);
           const isMarkerShowPath=ref(false);
           const isLoadPath=ref(false);
-      
-      // Initialize DateTimes
-  const fromDateTime = ref('');
-  const toDateTime = ref('');
-  // Set min and max date
+              
+              // Initialize DateTimes
+          const fromDateTime = ref('');
+          const toDateTime = ref('');
+          // Set min and max date
+          const currentDateTime = ref('');
 
-
-  const currentDateTime = ref('');
-
-  const fromDateTimeFormatted = ref('');
-  const toDateTimeFormatted = ref('');
-  
-  
-  // Modal control
-  const isDateTimePickerVisible = ref(false);
-  const selectedDateTime = ref(null);
-  const dateType = ref(null);
-  
- 
-  
-  
- 
-        
+          const fromDateTimeFormatted = ref('');
+          const toDateTimeFormatted = ref('');
+             
+          // Modal control
+          const isDateTimePickerVisible = ref(false);
+          const selectedDateTime = ref(null);
+          const dateType = ref(null);      
         // Icons
         const playIcon = playCircle;
-        const pauseIcon = pauseCircle;
-        
-        
+        const pauseIcon = pauseCircle;     
         const isPlaying= ref(false);
         const progressValue = ref(0); // Value for progress bar
         const speedValue = ref(5); // Example speed in km/h
         
-  
-  
            // const marker = ref();
         const polylinePathsForShowPath = ref();
         const directionsService = ref();
@@ -674,39 +660,38 @@ let markerId2: google.maps.Marker | null
                    IonItem, IonRow,IonProgressBar,IonRange,IonCheckbox,InfoWindowDorMarker},
   
                    computed: {
-                    mapFabContainerHeight() {
-                            let height = "100%";
-                            if (ishowPath.value) {
-                              if(isMarkerShowPath.value){
-                              height = `calc(${height} - 70px)`;
-                              }
-                             
-                            }
-  
-                            if (isLoadPath.value) {
-                              if(isMarkerShowPath.value){
-                              height = `calc(${height} - 85px)`;
-                              }else{
-                              height = `calc(${height} - 120px)`;
-                              }
-                            }
-  
-  
-                            return height;
+                        mapFabContainerHeight() {
+                                let height = "100%";
+                                if (ishowPath.value) {
+                                  if(isMarkerShowPath.value){
+                                  height = `calc(${height} - 70px)`;
+                                  }
+                                
+                                }
+      
+                                if (isLoadPath.value) {
+                                  if(isMarkerShowPath.value){
+                                  height = `calc(${height} - 85px)`;
+                                  }else{
+                                  height = `calc(${height} - 120px)`;
+                                  }
+                                }
+      
+      
+                                return height;
                           },
   
                           playPauseSection(){
-                            if(isMarkerShowPath.value){
-                             return `calc(85px)`;
-                              }else{
-                             return `calc(120px)`;
-                              }
+                              if(isMarkerShowPath.value){
+                              return `calc(85px)`;
+                                }else{
+                              return `calc(120px)`;
+                                }
                           }
                   },
                   
               setup() {
   
-               
   
                   const route = useRoute();
                   vehicleLat = route.params.vehLat;
@@ -717,38 +702,35 @@ let markerId2: google.maps.Marker | null
                   ? JSON.parse(route.params.arrayData)
                   : [];
                
-                 // console.log("displayData",vehicleLat+" "+vehicleLon);
-                 // console.log("arrayData", historyarray.value);
+            
   
-  
-  
-     // Function to get the formatted "Last Status Update"
-    const formatDateToString = (date,timeZone) => {
-       const parts = new Intl.DateTimeFormat("en-GB", {
-            timeZone,
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          }).formatToParts(date);
+                  // Function to get the formatted "Last Status Update"
+                  const formatDateToString = (date,timeZone) => {
+                    const parts = new Intl.DateTimeFormat("en-GB", {
+                          timeZone,
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false,
+                        }).formatToParts(date);
 
-          const lookup: any = {};
-          parts.forEach((p) => {
-            lookup[p.type] = p.value;
-          });
+                        const lookup: any = {};
+                        parts.forEach((p) => {
+                          lookup[p.type] = p.value;
+                        });
 
-          // Returns ISO-like string in that timezone
-          return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
+                        // Returns ISO-like string in that timezone
+                        return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
 
-    };
+                  };
                   
                 
                   onMounted(async () => {
 
-                      const login_data= await storage.get("login_data");
+                      const login_data= await storage.get('login_data');
                       userTimeZone.value=login_data.tz_idfier;
 
                          currentDateTime.value = formatDateToString(new Date(),userTimeZone.value);
@@ -762,11 +744,11 @@ let markerId2: google.maps.Marker | null
   
                       router.replace('/today');
                     });
-                   CallOnlyAPI();
-                    MapDisplay();
-                    MapIntervalRefresh();
+                   await CallOnlyAPI();
+                    await MapDisplay();
+                   await MapIntervalRefresh();
                               
-  
+                      console.log("uerhter");
           
                   });
             
@@ -801,22 +783,9 @@ let markerId2: google.maps.Marker | null
                   openDatePicker,validateDateTime,closeModal,selectedDateTime,
                   openModal,progressValue,speedValue,isSummaryChecked,isTripInfoChecked,isDateTimePickerVisible,
                   currentDateTime,updateDateTime,saveDateTime,interval,historyarray,currentIndex,fabButton,
-                  markerMovingIcon,isMapBusyWithRoute,formatDateToString,
-        polylinePathsForShowPath,
-        directionsService,
-        routePoints,
-        middleMarkers,
-        animationIndex,
-        animationTimer,
-        animationSpeed,
-        fetchRoute,processWaypoints,
-        extractRoutePoints,
-        animateRoute,getCurrentWaypointIndex,
-        updateSpeed,
-        updateAnimationProgress,
-        animationProgress,
-        
-  
+                  markerMovingIcon,isMapBusyWithRoute,formatDateToString, extractRoutePoints,animateRoute,getCurrentWaypointIndex,
+        polylinePathsForShowPath,  directionsService, routePoints, middleMarkers, animationIndex, animationTimer, animationSpeed, fetchRoute,processWaypoints,
+        updateSpeed,updateAnimationProgress,animationProgress,
                         };
                   },
           };
@@ -1037,20 +1006,38 @@ let markerId2: google.maps.Marker | null
 
        
       };
+
+
+      // ✅ Convert it to ISO **without changing local time**
+function formatForIonDatetime(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  // 👉 build a valid ISO string (no UTC conversion)
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
+}
   
  const openModal = (type: 'from' | 'to') => {
   dateType.value = type;
+   let originalDate = new Date();
 
   if (type === 'from') {
-    selectedDateTime.value = fromDateTime.value
+    originalDate = fromDateTime.value
       ? new Date(fromDateTime.value)
       : new Date();
   } else {
-    selectedDateTime.value = toDateTime.value
+    originalDate = toDateTime.value
       ? new Date(toDateTime.value)
       : new Date();
   }
+   selectedDateTime.value = formatForIonDatetime(originalDate);
 
+    console.log("selectedDateTime1",selectedDateTime.value);
+
+ 
   isDateTimePickerVisible.value = true;
 };
 
@@ -1086,35 +1073,7 @@ const saveDateTime = () => {
     isDateTimeValid.value = new Date(fromDateTime.value) <= new Date(toDateTime.value); // Ensure From is before To
   };
     
-  //collect route from start to end destinations
-  const getRoute = (start: { lat: any; lng: any; }, end: { lat: any; lng: any; }) => {
-    return new Promise((resolve, reject) => {
-      const request = {
-        origin: start,
-        destination: end,
-        travelMode: google.maps.TravelMode.DRIVING // Use DRIVING for road following
-      };
-  
-          if (typeof google !== 'undefined' && google.maps) {
-  
-            const directionsService = new google.maps.DirectionsService();
-          
-  
-      directionsService.route(request, (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-          resolve(result.routes[0].overview_path); // This is the path along the road
-        } else {
-          reject('Directions request failed due to ' + status);
-        }
-      });
-    }else {
-    console.error('Google Maps JavaScript API is not loaded.');
-  }
-  
-    });
-  };
-  
-  
+
   
   
   
@@ -1249,39 +1208,41 @@ const saveDateTime = () => {
   
             async function MapDisplay(){
                 try {
+
                   await nextTick();
               if (mapContainer.value) {
   
-                    const login_data= await storage.get("login_data");
+                    const login_data= await storage.get('login_data');
   
-  
-                    // Retrieve stored zoom and center from localStorage
-                    const storedZoom = localStorage.getItem('mapZoom');
-                    const mapLat = localStorage.getItem('mapLat');
-                    const mapLong = localStorage.getItem('mapLong');
-                    const storedMapType = localStorage.getItem('mapType'); // Retrieve map type
-  
-  
-                    const initialLat=mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);
-                    const initialLong=mapLong ? parseFloat(mapLong) : parseFloat(login_data.h_lon);
-  
+
+                    
+                        // Retrieve stored values
+                        const storedZoom = await storage.get('mapZoom');
+                        const mapLat = await storage.get('mapLat');
+                        const mapLong = await storage.get('mapLong');
+                        const storedMapType = await storage.get('mapType');
+
+                     
+                      const initialLat =
+                        mapLat !== null && mapLat !== undefined && !isNaN(parseFloat(mapLat))
+                          ? parseFloat(mapLat)
+                          : parseFloat(login_data?.h_lat);
+
+                      const initialLong =
+                        mapLong !== null && mapLong !== undefined && !isNaN(parseFloat(mapLong))
+                          ? parseFloat(mapLong)
+                          : parseFloat(login_data?.h_lon);
+
+                        console.log("initialLat:", login_data.h_lat, "initialLong:", login_data.h_lon);
   
                     // Parse zoom and center values from storage or set defaults
-                    const initialZoom = storedZoom ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
+                    const initialZoom =  storedZoom !== null && storedZoom !== undefined && !isNaN(parseFloat(storedZoom)) ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
                     const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
-                    const initialMapType = storedMapType ? storedMapType : 'roadmap';
-  
-                    const loader = new Loader({
-                    apiKey: Constants.Google_map_API,
-                    version: "beta", // Ensure you're using the beta version for AdvancedMarkerElement
-                            libraries: ["geometry","places"],
+                    const initialMapType = storedMapType !== null && storedMapType !== undefined && !isNaN(parseFloat(storedMapType))  ? storedMapType : 'roadmap';
 
-                  });
-  
-  
-                  loader.load().then(() => {
-  
-                    newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
+                      await loadGoogleMaps(); // ✅ Wait until Maps API is loaded
+
+                       newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
                       center: initialCenter,
                       zoom: initialZoom,
                       mapTypeId: initialMapType,
@@ -1295,9 +1256,8 @@ const saveDateTime = () => {
   
   
                     mapRef.value = newMap;
-                  }).catch((e) => {
-                          console.error('Error loading Google Maps API:', e);
-                        });
+
+  
                   
   
                     // Update the map type if it's stored in localStorage
@@ -1625,7 +1585,7 @@ const saveDateTime = () => {
                 // If valid lat/lon are passed, move camera to that location
                 if (!isNaN(vehicleLat) && !isNaN(vehicleLon) && parseFloat(vehicleLat) !== 0  &&
                  parseFloat(vehicleLon) !== 0) {
-                  moveCameraToLocation(vehicleLat, vehicleLon,16);
+                 await moveCameraToLocation(vehicleLat, vehicleLon,16);
                 }
   
                 if (historyarray.value.length > 0) {
@@ -1644,8 +1604,8 @@ const saveDateTime = () => {
                 }
   
   
-                const lat = localStorage.getItem("landmark_lat");
-          const lng = localStorage.getItem("landmark_lng");
+                const lat = await storage.get('landmark_lat');
+          const lng = await storage.get('landmark_lng');
   
   
           if (lat && lng) {
@@ -1653,28 +1613,28 @@ const saveDateTime = () => {
             const parsedLng = parseFloat(lng);
   
            // console.log("searched_land",parsedLat+" "+parsedLng);
-            moveCameraToLocation(parsedLat, parsedLng,10);
-            localStorage.removeItem("landmark_lat");
-            localStorage.removeItem("landmark_lng");
+            await moveCameraToLocation(parsedLat, parsedLng,10);
+           await storage.remove('landmark_lat');
+            await storage.remove('landmark_lng');
   
           }
         
-          const Nearest_dirLat = localStorage.getItem("Near_landmark_lat");
-            const Nearest_dirLon = localStorage.getItem("Near_landmark_lng");
-            const NearesVeh=JSON.parse(localStorage.getItem("NearestVeh"));
-           // console.log("displayjyoby",NearesVeh);
+          const Nearest_dirLat =await storage.get('Near_landmark_lat');
+            const Nearest_dirLon = await storage.get('Near_landmark_lng');
+            const NearesVeh=JSON.parse(await storage.get('NearestVeh'));
+            console.log("displayjyoby",NearesVeh);
   
-            if (Nearest_dirLat !== null && Nearest_dirLat.trim() !== "" && Nearest_dirLon !== null && Nearest_dirLon.trim() !== "") {
+            if (Nearest_dirLat !== null && Nearest_dirLat !== "" && Nearest_dirLon !== null && Nearest_dirLon !== "") {
   
             getDirections(Nearest_dirLat,Nearest_dirLon,NearesVeh);
           }
         
   
           
-          localStorage.removeItem("Near_landmark_lat");
-            localStorage.removeItem("Near_landmark_lng");
-            localStorage.removeItem("Near_landmark_address");
-            localStorage.removeItem("NearestVeh");
+          storage.remove('Near_landmark_lat');
+            storage.remove('Near_landmark_lng');
+            storage.remove('Near_landmark_address');
+            storage.remove('NearestVeh');
         
   
                   } else {
@@ -1690,9 +1650,10 @@ const saveDateTime = () => {
               };
   
              
-            const moveCameraToLocation = (lat: string | string[], lon: string | string[],zoomno:number) => {
+            const moveCameraToLocation = (lat, lon,zoomno:number) => {
               // Move the camera to the latitude and longitude
             
+              console.log("cameramove",lat+" "+lon);
               if (newMap) {
                   newMap.setCenter(new google.maps.LatLng(lat, lon));
                   newMap.setZoom(zoomno);
@@ -1701,79 +1662,89 @@ const saveDateTime = () => {
                 }
               };
           
-            const getDirections = async (destLat: number, destLon: number, vehicleObject:object) => {
-            if (!mapRef.value || !vehicleObject) {
-                console.error('Map or vehicle object is not initialized');
-                return;
-            }
+              const getDirections = async (destLat: number, destLon: number, vehicleObject: any) => {
+
+  // if (!mapRef.value || !vehicleObject) {
+  //   console.error("Map or vehicle object is not initialized");
+  //   return;
+  // }
+
+
+    Near_vehicleObject.value = vehicleObject;
+
+    // Clear existing polyline if present
+    if (polylineRef.value) {
+      polylineRef.value.setMap(null);
+      polylineRef.value = null;
+    }
+    console.log("vehicleObject.lat map",vehicleObject.lat+" "+vehicleObject.lon);
+
+   
+
+    // Define origin and destination
+    const origin = { lat: parseFloat(vehicleObject.lat), lng: parseFloat(vehicleObject.lon) };
+    const destination = { lat: destLat, lng: destLon };
+
+    console.log("showing map",origin.lat +" "+origin.lng+" de- "+destination.lat+" "+destination.lng);
+
+
+ const loading = await loadingController.create({
+    message: 'Loading directions...',
+    spinner: 'circles',
+  });
+  await loading.present();
+
+  try{
+    const directionsService = new google.maps.DirectionsService();
+
+    // Request route
+    const result = await directionsService.route({
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+     });
+
+      console.log("DirecttionResult",result.routes);
+
+    if (result.routes && result.routes.length > 0) {
+      const path = result.routes[0].overview_path;
+      polylineRef.value = new google.maps.Polyline({
+        path,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 5,
+      });
+
+        isnearVehObject.value = true;
+      polylineRef.value.setMap(mapRef.value);
+
+        // Move camera to vehicle’s location
+        await moveCameraToLocation(vehicleObject.lat, vehicleObject.lon, 16);
+      } else {
+        console.error("Directions request failed due to:", status);
+      }
+
   
-            Near_vehicleObject.value=vehicleObject;
-            // Clear existing polyline if present
-                if (polylineRef.value) {
-                  polylineRef.value.setMap(null); // Remove the existing polyline from the map
-                  polylineRef.value = null; // Clear the reference
-                }
+}catch (error) {
+    console.error('Error fetching directions:', error);
+  } finally {
+    await loading.dismiss();
+  }
+};
+    
   
-            const origin = { lat: vehicleObject.lat, lng: vehicleObject.lon };
-            const destination = { lat: destLat, lng: destLon };
-  
-            const directionsServiceUrl = "https://maps.googleapis.com/maps/api/directions/json";
-  
-            try {
-                const response = await axios.get(directionsServiceUrl, {
-                    params: {
-                        origin: `${origin.lat},${origin.lng}`,
-                        destination: `${destination.lat},${destination.lng}`,
-                        key: await Constants.getGoogleMapAPI(),
-                    },
-                });
-  
-               // console.log("Directions API Response", response.data);
-  
-                if (response.data.status === "OK" && response.data.routes.length > 0) {
-                    const route = response.data.routes[0].overview_polyline.points;
-                    const decodedPath = google.maps.geometry.encoding.decodePath(route);
-  
-                    // Log the decoded path
-                   // console.log("Decoded Path:", decodedPath);
-  
-                    // Convert decoded path to the format required by Capacitor Google Maps (array of LatLng objects)
-                    const polylinePoints = decodedPath.map(point => ({ lat: point.lat(), lng: point.lng() }));
-  
-                    if (decodedPath) {
-                    polylineRef.value = new google.maps.Polyline({
-                      path: decodedPath,
-                      geodesic: true,
-                      strokeColor: '#FF0000',
-                      strokeOpacity: 1.0,
-                      strokeWeight: 5,
-                    });
-  
-                    polylineRef.value.setMap(mapRef.value); // Add the polyline to the map
-  
-                    isnearVehObject.value=true;
-  
-                    // Move the camera to the vehicle's location (if desired)
-                    moveCameraToLocation(vehicleObject.lat, vehicleObject.lon, 16);
-                  }
-                } else {
-                    console.error("No route found or status not OK");
-                }
-            } catch (error) {
-                console.error("Error fetching directions:", error);
-            }
-              };
-  
-            // Function to move the camera to home location
+
+         
             const moveCameraToHomeLocation = async () => {
-              const login_data= await storage.get("login_data");
+              const login_data= await storage.get('login_data');
   
   
                           // Retrieve stored zoom and center from localStorage
-                          const storedZoom = localStorage.getItem('mapZoom');
-                          const mapLat = localStorage.getItem('mapLat');
-                          const mapLong = localStorage.getItem('mapLong');
-                          const storedMapType = localStorage.getItem('mapType'); // Retrieve map type
+                          const storedZoom = await storage.get('mapZoom');
+                          const mapLat =await storage.get('mapLat');
+                          const mapLong = await storage.get('mapLong');
+                          const storedMapType =await storage.get('mapType'); // Retrieve map type
   
   
                           const initialLat=mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);

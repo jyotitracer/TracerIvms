@@ -81,6 +81,8 @@ import { useRouter, useRoute } from "vue-router";
 import { username, selectedPage,isFuelEnabled } from "@/services/userstate"; // Import the global state
 import { App } from "@capacitor/app";
 import type { PluginListenerHandle } from "@capacitor/core";
+import { getCountryGoogleKey } from "@/services/ApiService";
+
 
 export default defineComponent({
   components: {
@@ -97,6 +99,8 @@ export default defineComponent({
     IonRouterOutlet,
   },
   setup() {
+
+    
     const { isConnected, showReconnectedMessage, initNetworkListener } =
       useNetwork(); // Use network service
 
@@ -208,16 +212,20 @@ const handleBackButton = async () => {
 
     // Lifecycle
     onMounted(() => {
+
       App.addListener('backButton', ({ canGoBack }) => {
     // prevent default capacitor back
             handleBackButton();
           }).then(listener => {
             backButtonListener = listener;
           });
-      retrieveData("login_data");
+      retrieveData('login_data');
       callMenuPage();
       GroupIntervalRefresh();
       initNetworkListener();
+
+        getCountryGoogleKey();
+
 
     });
 
@@ -228,9 +236,9 @@ const handleBackButton = async () => {
     // Retrieve page details
     const callMenuPage = async (): Promise<void> => {
       showTooltip.value = false;
-      const path = (await storage.get("selectedItem")) as string | null;
-      const title = (await storage.get("pagename")) as string | null;
-      const pageid = (await storage.get("pageid")) as string | null;
+      const path = (await storage.get('selectedItem')) as string | null;
+      const title = (await storage.get('pagename')) as string | null;
+      const pageid = (await storage.get('pageid')) as string | null;
 
       console.log("displayname", title + " " + pageid + " " + path);
 
@@ -240,13 +248,13 @@ const handleBackButton = async () => {
       pageId.value = pageid || "1";
 
       if (pageId.value !== "6") {
-        const eventReport = await storage.get("eventReport");
+        const eventReport = await storage.get('eventReport');
         if (eventReport) {
           await storage.remove("eventReport");
         }
       }
       if (pageId.value !== "7") {
-        const fuelData = await storage.get("fuelReport");
+        const fuelData = await storage.get('fuelReport');
         if (fuelData) {
           await storage.remove("fuelReport");
         }

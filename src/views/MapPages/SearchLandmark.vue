@@ -65,6 +65,7 @@ import {
   IonToolbar,IonSearchbar,IonLabel,IonList,IonItem
 } from '@ionic/vue';
 import { getPlaceApi } from "@/services/ApiService"; // Import the getPlaceApi service
+import storage from "@/services/storagefile";
 
 export default {
   name: 'SearchLandmark',
@@ -82,7 +83,6 @@ export default {
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
     const searchQuery = ref('');
     const searchResults = ref([]);
-    const googleApiKey = Constants.Google_map_API;
 
     const onSearch = async (event) => {
       const query = event.target.value.trim();
@@ -90,18 +90,31 @@ export default {
       // Only make API request if query length is 3 or more characters
       if (query.length > 2) {
         try {
-          const data = await getPlaceApi(query, googleApiKey);
-          if (data && data.results) {
-            // Populate the searchResults with the data received from the API
-            searchResults.value = data.results.map(result => ({
-              name: result.name,
-              formatted_address: result.formatted_address,
-              place_id: result.place_id,
-              geometry: result.geometry.location // Includes lat and lng
-            }));
-          } else {
-            searchResults.value = [];
-          }
+          const data = await getPlaceApi(query);
+                  console.log("Place Results:", data);
+
+        let places = [];
+
+            if (Array.isArray(data)) {
+              places = data;
+            } else if (data?.results && Array.isArray(data.results)) {
+              places = data.results;
+            }
+
+            searchResults.value = places.map(result => {
+              const loc = result.geometry?.location;
+              const lat = typeof loc?.lat === 'function' ? loc.lat() : loc?.lat;
+              const lng = typeof loc?.lng === 'function' ? loc.lng() : loc?.lng;
+
+              return {
+                name: result.name || 'Unnamed place',
+                formatted_address: result.formatted_address || '',
+                place_id: result.place_id || Math.random().toString(),
+                geometry: { lat, lng }
+              };
+            });
+
+
         } catch (error) {
           console.error('Error fetching places:', error);
           searchResults.value = [];
@@ -111,19 +124,22 @@ export default {
       }
     };
 
-    const selectLandmark = (landmark) => {
-      // When a landmark is selected, log the lat/lon and navigate back
-      const lat = landmark.geometry.lat;
-      const lng = landmark.geometry.lng;
-     // console.log('Selected Landmark:', landmark, `Lat: ${lat}, Lng: ${lng}`);
+    const selectLandmark = async (landmark) => {
+const lat = landmark.geometry.lat;
+const lng = landmark.geometry.lng;
 
-     localStorage.setItem("landmark_lat",lat);
-     localStorage.setItem("landmark_lng",lng);
+  console.log('Selected Landmark:', lat, lng);
 
+  if (lat && lng) {
+    await storage.set('landmark_lat', lat);
+    await storage.set('landmark_lng', lng);
+  } else {
+    console.warn('Invalid landmark coordinates:', landmark);
+  }
 
-      router.back();
-      
-    };
+  router.back();
+};
+
 
     onMounted(() => {
       initNetworkListener();

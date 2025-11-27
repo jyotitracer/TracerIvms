@@ -65,7 +65,7 @@ export default defineComponent({
     const setPage=ref('');
 
     const initializeSelection = async () => {
-      const storedMenu= await storage.get("selectedPage");
+      const storedMenu= await storage.get('selectedPage');
 
           if(storedMenu)
           {
@@ -103,9 +103,9 @@ export default defineComponent({
                   page.selected = true;
 
                   await storage.set('selectedPage', page);
-                  await storage.set("selectedItem", page.route);
-                await storage.set("pagename", page.title);
-                await storage.set("pageid",page.pageid)
+                  await storage.set('selectedItem', page.route);
+                await storage.set('pagename', page.title);
+                await storage.set('pageid',page.pageid)
 
 
                    // Set the selected page and save it to storage

@@ -37,6 +37,8 @@
 import InfoBox from '@/components/InfoBoxGroupMap.vue';
 import InfowindowgroupMap from '@/components/InfoWindowGroupMarker.vue';
 import { showToastMessage } from '@/services/toast'; 
+import { loadGoogleMaps } from '@/services/googleMapsLoader';
+import { oldPath } from '@/services/routeTracker';
 
 import {
   IonButtons,
@@ -122,11 +124,11 @@ export default defineComponent({
     const fabButton = ref(null);
 
 
-    localStorage.setItem('Dir_lat', '');
-    localStorage.setItem('Dir_lon', '');
-    localStorage.setItem('Dir_vehName', '');
-    localStorage.setItem('landmark_lat', '');
-    localStorage.setItem('landmark_lng', '');
+      // storage.set('Dir_lat', '');
+      // storage.set('Dir_lon', '');
+      // storage.set('Dir_vehName', '');
+      // storage.set('landmark_lat', '');
+      // storage.set('landmark_lng', '');
 
     const mapRef = ref<google.maps.Map | null>(null);
     let newMap: google.maps.Map | null = null;
@@ -137,82 +139,79 @@ export default defineComponent({
 
     const polylineRef = ref<google.maps.Polyline | null>(null);
 
-    let oldPath = '';
+
+
+const getDirections = async (destLat: number, destLon: number) => {
+
+  // if (!mapRef.value || !vehicleObject.value) {
+  //   console.error('Map or vehicle object is not initialized');
+  //   return;
+  // }
 
 
 
-    
-    // Function to fetch directions
-    const getDirections = async (destLat: number, destLon: number) => {
-      console.log('Directions API Response');
 
-      if (!mapRef.value || !vehicleObject.value) {
-        console.error('Map or vehicle object is not initialized');
-        return;
-      }
+  // ✅ Clear existing polyline
+  if (polylineRef.value) {
+    polylineRef.value.setMap(null);
+    polylineRef.value = null;
+  }
 
-      // Clear existing polyline if present
-      if (polylineRef.value) {
-        polylineRef.value.setMap(null); // Remove the existing polyline from the map
-        polylineRef.value = null; // Clear the reference
-      }
+ // ✅ Ensure both origin & destination are numbers
+  const origin = { 
+    lat: parseFloat(vehicleObject.value.lat), 
+    lng: parseFloat(vehicleObject.value.lon) 
+  };
+  const destination = { 
+    lat: parseFloat(destLat), 
+    lng: parseFloat(destLon) 
+  };
 
-      const origin = { lat: vehicleObject.value.lat, lng: vehicleObject.value.lon };
-      const destination = { lat: destLat, lng: destLon };
+  // console.log('Getting directions...',origin.lat+" "+origin.lng+"desti= "+destination.lat+" "+destination.lng);
 
-
-       // Create and present loading indicator
   const loading = await loadingController.create({
     message: 'Loading directions...',
     spinner: 'circles',
   });
-
   await loading.present();
-      try {
-        const response = await axios.get(directionsServiceUrl, {
-          params: {
-            origin: `${origin.lat},${origin.lng}`,
-            destination: `${destination.lat},${destination.lng}`,
-            key: Constants.Google_map_API,
-          },
-        });
 
+  try {
+    const directionsService = new google.maps.DirectionsService();
+    const result = await directionsService.route({
+       origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+    });
 
-        if (response.data.status === 'OK' && response.data.routes.length > 0) {
-          const route = response.data.routes[0].overview_polyline.points;
-          const decodedPath = google.maps.geometry.encoding.decodePath(route);
+    console.log("DirecttionResult",result.routes);
 
-          // Check if decodedPath is valid
-          console.log('Decoded Path:', decodedPath);
+    if (result.routes && result.routes.length > 0) {
+      const path = result.routes[0].overview_path;
+      polylineRef.value = new google.maps.Polyline({
+        path,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 5,
+      });
 
-          if (decodedPath) {
-            polylineRef.value = new google.maps.Polyline({
-              path: decodedPath,
-              geodesic: true,
-              strokeColor: '#FF0000',
-              strokeOpacity: 1.0,
-              strokeWeight: 5,
-            });
-
-            polylineRef.value.setMap(mapRef.value); // Add the polyline to the map
-            moveCameraToLocation(origin.lat, origin.lng, 16);
-          }
-        } else {
-          showToastMessage("No route found");
-
-          console.error('No route found or status not OK');
-        }
-      } catch (error) {
-        console.error('Error fetching directions:', error);
-      }finally {
-    // Dismiss loading indicator
+      polylineRef.value.setMap(mapRef.value);
+      moveCameraToLocation(origin.lat, origin.lng, 14);
+    } else {
+      showToastMessage("No route found");
+      console.warn('No routes found');
+    }
+  } catch (error) {
+    console.error('Error fetching directions:', error);
+  } finally {
     await loading.dismiss();
   }
-    };
+};
 
-    // Move camera to specific location
-    const moveCameraToLocation = (lat: number, lon: number, zoomno: number) => {
 
+   
+    const moveCameraToLocation = async (lat: number, lon: number, zoomno: number) => {
+      await loadGoogleMaps();
       if (mapRef.value) {
         mapRef.value?.setCenter(new google.maps.LatLng(lat, lon));
         mapRef.value?.setZoom(zoomno);
@@ -229,41 +228,34 @@ export default defineComponent({
       fabIcon.value = isFabOpen.value ? close : add; // Update icon based on FAB state
     };
 
-      const RunData=async (vehicleObject:any)=>{
-      
-      // console.log("DisplayData",vehicleObject);
-      //if (!mapRef.value && mapContainer.value) {
+const RunData = async (vehicleObject: any) => {
+  // ✅ Wait for Google Maps to load
+
+   await loadGoogleMaps();
+  
+ 
                 
                 const initialLat = parseFloat(vehicleObject.lat);
                 const initialLong = parseFloat(vehicleObject.lon);
                 const initialZoom = 16;
                 const initialCenter = { lat: initialLat, lng: initialLong };
-                const storedMapType = localStorage.getItem('groupmapType') || 'roadmap';
-
-              
-                const loader = new Loader({
-                apiKey: await Constants.getGoogleMapAPI(),
-                version: "beta", // Ensure you're using the beta version for AdvancedMarkerElement
-                libraries: ['geometry', 'places'] // Include necessary libraries
-              });
-                      
-              loader.load().then(() => {
-          // Now the google object is available
-          console.log('Google Maps API loaded');
-
-                newMap = new google.maps.Map(mapContainer.value, {
-                  center: initialCenter,
-                  zoom: initialZoom,
-                  mapTypeId: storedMapType,
-                  zoomControl: true,
-                  mapTypeControl: false, // Disable Map/Satellite control
-                fullscreenControl: false, // Disable fullscreen control (ESC button)
-                streetViewControl: false, // Disable the Pegman/Street View control
+                const storedMapType =  await storage.get('groupmapType') || 'roadmap';
+ 
 
 
-                });
 
-                mapRef.value = newMap;
+  newMap = new google.maps.Map(mapContainer.value, {
+                    center: initialCenter,
+                    zoom: 16,
+                    mapTypeId: storedMapType,
+                    zoomControl: true,
+                    mapTypeControl: false,
+                    fullscreenControl: false,
+                    streetViewControl: false,
+                  });
+
+                  mapRef.value = newMap;
+
             
                             // Create custom controls for navigator and map icons
                             const controlContainer = document.createElement('div');
@@ -368,28 +360,21 @@ export default defineComponent({
 
 
 
-                      }).catch((e) => {
-            console.error('Error loading Google Maps API:', e);
-          });
-
-       // }     
+      
       
     };
 
       
     // FAB button click handling
-    const navigateToPage = (pageName: number) => {
+    const navigateToPage = async (pageName: number) => {
 
   
       if (fabButton.value) {
         fabButton.value.$el?.click(); // Access the native element and trigger a click
       }
 
-        localStorage.removeItem('Dir_lat');
-                localStorage.removeItem('Dir_lon');
 
-                localStorage.removeItem('landmark_lat');
-                localStorage.removeItem('landmark_lng');
+              
 
         // Clear polyline
 
@@ -419,7 +404,7 @@ export default defineComponent({
           router.beforeEach((to, from, next) => {
              // Close the FAB list and toggle the icon to 'add' when navigating
          
-            oldPath = from.fullPath; // Store the previous path
+            oldPath.value = from.fullPath; // Store the previous path
 
     
           next(); // Proceed to the next route
@@ -427,11 +412,9 @@ export default defineComponent({
 
         
    
-      
     onIonViewWillEnter(async () => {
-
-     
-      const vehicleData = localStorage.getItem('selectedVeh');
+  
+ const vehicleData =await storage.get('selectedVeh');
 
 
       if(vehicleData)
@@ -440,14 +423,23 @@ export default defineComponent({
             vehicle_id=VehicleValue.veh_id;
 
         const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
+
+              console.log("displayveharra",storedValues);
+
               // 3️⃣ Find the group data matching the current group name
           const matchingGroups = storedValues.filter(
             (grouparray) => grouparray.group === 'All Group'
           );
-      
+          let allGroupVehicles;
+
+          if(matchingGroups[0])
+          {
+                     allGroupVehicles = matchingGroups[0].veh_arr || [];
+          }else{
+               allGroupVehicles = storedValues[0].veh_arr || [];
+          }
       
           // 4️⃣ Extract the group's vehicles
-         const allGroupVehicles = matchingGroups[0].veh_arr || [];
 
 
           // 5️⃣ Filter only vehicles whose veh_id exists in favorites
@@ -462,20 +454,18 @@ export default defineComponent({
       await RunData(vehicleObject.value);
     }
 
-
-
-      intervalId.value = setInterval( async () => {
+       intervalId.value = setInterval( async () => {
                const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
 
                                   
-                                      const matchingGroups = storedValues.filter(groupPage => groupPage.group === Group);
+                                      const matchingGroups = storedValues.filter(groupPage => groupPage.group === props.groupname);
                                       if (matchingGroups.length > 0) {
 
                                         console.log('Parsed storedValues:', matchingGroups);
 
                                           const matchingVehdata = matchingGroups[0].veh_arr.filter(vehobject => vehobject.veh_id === vehicle_id);
                                           
-                                          localStorage.setItem('selectedVeh', JSON.stringify(matchingVehdata[0]));
+                                           await storage.set('selectedVeh', JSON.stringify(matchingVehdata[0]));
 
 
                                           vehicleObject.value = matchingVehdata.length > 0 ? matchingVehdata[0] : null;
@@ -485,26 +475,37 @@ export default defineComponent({
                                           }
                                       }
                                    
-              },35000); // 30000 ms = 30 seconds
+              },60000); // 30000 ms = 60 seconds
 
-          console.log('Old path:', oldPath);
 
-             if (oldPath === '/groupsearchvehiclemap') {
-                  
-              
-                    const dirLat = localStorage.getItem('Dir_lat');
-                  const dirLon = localStorage.getItem('Dir_lon');
+    
+              // ✅ Wait for Google Maps API to load
+               // await loadGoogleMaps();
 
-                  console.log("displayDataaWrong",dirLat+" "+dirLon);
+                   
 
-                    getDirections(parseFloat(dirLat), parseFloat(dirLon));
-                  
-                  } 
+                console.log('Old path:', oldPath.value);
+
+              if (oldPath.value === '/groupsearchvehiclemap') {
+
+                    const dirLat = await storage.get('Dir_lat') ;
+                    const dirLon = await storage.get('Dir_lon') ;
+
+
+                      if (!dirLat || !dirLon) {
+                        console.warn('Invalid direction coordinates');
+                      } else {
+                        getDirections(dirLat, dirLon);
+                      }
+
+                  }
                 
-                if (oldPath === '/searchland') {
+                if (oldPath.value === '/searchland') {
                  
-                      const land_dirLat= localStorage.getItem("landmark_lat");
-                    const land_dirLng= localStorage.getItem("landmark_lng");
+                      const land_dirLat= await storage.get('landmark_lat');
+                    const land_dirLng=await storage.get('landmark_lng');
+                   
+                    console.log('searchland:', land_dirLat+" "+land_dirLng);
 
 
                       moveCameraToLocation(parseFloat(land_dirLat), parseFloat(land_dirLng),10);
@@ -512,27 +513,17 @@ export default defineComponent({
  
                 } 
                 
-                 if (oldPath === '/groupmaplayer') {
+                 if (oldPath.value === '/groupmaplayer') {
                  
-                  if(mapRef.value)
-                {
-                  mapRef.value?.setMapTypeId(localStorage.getItem('groupmapType') || 'roadmap');
-                }else{
-                  console.log("Failed to map ref")
-                }
+                        if(mapRef.value)
+                      {
+                        mapRef.value?.setMapTypeId(await storage.get('groupmapType') || 'roadmap');
+                      }else{
+                        console.log("Failed to map ref")
+                      }
 
                 }
 
-
-                
-            
-
-
-    });
-
-
-    onMounted(()=>{
-      
     });
 
 

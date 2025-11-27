@@ -37,8 +37,9 @@
   
   <script lang="ts">
     import { IonButtons,IonBackButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-    import { defineComponent } from 'vue';
+    import { defineComponent, onMounted } from 'vue';
     import { ref ,watch} from "vue";
+    import storage from "@/services/storagefile";
 
 
     export default defineComponent({
@@ -51,13 +52,22 @@
         IonButtons,
         IonBackButton
       },
-      setup(){
-        const selectedMapType = ref(localStorage.getItem("mapType") || "roadmap");
+       setup(){
+        const selectedMapType = ref('roadmap');
+
 
               // Watch for changes in selectedMapType and save it to localStorage
-              watch(selectedMapType, (newType) => {
-                localStorage.setItem("mapType", newType);
+              watch(selectedMapType, async (newType) => {
+                await storage.set('mapType', newType);
               });
+
+            
+
+                  onMounted(async () => {
+                            selectedMapType.value=await storage.get('mapType') ;
+
+                  });
+
 
               return {
                 selectedMapType,

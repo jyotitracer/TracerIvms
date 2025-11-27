@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { onMounted, onUnmounted, watch, ref } from 'vue';
+import { onMounted, onUnmounted, watch, ref, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { IonCol, IonRow } from '@ionic/vue';
 
@@ -53,12 +53,13 @@ export default {
       required:true,
     },
   },
-  setup(props) {
+   setup(props) {
     const chart = ref(null);
     const lineChartRef = ref(null);
     let fromdate;
 
     fromdate=props.FromDate;
+
     const createChart = () => {
       const canvas = lineChartRef.value;
       if (!canvas) {

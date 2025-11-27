@@ -160,9 +160,7 @@ export default defineComponent({
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
 
-    localStorage.setItem("Dir_lat",'');
-       localStorage.setItem("Dir_lon",'');
-       localStorage.setItem("Dir_vehName",'');
+    
 
     const items = ref([]); // Vehicle items
     const searchQuery = ref(''); // Search query bound to the search bar
@@ -243,10 +241,12 @@ export default defineComponent({
 
     });
 
-    const navigateToPage = (veh) => {
-       localStorage.setItem("Dir_lat",veh.lat);
-       localStorage.setItem("Dir_lon",veh.lon);
-       localStorage.setItem("Dir_vehName",veh.vehname);
+    const navigateToPage = async (veh) => {
+      console.log("selectedData",veh.lat+" "+veh.lon);
+      
+      await storage.set('Dir_lat',veh.lat);
+      await storage.set('Dir_lon',veh.lon);
+     await storage.set('Dir_vehName',veh.vehname);
 
       
       goBack();

@@ -313,7 +313,7 @@ const listenToNetworkChanges = () => {
 
                      // Call the API using the fetchData promise
                      fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Dash_All, params)
-                       .then(response => {
+                       .then(async response => {
                          const responsejson = response.data;
 
                          if (response.status === 200) {
@@ -322,13 +322,13 @@ const listenToNetworkChanges = () => {
                            console.log("Received data");
 
                            const currentDateTime = new Date();
-                           localStorage.setItem('APIcalledTodaysDate', currentDateTime);
+                          await storage.set('APIcalledTodaysDate', currentDateTime);
 
                            if (arrData && arrData.length > 0) {
                              console.log("displayerror", arrData[0]);
 
                              // Store today's data and update UI values
-                             return storage.set(Constants.storageValue.Key_Todays, arrData)
+                             return await storage.set(Constants.storageValue.Key_Todays, arrData)
                                .then(() => {
                                  todaysData.value.t_av = arrData[0].t_av;
                                  todaysData.value.t_sv = arrData[0].t_sv;
@@ -440,7 +440,8 @@ const listenToNetworkChanges = () => {
                  const createChart = async () => {
 
                   
-                    
+                      await nextTick();
+
                  
                   const movingStoredColor = await storage.get('movingcolor');
               const stoppedStoredColor = await storage.get('stoppedcolor');
@@ -585,7 +586,7 @@ const listenToNetworkChanges = () => {
                    // Start listening to network changes
                    listenToNetworkChanges();
 
-                     const savedDate = localStorage.getItem('savedTodaysDate');
+                     const savedDate = await storage.get('savedTodaysDate');
 
                      if (savedDate) {
                        receivedDate.value = savedDate;
@@ -609,7 +610,7 @@ const listenToNetworkChanges = () => {
                           dateAPI.value = get_Date_API(datatoday);
                        }
 
-                      const ApiCalledDate= localStorage.getItem("APIcalledTodaysDate");
+                      const ApiCalledDate= await storage.get('APIcalledTodaysDate');
 
                       if(ApiCalledDate!==null)
                       {
@@ -645,6 +646,7 @@ const listenToNetworkChanges = () => {
                        }
 
                      }
+
                        createChart();
 
                  });
@@ -689,7 +691,7 @@ const listenToNetworkChanges = () => {
    // Check if we are coming back from Page 2
    if (from.name === 'Periodtoday') {
 
-     let isChangeDate = localStorage.getItem('isChangeDateToday');
+     let isChangeDate = storage.get('isChangeDateToday');
      // Perform your task here
 
      if (isChangeDate === "true") {

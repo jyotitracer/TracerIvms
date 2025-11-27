@@ -171,7 +171,7 @@ export default defineComponent({
      const navigateToPage = async (path, title,pageid) => {
       await storage.set('selectedItem', path);
       await storage.set('pagename', title);
-      await storage.set("pageid",pageid);
+      await storage.set('pageid',pageid);
 
      // console.log("displayDataPage",title);
 
@@ -222,48 +222,47 @@ export default defineComponent({
       }
     };
 
-    const logoutMethod = () => {
-  loadingController.create({ message: 'Loading...',
-  backdropDismiss: true // Makes the loading controller cancelable
-
-   })
-    .then(loading => {
-      loading.present();
-
-      fetchData(Constants.CONT.Login_Contro, Constants.CMD.LOGOUT, {})
-        .then(response => {
-          if (response.status === 200) {
-            toastMessage.value = response.data.message;
-            closeMenu();
-            
-            // Clear storage and localStorage
-
-            
-             storage.clear();
-             localStorage.clear();
-             username.value='';
-             selectedPage.value = { }; // Update the shared state
-
-
-                router.push('/');
-              
-          } else if (response.status === 204) {
-            showToastMessage("Data Not Available");
-          }else if (response.status === 401) {
-
-          }
-        })
-        .catch(error => {
-          console.error('Error during logout:', error);
-        })
-        .finally(() => {
-          loading.dismiss();
-        });
-    })
-    .catch(error => {
-      console.error('Error creating loading:', error);
+const logoutMethod = async () => {
+  try {
+    const loading = await loadingController.create({
+      message: 'Loading...',
+      backdropDismiss: true
     });
+    await loading.present();
+
+    const response = await fetchData(
+      Constants.CONT.Login_Contro,
+      Constants.CMD.LOGOUT,
+      {}
+    );
+
+    if (response.status === 200) {
+      toastMessage.value = response.data.message;
+      closeMenu();
+
+      // Clear storage and localStorage
+      await storage.clear();
+      localStorage.clear();
+
+      username.value = '';
+      selectedPage.value = {};
+
+      await router.push('/');
+    } else if (response.status === 204) {
+      showToastMessage('Data Not Available');
+    } else if (response.status === 401) {
+      // handle unauthorized
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+  } finally {
+    const topLoader = await loadingController.getTop();
+    if (topLoader) {
+      topLoader.dismiss();
+    }
+  }
 };
+
 
     return {
       filteredPages,

@@ -166,6 +166,8 @@ import { Loader } from "@googlemaps/js-api-loader";
 import { defineComponent,nextTick } from 'vue';
 import { useRouter ,useRoute} from 'vue-router';
 import { App } from '@capacitor/app';
+import { loadGoogleMaps } from '@/services/googleMapsLoader';
+    import storage from "@/services/storagefile";
 
 
 addIcons({ close });
@@ -553,24 +555,17 @@ export default defineComponent({
         }
       });
     };
+
     const callMapInit= async ()=>{
      
-
   const initialLat = 19.0760; // Corrected latitude
   const initialLng = 72.8777; // Corrected longitude
   const initialZoom = 16;
   const initialCenter = { lat: initialLat, lng: initialLng };
-  const storedMapType = localStorage.getItem('groupmapType') || 'roadmap';
+  const storedMapType = await storage.get('groupmapType') || 'roadmap';
 
-  const loader = new Loader({
-                apiKey: await Constants.getGoogleMapAPI(),
-                version: "beta", // Ensure you're using the beta version for AdvancedMarkerElement
-                libraries: ['geometry', 'places'] // Include necessary libraries
-              });
-                      
-              loader.load().then(() => {
-          // Now the google object is available
-          console.log('Google Maps API loaded');
+
+  await loadGoogleMaps();
 
                 newMap = new google.maps.Map(mapContainer.value, {
                   center: initialCenter,
@@ -586,9 +581,9 @@ export default defineComponent({
 
         mapRef.value = newMap;
             
-  }).catch((error) => {
-    console.error("Error loading Google Maps API:", error);
-  });
+  // }).catch((error) => {
+  //   console.error("Error loading Google Maps API:", error);
+  // });
     };
 
     onMounted(async () => {

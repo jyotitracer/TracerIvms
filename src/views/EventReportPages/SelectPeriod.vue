@@ -116,8 +116,8 @@ export default {
       isPrivacyPolicyOpen.value = true;
     }
 
-    const savedEventReportFromDate = localStorage.getItem('savedEventReportFromDate');
-    const savedEventReportToDate = localStorage.getItem('savedEventReportToDate');
+    const savedEventReportFromDate = storage.get('savedEventReportFromDate');
+    const savedEventReportToDate = storage.get('savedEventReportToDate');
 
     onMounted(()=>{
       initNetworkListener();
@@ -244,8 +244,8 @@ export default {
       this.clearSelection();
     } else {
       // Proceed with valid date selection logic here
-      localStorage.setItem('savedEventReportFromDate', this.fromDate);
-      localStorage.setItem('savedEventReportToDate', this.toDate);
+      storage.set('savedEventReportFromDate', this.fromDate);
+      storage.set('savedEventReportToDate', this.toDate);
       this.$router.back();
     }
   }

@@ -168,19 +168,6 @@ export default defineComponent({
 
    
 
-  // Parse the selected landmark's latitude and longitude
-  try {
-
-      selectedLandCoords.value.lat = parseFloat(localStorage.getItem("Near_landmark_lat"));
-      selectedLandCoords.value.lon = parseFloat(localStorage.getItem("Near_landmark_lng"));
-      selectedLandAdd.value=  localStorage.getItem("Near_landmark_address");
-
-      console.log("parsedLandmark",selectedLandCoords.value.lat+" "+selectedLandCoords.value.lon+" "+selectedLandAdd.value);
-
-
-    } catch (error) {
-      console.error("Error parsing landmark coordinates", error);
-    }
     const labels = ['All', 'Moving', 'Stopped', 'Idle']; // Filter labels
 
      // Haversine formula to calculate the distance between two points (lat/lon)
@@ -307,6 +294,20 @@ export default defineComponent({
 
     onMounted(async () => {
       initNetworkListener();
+      
+  // Parse the selected landmark's latitude and longitude
+  try {
+
+      selectedLandCoords.value.lat = await storage.get('Near_landmark_lat');
+      selectedLandCoords.value.lon = await storage.get('Near_landmark_lng');
+      selectedLandAdd.value=  await storage.get('Near_landmark_address');
+
+      console.log("parsedLandmark",selectedLandCoords.value.lat+" "+selectedLandCoords.value.lon+" "+selectedLandAdd.value);
+
+
+    } catch (error) {
+      console.error("Error parsing landmark coordinates", error);
+    }
 
       await loadVehicleDetails(); // Load vehicle data from storage
       console.log("displaylost",items.value);
@@ -320,7 +321,7 @@ export default defineComponent({
       //   params: { vehLat: veh.lat, vehLon: veh.lon }  // Passing the selected lat/lon as query parameters
       // });      
 
-      localStorage.setItem("NearestVeh",JSON.stringify(veh));
+      storage.set('NearestVeh',JSON.stringify(veh));
 
       router.go(-2); // Go back two steps in the navigation history
       

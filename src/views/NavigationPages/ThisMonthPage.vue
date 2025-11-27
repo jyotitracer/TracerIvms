@@ -112,7 +112,7 @@
 
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { addCircleOutline } from 'ionicons/icons';
 import {   IonContent,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid,  loadingController} from '@ionic/vue';
@@ -277,13 +277,13 @@ export default {
     Constants.CMD.Req_Dash_All,
     params
   )
-    .then((response) => {
+    .then(async(response) => {
       const responsejson = response.data;
 
       if (response.status === 200) {
         // Handle success
         const currentDateTime = new Date();
-        localStorage.setItem('APIcalledMonthDate', currentDateTime + "");
+        await storage.set('APIcalledMonthDate', currentDateTime + "");
 
         const arrData = responsejson.arr_data;
 
@@ -396,6 +396,8 @@ export default {
 
     console.log("stepSize",stepSize+" "+maxValue);
 
+     await nextTick();
+
     if (chartInstance) {
         chartInstance.destroy();
       }
@@ -506,8 +508,8 @@ export default {
 
           });
             
-    const FromDate = localStorage.getItem('savedMonthFromDate');
-    const ToDate = localStorage.getItem('savedMonthToDate');
+    const FromDate = await storage.get('savedMonthFromDate');
+    const ToDate =await storage.get('savedMonthToDate');
 
 
     if(FromDate)
@@ -538,7 +540,7 @@ export default {
     }
 
 
-    const ApiCalledDate = localStorage.getItem("APIcalledMonthDate");
+    const ApiCalledDate = await storage.get('APIcalledMonthDate');
 
     if (ApiCalledDate !== null) {
       const isMinDoneOrNot = checkTimeDifference(ApiCalledDate);
@@ -595,7 +597,7 @@ export default {
 },
 
 
-beforeRouteEnter(to, from, next) {
+   async beforeRouteEnter(to, from, next) {
     // Log the navigation for debugging
     
     isPeriodChange=false;
@@ -603,7 +605,7 @@ beforeRouteEnter(to, from, next) {
     // Check if we are coming back from Page 2
     if (from.name === 'Periodmonth') {
 
-      let isChangeDate = localStorage.getItem('isChangeDate');
+      let isChangeDate =await storage.get('isChangeDate');
       // Perform your task here
 
       if (isChangeDate === "true") {

@@ -173,6 +173,7 @@ import { fetchData } from "@/services/ApiService";
 import { Network } from '@capacitor/network';
 import { showToast } from '@/services/toast'; // Import toast utility function
 import router from '@/router/index'; // Assuming your router file is named router.js
+    import storage from "@/services/storagefile";
 
 addIcons({ close });
 
@@ -417,10 +418,10 @@ export default {
     };
 
     // API call logic
-    const CallAPIForData = () => {
+    const CallAPIForData = async () => {
 
 
-      const storedVehicle = localStorage.getItem('showtripselectpage');
+      const storedVehicle = await storage.get('showtripselectpage');
       const vehicle = JSON.parse(storedVehicle);
 
 

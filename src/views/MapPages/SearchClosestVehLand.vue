@@ -53,7 +53,8 @@
   import { onMounted, ref } from 'vue';
   import Constants from '@/common/constants';
   import router from '@/router/index';
-  
+import storage from '@/services/storagefile';
+
   
   import {
     IonButtons,
@@ -82,46 +83,62 @@
       const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
       const searchQuery = ref('');
       const searchResults = ref([]);
-      const googleApiKey = Constants.Google_map_API;
   
       const onSearch = async (event) => {
         const query = event.target.value.trim();
   
         // Only make API request if query length is 3 or more characters
-        if (query.length > 2) {
-          try {
-            const data = await getPlaceApi(query, googleApiKey);
-            if (data && data.results) {
-              // Populate the searchResults with the data received from the API
-              searchResults.value = data.results.map(result => ({
-                name: result.name,
-                formatted_address: result.formatted_address,
-                place_id: result.place_id,
-                geometry: result.geometry.location // Includes lat and lng
-              }));
-            } else {
-              searchResults.value = [];
+       // Only make API request if query length is 3 or more characters
+      if (query.length > 2) {
+        try {
+          const data = await getPlaceApi(query);
+                  console.log("Place Results:", data);
+
+        let places = [];
+
+            if (Array.isArray(data)) {
+              places = data;
+            } else if (data?.results && Array.isArray(data.results)) {
+              places = data.results;
             }
-          } catch (error) {
-            console.error('Error fetching places:', error);
-            searchResults.value = [];
-          }
-        } else {
+
+            searchResults.value = places.map(result => {
+              const loc = result.geometry?.location;
+              const lat = typeof loc?.lat === 'function' ? loc.lat() : loc?.lat;
+              const lng = typeof loc?.lng === 'function' ? loc.lng() : loc?.lng;
+
+              return {
+                name: result.name || 'Unnamed place',
+                formatted_address: result.formatted_address || '',
+                place_id: result.place_id || Math.random().toString(),
+                geometry: { lat, lng }
+              };
+            });
+
+
+        } catch (error) {
+          console.error('Error fetching places:', error);
           searchResults.value = [];
         }
-      };
+      } else {
+        searchResults.value = [];
+      }
+    };
+      
   
-      const selectLandmark = (landmark) => {
+      const selectLandmark = async (landmark) => {
         // When a landmark is selected, log the lat/lon and navigate back
         const lat = landmark.geometry.lat;
         const lng = landmark.geometry.lng;
-       // console.log('Selected Landmark:', landmark, `Lat: ${lat}, Lng: ${lng}`);
-        console.log(landmark.formatted_address);
-  
-       localStorage.setItem("Near_landmark_lat",lat);
-       localStorage.setItem("Near_landmark_lng",lng);
-       localStorage.setItem("Near_landmark_address",landmark.formatted_address);
+        console.log('Selected closest Landmark:', landmark,lat,lng);
+      if (lat && lng) {  
+            await storage.set('Near_landmark_lat',lat);
+            await storage.set('Near_landmark_lng',lng);
+            await storage.set('Near_landmark_address',landmark.formatted_address);
 
+      } else {
+          console.warn('Invalid landmark coordinates:', landmark);
+        }
 
   
   

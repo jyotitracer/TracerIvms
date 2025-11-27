@@ -3,7 +3,7 @@
 <template>
   <ion-content>
     <ion-searchbar placeholder="Search Group" v-model="searchQuery"></ion-searchbar>
-    <ion-list>
+    <ion-list v-if="filteredItems.length > 0">
       <custom-item
         v-for="item in filteredItems"
         :key="item.id"
@@ -11,6 +11,11 @@
         @click="handleItemClick(item)"
       />
     </ion-list>
+
+     <!-- When no data found -->
+    <div v-else class="no-data">
+      No data available
+    </div>
   </ion-content>
 </template>
 
@@ -705,5 +710,10 @@ export default {
 </script>
 
 <style>
-/* Add any styles for your page here */
+.no-data {
+  text-align: center;
+  color: var(--ion-color-medium);
+  margin-top: 20px;
+  font-size: 16px;
+}
 </style>

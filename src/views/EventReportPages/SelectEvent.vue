@@ -101,7 +101,7 @@ export default defineComponent({
         if (arrData && arrData.length > 0) {
 
 
-          const storedItems = await storage.get("eventItems");
+          const storedItems = await storage.get('eventItems');
           
               const storedItemsMap = new Map(
                 (storedItems || []).map((item) => [item.eventid, item.checked])

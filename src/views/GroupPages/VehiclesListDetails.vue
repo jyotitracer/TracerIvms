@@ -243,10 +243,10 @@ export default defineComponent({
 });
 
 
-    const navigateToPage = (vehicle,veh_id, veh_no,group) => {
+    const navigateToPage = async (vehicle,veh_id, veh_no,group) => {
       //console.log("displayData",JSON.stringify(vehicle));
-      localStorage.setItem("selectedVeh",JSON.stringify(vehicle));
-      localStorage.setItem("SelectGroup",group);
+     await storage.set('selectedVeh',JSON.stringify(vehicle));
+      await storage.set('SelectGroup',group);
 
       // router.push({ 
       //   name: 'VehcileMapInfoTripPage', 

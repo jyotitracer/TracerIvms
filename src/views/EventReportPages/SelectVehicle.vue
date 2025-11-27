@@ -127,7 +127,7 @@ export default defineComponent({
 
     const selectVehicle = (vehicle) => {
       // Store the selected vehicle details in localStorage
-      localStorage.setItem('selectedVehicle', JSON.stringify(vehicle));
+      storage.set('selectedVehicle', JSON.stringify(vehicle));
       console.log('Selected vehicle saved:', vehicle);
       goBack();
     };

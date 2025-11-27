@@ -125,7 +125,7 @@ export default defineComponent({
 
     const selectVehicle = (vehicle) => {
       // Store the selected vehicle details in localStorage
-      localStorage.setItem('showtripselectpage', JSON.stringify(vehicle));
+      storage.set('showtripselectpage', JSON.stringify(vehicle));
       router.push('/tripvehiwise');
     };
 

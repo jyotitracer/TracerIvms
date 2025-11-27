@@ -288,7 +288,7 @@ async getLastStatusUpdate(inputDate) {
   const dateStatus = ref('');
 
   try {
-    const login_data = await storage.get("login_data");
+    const login_data = await storage.get('login_data');
     const deviceTimezone = login_data.tz_idfier;
 
 

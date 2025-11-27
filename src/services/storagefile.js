@@ -29,8 +29,11 @@ const storage =
         for (const key of keysToRemove) {
             console.log(key);
           await Preferences.remove({ key });
-        }   
-     }
+        }
+        
+     },
+
+    
 };
 
 export default storage;

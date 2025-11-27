@@ -224,9 +224,9 @@ export default {
 
 
     const saveReportStateToLocalStorage = () => {
-  localStorage.setItem('showEfficiencyReport', showEfficiencyReport.value);
-  localStorage.setItem('showFillDropReport', showFillDropReport.value);
- // localStorage.setItem('items', JSON.stringify(items.value));
+  storage.set('showEfficiencyReport', showEfficiencyReport.value);
+  storage.set('showFillDropReport', showFillDropReport.value);
+ // storage.set('items', JSON.stringify(items.value));
 };
 
     const CallAPIForData = () => {
@@ -366,9 +366,9 @@ export default {
 
     const checkStorageAndSetLabels = async () => {
       const storedGroups = await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus);
-      const savedFromDate = localStorage.getItem('savedFuelReportFromDate');
-      const savedToDate = localStorage.getItem('savedFuelReportToDate');
-      const selectedVehicle = localStorage.getItem('selectedFuelVehicle');
+      const savedFromDate = storage.get('savedFuelReportFromDate');
+      const savedToDate = storage.get('savedFuelReportToDate');
+      const selectedVehicle = storage.get('selectedFuelVehicle');
 
       if (storedGroups && storedGroups.length > 0) {
         const selectedGroups = storedGroups.filter(group => group.checked);
@@ -435,10 +435,10 @@ export default {
       }
     };
     const loadReportStateFromLocalStorage = async () => {
-  const storedShowEfficiencyReport = localStorage.getItem('showEfficiencyReport');
-  const storedShowFillDropReport = localStorage.getItem('showFillDropReport');
+  const storedShowEfficiencyReport = storage.get('showEfficiencyReport');
+  const storedShowFillDropReport = storage.get('showFillDropReport');
   const fuelData= await storage.get('fuelReport');
-  const savedOption = localStorage.getItem('selectedFuelReportOption');
+  const savedOption = storage.get('selectedFuelReportOption');
 
   if(savedOption=="point1")
   {
@@ -546,7 +546,7 @@ export default {
             router.replace('/today');
             });
       
-      const savedOption = localStorage.getItem('selectedFuelReportOption');
+      const savedOption = storage.get('selectedFuelReportOption');
       if (savedOption) {
         selectedOption.value = savedOption;
       }
@@ -558,7 +558,7 @@ export default {
 });
 
 watch(selectedOption, (newValue) => {
-  localStorage.setItem('selectedFuelReportOption', newValue);
+  storage.set('selectedFuelReportOption', newValue);
 });
 
 

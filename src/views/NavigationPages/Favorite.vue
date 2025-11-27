@@ -82,9 +82,9 @@ export default defineComponent({
     const vehicleToRemove = ref(null);
     let backButtonListener;
 
-    const navigateToPage = (veh_id,veh_no,vehicle) => {
-      localStorage.setItem("selectedVeh",JSON.stringify(vehicle));
-      localStorage.setItem("SelectGroup",vehicle.groupname);
+    const navigateToPage = async (veh_id,veh_no,vehicle) => {
+      await storage.set('selectedVeh',JSON.stringify(vehicle));
+      await storage.set('SelectGroup',vehicle.groupname);
 
       //router.push({ name: 'VehcileMapInfoTripPage', params: { vehicleId: veh_id, vehicleName:veh_no } });
           router.push(`/vehtabs/${veh_id}/${veh_no}/${vehicle.groupname}/map`);
@@ -118,8 +118,15 @@ export default defineComponent({
            console.log("matchingGroups IDs:", matchingGroups);
 
            
+            let allGroupVehicles;
+
+          if(matchingGroups[0])
+          {
+                     allGroupVehicles = matchingGroups[0].veh_arr || [];
+          }else{
+               allGroupVehicles = storedValues[0].veh_arr || [];
+          }
           // 4️⃣ Extract the group's vehicles
-         const allGroupVehicles = matchingGroups[0].veh_arr || [];
 
 
           // 5️⃣ Filter only vehicles whose veh_id exists in favorites

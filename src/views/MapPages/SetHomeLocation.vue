@@ -47,6 +47,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import Constants from '@/common/constants';
 import router from '@/router';
 import storage from '@/services/storagefile';
+import { loadGoogleMaps } from '@/services/googleMapsLoader';
 
 
 export default defineComponent({
@@ -79,25 +80,36 @@ export default defineComponent({
         await nextTick();
 
         if (mapContainer.value) {
-          const login_data= await storage.get("login_data");
+          // Retrieve stored zoom and center from localStorage
+          
+          const login_data= await storage.get('login_data');
 
 
-              // Retrieve stored zoom and center from localStorage
-              const storedZoom = localStorage.getItem('mapZoom');
-              const mapLat = localStorage.getItem('mapLat');
-              const mapLong = localStorage.getItem('mapLong');
-              const storedMapType = localStorage.getItem('mapType'); // Retrieve map type
+        // Retrieve stored zoom and center from localStorage
+        const storedZoom = await storage.get('mapZoom');
+        const mapLat = await storage.get('mapLat');
+        const mapLong = await storage.get('mapLong');
+        const storedMapType = await storage.get('mapType'); // Retrieve map type
 
 
-              const initialLat=mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);
-              const initialLong=mapLong ? parseFloat(mapLong) : parseFloat(login_data.h_lon);
+                      const initialLat =
+                        mapLat !== null && mapLat !== undefined && !isNaN(parseFloat(mapLat))
+                          ? parseFloat(mapLat)
+                          : parseFloat(login_data?.h_lat);
 
+                      const initialLong =
+                        mapLong !== null && mapLong !== undefined && !isNaN(parseFloat(mapLong))
+                          ? parseFloat(mapLong)
+                          : parseFloat(login_data?.h_lon);
 
-              // Parse zoom and center values from storage or set defaults
-              const initialZoom = storedZoom ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
-              const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
-              const initialMapType = storedMapType ? storedMapType : 'roadmap';
+                        console.log("initialLat:", login_data.h_lat, "initialLong:", login_data.h_lon);
+  
+                    // Parse zoom and center values from storage or set defaults
+                    const initialZoom =  storedZoom !== null && storedZoom !== undefined && !isNaN(parseFloat(storedZoom)) ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
+                    const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
+                    const initialMapType = storedMapType !== null && storedMapType !== undefined && !isNaN(parseFloat(storedMapType))  ? storedMapType : 'roadmap';
 
+                      await loadGoogleMaps(); // ✅ Wait until Maps API is loaded
 
 
           newMap = new google.maps.Map(mapContainer.value, {
@@ -148,12 +160,12 @@ export default defineComponent({
     });
 
     // Save home location function
-    const saveHomeLocation = () => {
+    const saveHomeLocation = async () => {
       if (currentLat.value !== null && currentLng.value !== null && currentZoom.value !== null) {
         // Save zoom level and center location in localStorage
-        localStorage.setItem('mapZoom', currentZoom.value.toString());
-        localStorage.setItem('mapLat', currentLat.value.toString());
-        localStorage.setItem('mapLong', currentLng.value.toString());
+        await storage.set('mapZoom', currentZoom.value.toString());
+        await storage.set('mapLat', currentLat.value.toString());
+        await storage.set('mapLong', currentLng.value.toString());
 
         console.log('Home location saved:', {
           zoom: currentZoom.value,

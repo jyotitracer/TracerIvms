@@ -53,7 +53,7 @@ import TourPage from '@/views/TourPage.vue';
 import FuelSelectPeriod from '@/views/FuelReportPages/FuelSelectPeriod.vue';
 import GroupMapLayer from '@/views/GroupPages/GroupMapLayer.vue';
 import GroupSearchVehicle from '@/views/GroupPages/GroupSearchVehicle.vue';
-import Testfile from '@/views/testfile.vue';
+import { oldPath, newPath } from '@/services/routeTracker';
 
 
 // Define route configurations
@@ -115,7 +115,8 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        redirect: 'map',
+        component: VehicleMapDetails,
+        props: true,
       },
       {
         path: 'map',
@@ -324,10 +325,7 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
-  {
-    path: '/test',
-    component: Testfile,
-  }
+ 
 ];
 
 // Create router instance
@@ -340,6 +338,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // Attach from.path to the `to` route's `meta`
   to.meta.previousPath = from.path;
+
+   oldPath.value = from.fullPath;
+  newPath.value = to.fullPath;
+  
   next();
 });
 

@@ -48,26 +48,9 @@ import './global.css'; // Ensure this line is present if using CSS
 import './theme/variables.css';
  import {GroupIntervalRefresh, stopInterval,intervalRunning} from '@/services/GrouprefreshService';
  import{MapIntervalRefresh,stopInterval1Min,intervalRunning1Min} from '@/services/MaprefreshService';
-import  { getGoogleMapKey } from '@/common/constants';
 
-async function loadGoogleMaps() {
-  const googleMapsApiKey = await getGoogleMapKey();
-  
-  if (!googleMapsApiKey) {
-    console.error("No Google Maps API key found!");
-    return;
-  }
 
-  if (!document.querySelector(`#google-maps-script`)) {
-    const script = document.createElement("script");
-    script.id = "google-maps-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=geometry,marker,places`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-  }
-}
-loadGoogleMaps();
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDu2KSTqwmKK-4sWWRc36HO2HPYJwu-2V8",

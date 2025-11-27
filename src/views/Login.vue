@@ -169,7 +169,7 @@ export default {
                   if (response.data?.status == "success") {
                     return Promise.all([
                       storeData('Domain_Name', responseJson.data[0].domain+""),
-                      storeData('Link_Name', responseJson.data[0].linkName+""),
+                      storeData('Link_Name', responseJson.data[0].link_name+""),
                     ]).then(() => {
                       return Network.getStatus().then((status_1) => {
                         if (status_1.connected) {
@@ -217,15 +217,13 @@ export default {
               if (response.status === 200) {
                 toastMessage.value = responseJson.message;
 
-                      if (responseJson?.username) {
+                      if (responseJson.username) {
                         username.value = responseJson.username;
                       }
 
-                      console.log("responseJson?.isFuel",responseJson?.isFuel);
-                      if(responseJson?.isFuel)
-                      {
+                      
                         isFuelEnabled.value=responseJson.isFuel;
-                      }
+                      
                 return Promise.all([
                   storeData('login_data', responseJson),
                   storeData('IsLoginAlready', true)
@@ -287,9 +285,9 @@ export default {
                 router.replace('/today');
 
                 return Promise.all([
-                  storage.set("selectedItem", '/today'),
-                  storage.set("pagename", 'Dashboard Today'),
-                  storage.set("pageid", "1")
+                  storage.set('selectedItem', '/today'),
+                  storage.set('pagename', 'Dashboard Today'),
+                  storage.set('pageid', "1")
                 ]);
               } else if (response.status === 401) {
                 toastMessage.value = response.data.message;

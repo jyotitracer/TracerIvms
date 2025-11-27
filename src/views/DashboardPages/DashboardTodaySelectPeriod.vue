@@ -65,6 +65,7 @@ import {
 import { useRoute } from 'vue-router';
 import useNetwork from '@/services/networkService'; // Import the network service
 import { onMounted } from 'vue';
+import storage from "@/services/storagefile";
 
 
 export default {
@@ -74,7 +75,7 @@ export default {
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
 
-    localStorage.setItem('isChangeDateToday', false);
+    storage.set('isChangeDateToday', false);
 
 
     const route = useRoute();
@@ -170,9 +171,9 @@ return {
     },
     confirmSelection() {
       if (this.selectedDate) {
-        localStorage.setItem('isChangeDateToday', true);
+        storage.set('isChangeDateToday', true);
 
-        localStorage.setItem('savedTodaysDate', this.selectedDate);
+        storage.set('savedTodaysDate', this.selectedDate);
         this.goBack();
       }
     },

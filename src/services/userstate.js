@@ -14,4 +14,16 @@ export const selectedPage = ref({
   export const isFuelEnabled=ref(0);
 
 
+//  let googleMapKey = null;
+export const getGoogleMapKey = ref('');
+
+
+// export function setGoogleMapKey(newKey) {
+//   googleMapKey = newKey;
+// }
+
+// export function getGoogleMapKey() {
+//   return googleMapKey;
+// }
+
   

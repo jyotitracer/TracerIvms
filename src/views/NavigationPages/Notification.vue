@@ -90,7 +90,7 @@ export default defineComponent({
       try {
         await loading.present();
 
-        const lastRecId = localStorage.getItem('last_rec_id') || '0';
+        const lastRecId = storage.get('last_rec_id') || '0';
         const params = { lst_rec_id: lastRecId };
 
         const response = await fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Noti, params);
@@ -105,7 +105,7 @@ export default defineComponent({
 
           if (fetchedItems.length > 0) {
             const lastRecId = responsejson.arr_data[0].rec_id;
-            localStorage.setItem('last_rec_id', lastRecId);
+            storage.set('last_rec_id', lastRecId);
             await storage.set('selectedItems', fetchedItems);
             await loadItemsFromStorage();
           } else {
@@ -113,11 +113,11 @@ export default defineComponent({
           }
         } else {
           console.error(`API Error: ${response.status}`);
-          showToastMessage('Error fetching data. Please try again.');
+         // showToastMessage('Error fetching data. Please try again.');
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        showToastMessage('Error fetching data. Please check your connection.');
+       // showToastMessage('Error fetching data. Please check your connection.');
       } finally {
         loading.dismiss();
       }

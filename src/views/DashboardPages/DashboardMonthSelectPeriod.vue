@@ -77,6 +77,7 @@ import {
 import { ref, nextTick ,onMounted} from 'vue';
 import { useRoute } from 'vue-router';
 import useNetwork from '@/services/networkService'; // Import the network service
+import storage from "@/services/storagefile";
 
 export default {
   name: 'Periodmonth',
@@ -112,7 +113,7 @@ export default {
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
 
-    localStorage.setItem('isChangeDate', false);
+    storage.set('isChangeDate', false);
     const route = useRoute();
 
     const receivedFromDate = new Date(route.params.fromdate);
@@ -259,9 +260,9 @@ if (monthElements[selectedMonthIndex]) {
           this.showPrivacyPolicyAlert();
           this.clearSelection();
         } else {
-          localStorage.setItem('isChangeDate', true);
-          localStorage.setItem('savedMonthFromDate', this.fromDate);
-          localStorage.setItem('savedMonthToDate', this.toDate);
+          storage.set('isChangeDate', true);
+          storage.set('savedMonthFromDate', this.fromDate);
+          storage.set('savedMonthToDate', this.toDate);
           this.goBack();
         }
       }

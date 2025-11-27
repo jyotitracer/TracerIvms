@@ -37,13 +37,16 @@ import {
   IonHeader,
   IonPage,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  IonButton,
+  IonFooter
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import Constants from '@/common/constants';
 import storage from '@/services/storagefile';
 import router from '@/router';
+import { loadGoogleMaps } from '@/services/googleMapsLoader';
 
 
 export default defineComponent({
@@ -54,7 +57,7 @@ export default defineComponent({
     IonTitle,
     IonToolbar,
     IonButtons,
-    IonBackButton
+    IonBackButton,IonButton,IonFooter
   },
   setup() {
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
@@ -73,26 +76,35 @@ export default defineComponent({
     if (mapContainer.value) {
           // Retrieve stored zoom and center from localStorage
           
-          const login_data= await storage.get("login_data");
+          const login_data= await storage.get('login_data');
 
 
         // Retrieve stored zoom and center from localStorage
-        const storedZoom = localStorage.getItem('mapZoom');
-        const mapLat = localStorage.getItem('mapLat');
-        const mapLong = localStorage.getItem('mapLong');
-        const storedMapType = localStorage.getItem('mapType'); // Retrieve map type
+        const storedZoom = await storage.get('mapZoom');
+        const mapLat = await storage.get('mapLat');
+        const mapLong = await storage.get('mapLong');
+        const storedMapType = await storage.get('mapType'); // Retrieve map type
 
 
-        const initialLat=mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);
-        const initialLong=mapLong ? parseFloat(mapLong) : parseFloat(login_data.h_lon);
+                      const initialLat =
+                        mapLat !== null && mapLat !== undefined && !isNaN(parseFloat(mapLat))
+                          ? parseFloat(mapLat)
+                          : parseFloat(login_data?.h_lat);
 
+                      const initialLong =
+                        mapLong !== null && mapLong !== undefined && !isNaN(parseFloat(mapLong))
+                          ? parseFloat(mapLong)
+                          : parseFloat(login_data?.h_lon);
 
-        // Parse zoom and center values from storage or set defaults
-        const initialZoom = storedZoom ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
-        const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
-        const initialMapType = storedMapType ? storedMapType : 'roadmap';
+                        console.log("initialLat:", login_data.h_lat, "initialLong:", login_data.h_lon);
+  
+                    // Parse zoom and center values from storage or set defaults
+                    const initialZoom =  storedZoom !== null && storedZoom !== undefined && !isNaN(parseFloat(storedZoom)) ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
+                    const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
+                    const initialMapType = storedMapType !== null && storedMapType !== undefined && !isNaN(parseFloat(storedMapType))  ? storedMapType : 'roadmap';
 
-         
+                      await loadGoogleMaps(); // ✅ Wait until Maps API is loaded
+
 
           newMap = new google.maps.Map(mapContainer.value, {
           
@@ -113,15 +125,15 @@ export default defineComponent({
           // newMap.setOnCameraIdleListener((position) => {
           //   const currentZoom = position.zoom; // The zoom level comes from the event
           //   console.log('Current Zoom:', currentZoom);
-          //   localStorage.setItem('mapZoom', currentZoom.toString()); // Store the zoom value in localStorage
+          //   storage.set('mapZoom', currentZoom.toString()); // Store the zoom value in localStorage
           // });
 
 
-          newMap.addListener('zoom_changed', () => {
+          newMap.addListener('zoom_changed', async () => {
           const currentZoom = newMap?.getZoom();
           if (currentZoom !== null) {
             console.log('Current Zoom:', currentZoom);
-            localStorage.setItem('mapZoom', currentZoom.toString());
+            await storage.set('mapZoom', currentZoom+"");
           }
         });
 

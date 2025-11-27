@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { IonContent } from '@ionic/vue';
 import Constants from "@/common/constants";
@@ -61,6 +61,7 @@ export default {
    const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
    const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
 
+                      await nextTick();
 
   // If the chart is ready, render the chart
   if (barChart.value) {

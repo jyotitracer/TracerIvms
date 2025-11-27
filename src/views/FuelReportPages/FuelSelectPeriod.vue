@@ -107,8 +107,8 @@ export default {
   }
 
 
-  const savedFuelReportFromDate = localStorage.getItem('savedFuelReportFromDate');
-    const savedFuelReportToDate = localStorage.getItem('savedFuelReportToDate');
+  const savedFuelReportFromDate = storage.get('savedFuelReportFromDate');
+    const savedFuelReportToDate = storage.get('savedFuelReportToDate');
 
   onMounted(()=>{
     initNetworkListener();
@@ -227,8 +227,8 @@ export default {
           // Proceed with valid date selection logic here
          // console.log('Valid selection:', this.fromDate+"\n"+ this.toDate);
          
-          localStorage.setItem('savedFuelReportFromDate', this.fromDate);
-          localStorage.setItem('savedFuelReportToDate', this.toDate);
+          storage.set('savedFuelReportFromDate', this.fromDate);
+          storage.set('savedFuelReportToDate', this.toDate);
           this.$router.back();
 
         }

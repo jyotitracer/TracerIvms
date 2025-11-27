@@ -48,6 +48,7 @@ import storage from '@/services/storagefile';
 import poli_storage from '@/services/policyStorage';
 import { Capacitor } from '@capacitor/core';
 
+
 const router = useRouter();
 const isPrivacyPolicyOpen = ref(false);
 
@@ -160,6 +161,8 @@ const checkLoginAndRedirect = async () => {
           await storage.set('pagename', 'Dashboard Today');
           await storage.set('pageid', '1');
         }
+
+      
       } else {
         router.push('/login');
       }

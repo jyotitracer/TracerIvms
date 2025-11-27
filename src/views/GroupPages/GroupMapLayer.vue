@@ -49,6 +49,7 @@
     import { defineComponent } from 'vue';
     import { ref ,watch,onMounted} from "vue";
     import useNetwork from '@/services/networkService'; // Import the network service
+    import storage from "@/services/storagefile";
 
 
     export default defineComponent({
@@ -61,22 +62,26 @@
         IonButtons,
         IonBackButton
       },
-      setup(){
+       setup(){
 
         const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
-        const selectedMapType = ref(localStorage.getItem("groupmapType") || "roadmap");
+            const selectedMapType = ref("roadmap");
 
-              // Watch for changes in selectedMapType and save it to localStorage
-              watch(selectedMapType, (newType) => {
-                localStorage.setItem("groupmapType", newType);
-              });
+              onMounted(async () => {
+              // Load saved map type
+              const savedType = await storage.get('groupmapType');
+              if (savedType) selectedMapType.value = savedType;
 
+              // Initialize network listener
+              initNetworkListener();
+            });
 
-              onMounted(()=>{
-                initNetworkListener();
+            // Watch for changes in selected map type
+            watch(selectedMapType, async (newType) => {
+              await storage.set('groupmapType', newType);
+            });
 
-              });
               return {
                 selectedMapType,
                 isConnected, showReconnectedMessage, initNetworkListener

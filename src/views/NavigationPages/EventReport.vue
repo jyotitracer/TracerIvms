@@ -283,9 +283,9 @@ export default {
     const checkStorageAndSetLabels = async () => {
       const storedEventItems = await storage.get('eventItems');
       const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus);
-      const savedFromDate = localStorage.getItem('savedEventReportFromDate');
-      const savedToDate = localStorage.getItem('savedEventReportToDate');
-      const selectedVehicle = localStorage.getItem('selectedVehicle');
+      const savedFromDate = storage.get('savedEventReportFromDate');
+      const savedToDate = storage.get('savedEventReportToDate');
+      const selectedVehicle = storage.get('selectedVehicle');
 
       // Set event label
       if (storedEventItems && storedEventItems.length > 0) {

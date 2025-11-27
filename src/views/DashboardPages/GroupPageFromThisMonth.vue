@@ -263,7 +263,7 @@ export default defineComponent({
 
       if (response.status === 200) {
         const arrData = responsejson.arr_data;
-        localStorage.setItem('APIcalledMonthGroupDate', new Date() + "");
+        storage.set('APIcalledMonthGroupDate', new Date() + "");
 
         if (arrData && arrData.length > 0) {
           // Store data in storage and map it to items
@@ -319,7 +319,7 @@ export default defineComponent({
     onMounted(async () => {
       initNetworkListener();
 
-      const ApiCalledDate = localStorage.getItem("APIcalledMonthGroupDate");
+      const ApiCalledDate = storage.get('APIcalledMonthGroupDate');
 
       if (ApiCalledDate !== null) {
         const isMinDoneOrNot = checkTimeDifference(ApiCalledDate);
