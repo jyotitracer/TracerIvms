@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
-import { getMessaging } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
 import { App as CapacitorApp } from '@capacitor/app';
 import { registerPushNotifications,createNotificationChannel } from '@/services/pushNotifications'; // Import your push notifications setup function
@@ -11,7 +10,6 @@ import { addIcons } from 'ionicons';
 import { checkmarkCircle, checkmarkDoneCircle, shareOutline, shareSocialOutline ,searchOutline, closeOutline, location, chevronUp, locationOutline, chevronDown, arrowBackCircle } from 'ionicons/icons';
 import longPress from './directives/long-press';
 import { Capacitor } from '@capacitor/core';
-import { getAnalytics } from "firebase/analytics";
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
 
@@ -64,8 +62,6 @@ const firebaseConfig = {
 
 
 export const firebaseApp = initializeApp(firebaseConfig);
-const analytics = getAnalytics(firebaseApp);
-export const messaging = getMessaging(firebaseApp);
 
 // Add the icons
 addIcons({

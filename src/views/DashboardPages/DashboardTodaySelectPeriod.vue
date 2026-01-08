@@ -16,7 +16,7 @@
       Connected to Network
     </div>
 
-    <ion-content class="ion-padding" >
+    <ion-content class="ion-padding" ref="contentRef">
       <div v-for="month in months" :key="month.name" class="month" >
         <h5>{{ month.name }} {{ currentYear }}</h5>
         <div class="days-row">
@@ -42,7 +42,7 @@
 
     <ion-footer class="ion-no-border">
       <ion-toolbar style="--background: white;">
-        <ion-button expand="full" class="custom-button" @click="confirmSelection">
+        <ion-button expand="full" class="custom-button" @click="confirmSelection" ref="doneBtn">
           Done
         </ion-button>
       </ion-toolbar>
@@ -64,7 +64,7 @@ import {
 } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import useNetwork from '@/services/networkService'; // Import the network service
-import { onMounted } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import storage from "@/services/storagefile";
 
 
@@ -85,7 +85,13 @@ export default {
     : new Date(); // Fallback to current date if no date is passed
 
 
+const doneBtn = ref();
+
+
     onMounted(async () => {
+
+   await nextTick();
+  doneBtn.value?.$el?.scrollIntoView({ behavior: 'smooth' });
 
 
       initNetworkListener();
@@ -169,11 +175,11 @@ return {
     goBack() {
       this.$router.back();
     },
-    confirmSelection() {
+    async confirmSelection() {
       if (this.selectedDate) {
-        storage.set('isChangeDateToday', true);
+        await storage.set('isChangeDateToday', true);
 
-        storage.set('savedTodaysDate', this.selectedDate);
+        await storage.set('savedTodaysDate', this.selectedDate);
         this.goBack();
       }
     },

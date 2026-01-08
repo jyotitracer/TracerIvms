@@ -139,15 +139,18 @@
             <ion-label style="width: 60px;   color: white; font-size: 14px;">Progress</ion-label>
   
          
+        
+
             <ion-range
-              class="progress-bar"
-              :min="0"
-               :max="routePoints.length - 1"
-              step="1"
-              v-model="animationProgress"
-              :disabled="!isPlaying"
-              @ionChange="updateAnimationProgress"
-            ></ion-range>
+                  :key="routePoints.length"
+                  class="progress-bar"
+                  :min="0"
+                  step="1"
+                  :max="Math.max(routePoints.length - 1, 0)"
+                  v-model="animationProgress"
+                  :disabled="!isPlaying"
+                  @ionChange="updateAnimationProgress"
+                />
           </div>
   
           <div class="label-and-range">
@@ -205,7 +208,7 @@
     </div>
   
     </ion-content>
-  </template>
+</template>
   
    <style scoped>
   
@@ -541,8 +544,7 @@
   
   </style>
   
-  
-    
+
     <script lang="ts">
 
     import InfoBoxNearestVeh from '@/components/InfoBoxNearestVeh.vue';
@@ -552,7 +554,7 @@
     import {  chevronUpCircle,    colorPalette,    globe, playCircle, pauseCircle, star, close, closeCircle } from 'ionicons/icons';
     import router from '@/router/index'; // Assuming your router file is named router.js
     import{MapIntervalRefresh,stopInterval1Min} from '@/services/MaprefreshService';
-    import { ref, onMounted, onUnmounted,nextTick } from 'vue';
+    import { ref, onMounted, onUnmounted,nextTick, watch } from 'vue';
     import Constants from '@/common/constants';
     import { fetchData } from '@/services/ApiService';
     import storage from '@/services/storagefile';
@@ -570,7 +572,6 @@
     import { loadGoogleMaps } from '@/services/googleMapsLoader';
     import * as tz from "date-fns-tz";
 
-  
   
           const selectedVehNo=ref('');
           const currentIndex = ref(0);  // Track the current index
@@ -690,174 +691,190 @@
                           }
                   },
                   
-              setup() {
-  
-  
-                  const route = useRoute();
-                  vehicleLat = route.params.vehLat;
-                  vehicleLon = route.params.vehLon;
-                  // historyarray.value = route.params.arrayData;
-                  historyarray.value=[];
-                   historyarray.value = route.params.arrayData
-                  ? JSON.parse(route.params.arrayData)
-                  : [];
-               
-            
-  
-                  // Function to get the formatted "Last Status Update"
-                  const formatDateToString = (date,timeZone) => {
-                    const parts = new Intl.DateTimeFormat("en-GB", {
-                          timeZone,
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                        }).formatToParts(date);
-
-                        const lookup: any = {};
-                        parts.forEach((p) => {
-                          lookup[p.type] = p.value;
-                        });
-
-                        // Returns ISO-like string in that timezone
-                        return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
-
-                  };
+                  setup() {
+      
+      
+                      const route = useRoute();
+                      vehicleLat = route.params.vehLat;
+                      vehicleLon = route.params.vehLon;
+                      // historyarray.value = route.params.arrayData;
+                      historyarray.value=[];
+                      historyarray.value = route.params.arrayData
+                      ? JSON.parse(route.params.arrayData)
+                      : [];
                   
                 
-                  onMounted(async () => {
+      
+                      // Function to get the formatted "Last Status Update"
+                      const formatDateToString = (date,timeZone) => {
+                        const parts = new Intl.DateTimeFormat("en-GB", {
+                              timeZone,
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false,
+                            }).formatToParts(date);
 
-                      const login_data= await storage.get('login_data');
-                      userTimeZone.value=login_data.tz_idfier;
+                            const lookup: any = {};
+                            parts.forEach((p) => {
+                              lookup[p.type] = p.value;
+                            });
 
-                         currentDateTime.value = formatDateToString(new Date(),userTimeZone.value);
+                            // Returns ISO-like string in that timezone
+                            return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
+
+                      };
+                      
+                    watch(
+                            () => routePoints.value.length,
+                            (newLen) => {
+                              if (newLen > 0) {
+                                animationProgress.value = 0;
+                              }
+                            }
+                          );
+
+                      onMounted(async () => {
+
+                          const login_data= await storage.get('login_data');
+                          userTimeZone.value=login_data.tz_idfier;
+
+                            currentDateTime.value = formatDateToString(new Date(),userTimeZone.value);
 
 
-                      useBackButton(9999, async () => {
-                        const title='';
-                      const pageid='';
-                      const path='';
-                      selectedPage.value = { title, pageid,path }; // Update the shared state
-  
-                      router.replace('/today');
-                    });
-                   await CallOnlyAPI();
-                    await MapDisplay();
-                   await MapIntervalRefresh();
-                              
-                      console.log("uerhter");
-          
-                  });
-            
-                      // Stop timer when component is unmounted
-                  onUnmounted(() => {
-                    // Destroy the map when the component is unmounted
-                    if (mapRef.value) {
-                      mapRef.value = null;
-                    }
-                    closeShowPath(1);
-  
-                    stopInterval1Min();
-                  });
-  
-  
-                   // Method to clear the polyline
-                    const clearPolyline = () => {
-                      if (polylineRef.value) {
-                        polylineRef.value.setMap(null); // Remove polyline from the map
-                        polylineRef.value = null; // Clear the reference
-                      }
-                      isnearVehObject.value = false; // Also hide the info box
-                    };
-  
-            
-          
-                  return {
-                    closeCircle,chevronUpCircle, colorPalette,globe, mapContainer,navigateToPage, closeShowPath,ishowPath,isMarkerShowPath,isLoadPath,
-                      moveCameraToLocation, MapDisplay,getDirections, Near_vehicleObject, summaryTripObject,isnearVehObject,isSumTripObject,
-                        clearPolyline,showData,isPlaying,vehicleNo,distance,fromDateTime,toDateTime,loadData,togglePlayPause,playIcon,
-                    pauseIcon,isFromPickerVisible,isToPickerVisible,isDateTimeValid,fromDateTimeFormatted,toDateTimeFormatted,
-                  openDatePicker,validateDateTime,closeModal,selectedDateTime,
-                  openModal,progressValue,speedValue,isSummaryChecked,isTripInfoChecked,isDateTimePickerVisible,
-                  currentDateTime,updateDateTime,saveDateTime,interval,historyarray,currentIndex,fabButton,
-                  markerMovingIcon,isMapBusyWithRoute,formatDateToString, extractRoutePoints,animateRoute,getCurrentWaypointIndex,
-        polylinePathsForShowPath,  directionsService, routePoints, middleMarkers, animationIndex, animationTimer, animationSpeed, fetchRoute,processWaypoints,
-        updateSpeed,updateAnimationProgress,animationProgress,
+                          useBackButton(9999, async () => {
+                            const title='';
+                          const pageid='';
+                          const path='';
+                          selectedPage.value = { title, pageid,path }; // Update the shared state
+      
+                          router.replace('/today');
+                        });
+                      await CallOnlyAPI();
+                        await MapDisplay();
+                      await MapIntervalRefresh();
+                                  
+                          console.log("uerhter");
+              
+                      });
+                
+                          // Stop timer when component is unmounted
+                      onUnmounted(() => {
+                        // Destroy the map when the component is unmounted
+                        if (mapRef.value) {
+                          mapRef.value = null;
+                        }
+                        closeShowPath(1);
+      
+                        stopInterval1Min();
+                      });
+      
+      
+                      // Method to clear the polyline
+                        const clearPolyline = () => {
+                          if (polylineRef.value) {
+                            polylineRef.value.setMap(null); // Remove polyline from the map
+                            polylineRef.value = null; // Clear the reference
+                          }
+                          isnearVehObject.value = false; // Also hide the info box
                         };
-                  },
+      
+                
+              
+                      return {
+                        closeCircle,chevronUpCircle, colorPalette,globe, mapContainer,navigateToPage, closeShowPath,ishowPath,isMarkerShowPath,isLoadPath,
+                          moveCameraToLocation, MapDisplay,getDirections, Near_vehicleObject, summaryTripObject,isnearVehObject,isSumTripObject,
+                            clearPolyline,showData,isPlaying,vehicleNo,distance,fromDateTime,toDateTime,loadData,togglePlayPause,playIcon,
+                        pauseIcon,isFromPickerVisible,isToPickerVisible,isDateTimeValid,fromDateTimeFormatted,toDateTimeFormatted,
+                      openDatePicker,validateDateTime,closeModal,selectedDateTime,
+                      openModal,progressValue,speedValue,isSummaryChecked,isTripInfoChecked,isDateTimePickerVisible,
+                      currentDateTime,updateDateTime,saveDateTime,interval,historyarray,currentIndex,fabButton,
+                      markerMovingIcon,isMapBusyWithRoute,formatDateToString, extractRoutePoints,animateRoute,getCurrentWaypointIndex,
+            polylinePathsForShowPath,  directionsService, routePoints, middleMarkers, animationIndex, animationTimer, animationSpeed, fetchRoute,processWaypoints,
+            updateSpeed,updateAnimationProgress,animationProgress,
+                            };
+                      },
           };
   
   
   
       //this function called on click of loadData Button of show trip point. 
-          const loadData = () => {
+      const loadData = () => {
           CallTripPath();
   
          // console.log('Loading data...');
   
-        };
-  
-
-
-      const processWaypoints = async (waypoints) => {
-       
-
-           for (let i = 0; i < waypoints.length -1; i++) {
-            const origin = waypoints[i].location;
-            const destination = waypoints[i + 1].location;
-            try {
-              await fetchRoute(origin, destination,i);
-            } catch (error) {
-              console.error(`Error fetching route for segment ${i} -> ${i + 1}:`, error);
-            }
-          }
-     };
-  
-  const fetchRoute = (origin, destination,wayPointIndex) => {
-
-    return new Promise((resolve, reject) => {
-      const request = {
-        origin,
-        destination,
-        travelMode: google.maps.TravelMode.DRIVING,
       };
   
-      directionsService.value.route(request, (response, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-          extractRoutePoints(response,wayPointIndex);
 
-          resolve();
-        } else {
-          // showToastMessage('Directions failed');
-          console.error("Directions request failed:", status);
-          reject(status);
-        }
-      });
-    });
-  };
-  
-  const extractRoutePoints = (response,wayPointIndex) => {
-    const route = response.routes[0];
-    const legs = route.legs;
+    const processWaypoints = async (waypoints) => {
+  routePoints.value = [];   // 🔴 REQUIRED
 
-  
-      legs.forEach((leg,legIndex) => {
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const origin = new google.maps.LatLng(
+      waypoints[i].location.lat,
+      waypoints[i].location.lng
+    );
 
-       // console.log("iteration",iteration+" "+legIndex+" "+wayPointlength);
+    const destination = new google.maps.LatLng(
+      waypoints[i + 1].location.lat,
+      waypoints[i + 1].location.lng
+    );
 
-        leg.steps.forEach((step,stepIndex) => {
+    await fetchRoute(origin, destination, i);
+  }
 
-          const stepPoints = google.maps.geometry.encoding.decodePath(step.polyline.points);
-          routePoints.value.push(...stepPoints);
+  animationIndex.value = 0;
+  animationProgress.value = 0;
+};
+
+      const fetchRoute = (origin, destination,wayPointIndex) => {
+
+          
+                      
+        return new Promise((resolve, reject) => {
+          const request = {
+            origin,
+            destination,
+            travelMode: google.maps.TravelMode.DRIVING,
+          };
+      
+          directionsService.value.route(request, (response, status) => {
+            if (status === google.maps.DirectionsStatus.OK) {
+              extractRoutePoints(response,wayPointIndex);
+
+              resolve();
+            } else {
+              // showToastMessage('Directions failed');
+              console.error("Directions request failed:", status);
+              reject(status);
+            }
+          });
         });
-      });
+       };
+      
+ const extractRoutePoints = (response,wayPointIndex) => {
+        const route = response.routes[0];
+        const legs = route.legs;
+
+      
+          legs.forEach((leg,legIndex) => {
 
 
-  };
-  
+            leg.steps.forEach((step,stepIndex) => {
+
+              const stepPoints = google.maps.geometry.encoding.decodePath(step.polyline.points);
+              routePoints.value.push(...stepPoints);
+            });
+          });
+
+
+       };
+
+      
 
   
       //this function used for play pause button
@@ -958,10 +975,6 @@
   return closestIndex;
       };
           
-
- 
-
-  
   
       //update speed based on used change speed progress
       const updateSpeed = (event: { detail: { value: number; }; }) => {
@@ -1008,7 +1021,7 @@
       };
 
 
-      // ✅ Convert it to ISO **without changing local time**
+ // ✅ Convert it to ISO **without changing local time**
 function formatForIonDatetime(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -1731,7 +1744,7 @@ const saveDateTime = () => {
   } finally {
     await loading.dismiss();
   }
-};
+              };
     
   
 
@@ -2022,7 +2035,7 @@ const saveDateTime = () => {
               };
   
   
-              const processAnimation=(fromwhere)=>{
+              const processAnimation=async (fromwhere)=>{
   
                 if(fromwhere===1)
               {
@@ -2044,6 +2057,9 @@ const saveDateTime = () => {
                     lng: historyarray.value[0].lon,
                   };
   
+
+                  
+                  
                   // Extract destination (last index)
                   const destination = {
                     lat: historyarray.value[historyarray.value.length - 1].lat,
@@ -2055,33 +2071,33 @@ const saveDateTime = () => {
                  
   
   
-                  markerId1 = new google.maps.Marker ({
-                  position: origin,
-                  map: newMap,
-                  icon: {
-                          url: "/ic_end.png", // Path to the icon
-                          scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                        }              
+                  // markerId1 = new google.maps.Marker ({
+                  // position: origin,
+                  // map: newMap,
+                  // icon: {
+                  //         url: "/ic_end.png", // Path to the icon
+                  //         scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                  //       }              
                       
-                    });
+                  //   });
   
   
-                  markerId2 = new google.maps.Marker ({
-                  position: destination,
-                  map: newMap,
-                        icon: {
-                            url: "/ic_st.png", // Path to the icon
-                            scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                          }
-                  });
+                  // markerId2 = new google.maps.Marker ({
+                  // position: destination,
+                  // map: newMap,
+                  //       icon: {
+                  //           url: "/ic_st.png", // Path to the icon
+                  //           scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                  //         }
+                  // });
   
   
-                  markersArray.value.push(markerId1);
-                  markersArray.value.push(markerId2);
+                  // markersArray.value.push(markerId1);
+                  // markersArray.value.push(markerId2);
   
   
-                  newMap?.setCenter(new google.maps.LatLng(origin));
-                  newMap?.setZoom(14);
+                  // newMap?.setCenter(new google.maps.LatLng(origin));
+                  // newMap?.setZoom(14);
   
   
                   markerMovingIcon = new google.maps.Marker({
@@ -2120,8 +2136,50 @@ const saveDateTime = () => {
                   for (let i = 0; i < historyarray.value.length; i++) 
                   {
   
-                      const s1 ={lat:historyarray.value[i].lat,lng:historyarray.value[i].lon}
+                     // const s1 ={lat:historyarray.value[i].lat,lng:historyarray.value[i].lon}
   
+                          const s1 = await snapToRoad(
+                            historyarray.value[i].lat,
+                            historyarray.value[i].lon
+                          );
+
+                          if(i==0)
+                          {
+
+
+                            
+                              markerId1 = new google.maps.Marker ({
+                              position: s1,
+                              map: newMap,
+                              icon: {
+                                      url: "/ic_end.png", // Path to the icon
+                                      scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                                    }              
+                                  
+                                });
+                                 markersArray.value.push(markerId1);
+
+                        newMap?.setCenter(new google.maps.LatLng(s1));
+                                        newMap?.setZoom(16);
+                        }
+
+                          if(i==historyarray.value.length-1)
+                          {
+                              markerId2 = new google.maps.Marker ({
+                              position: s1,
+                              map: newMap,
+                                    icon: {
+                                        url: "/ic_st.png", // Path to the icon
+                                        scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                                      }
+                              });
+              
+          
+                          markersArray.value.push(markerId2);
+                          }
+  
+
+                          
   
                       let dot_marker;
 
@@ -2143,6 +2201,7 @@ const saveDateTime = () => {
                               rotation: 0 // Will be dynamically updated
                             }
                         });
+
                       }else  if(historyarray.value[i].event_type===Constants.eventType.Event_Type_NoData ||
                       historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_OFF_NoGPS ||
                       historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_ON_NoGPS)
@@ -2471,7 +2530,39 @@ const saveDateTime = () => {
      
       export { intervalCallback1Min,intervalRunning1Min };
   
-  
+
+
+const snapToRoad = (lat, lng) => {
+  return new Promise((resolve) => {
+    const latLng = new google.maps.LatLng(lat, lng);
+
+    directionsService.value.route(
+      {
+        origin: latLng,
+        destination: latLng,
+        travelMode: google.maps.TravelMode.DRIVING
+      },
+      (response, status) => {
+        if (
+          status === google.maps.DirectionsStatus.OK &&
+          response.routes.length > 0
+        ) {
+          const snapped =
+            response.routes[0].legs[0].start_location;
+
+          resolve({
+            lat: snapped.lat(),
+            lng: snapped.lng()
+          });
+        } else {
+          // fallback to original GPS point
+          resolve({ lat, lng });
+        }
+      }
+    );
+  });
+};
+
   </script>
   
  

@@ -161,6 +161,7 @@ import { onIonViewWillEnter } from '@ionic/vue';
 import { useBackButton } from '@ionic/vue';
 import { showToastMessage } from '@/services/toast'; 
 
+const savedTodaysData = ref("");
 
 Chart.register(...registerables);
 
@@ -292,6 +293,7 @@ const listenToNetworkChanges = () => {
            }
            
            async function CallAPIForTodayData() {
+            console.log("calledAPi");
                      const DateTime = dateAPI.value;
 
                      const params = {
@@ -567,6 +569,7 @@ const listenToNetworkChanges = () => {
                   const loginisfuel = loginResponse.isFuel;
                   IsFuelEnable.value = loginisfuel === 1 ? true : false;
 
+                  
                   useBackButton(9999, async () => {
                     console.log("displayionview","today");
 
@@ -600,7 +603,7 @@ const listenToNetworkChanges = () => {
                      }
                      
 
-                     console.log('Selected date:', receivedDate.value);
+                     console.log('Selected date11:', receivedDate.value);
 
                      if(receivedDate.value!==null)
                        {
@@ -651,6 +654,8 @@ const listenToNetworkChanges = () => {
 
                  });
 
+             
+
                  onBeforeUnmount(() => {
                    if (chartInstance) {
                      chartInstance.destroy();
@@ -683,26 +688,24 @@ const listenToNetworkChanges = () => {
                },
 
 
-               beforeRouteEnter(to, from, next) {
-   // Log the navigation for debugging
-   
-   isPeriodChange=false;
+               async beforeRouteEnter(to, from, next) {
+                // Log the navigation for debugging
+                
+                isPeriodChange=false;
 
-   // Check if we are coming back from Page 2
-   if (from.name === 'Periodtoday') {
+                // Check if we are coming back from Page 2
+                if (from.name === 'Periodtoday') {
 
-     let isChangeDate = storage.get('isChangeDateToday');
-     // Perform your task here
+                  let isChangeDate = await storage.get('isChangeDateToday');
+                  // Perform your task here
 
-     if (isChangeDate === "true") {
-       
-     isPeriodChange=true;
-   }
+                  if (isChangeDate) {    
+                      isPeriodChange=true;
 
-
- }
-   next(); // Proceed with route navigation
- },
+                  }
+                  }
+                    next(); // Proceed with route navigation
+                  },
 
   });
 </script>

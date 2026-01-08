@@ -50,7 +50,7 @@
   
   <script>
   import useNetwork from '@/services/networkService';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import Constants from '@/common/constants';
   import router from '@/router/index';
 import storage from '@/services/storagefile';
@@ -149,6 +149,9 @@ import storage from '@/services/storagefile';
       onMounted(() => {
         initNetworkListener();
       });
+      onUnmounted(()=>{
+        searchQuery.value='';
+      })
   
       return {
         searchQuery,

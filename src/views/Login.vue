@@ -163,7 +163,6 @@ export default {
               .then((response) => {
                 const responseJson = response.data;
 
-
                 if (response.status === 200) {
                   //toastMessage.value = responseJson.message;
                   if (response.data?.status == "success") {
@@ -180,8 +179,9 @@ export default {
                       });
                     });  
                   }
-                  else
+                  else{
                     showToastMessage(response.data?.message);
+                  }
 
                 } else if (response.status === 401) {
                   console.log("displaydata", responseJson.message);
@@ -239,7 +239,7 @@ export default {
               } else if (response.status === 401) {
                 console.log("displaydata",responseJson.message);
                 toastMessage.value = responseJson.message;
-                showToastMessage(toastMessage.value);
+                //showToastMessage(toastMessage.value);
               } else {
                 console.error('Empty response data');
               }

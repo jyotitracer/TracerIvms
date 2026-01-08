@@ -129,9 +129,9 @@ const fetchSlidesData = async () => {
                 slides.value= response.data.map(item => ({
                 ...item,  // Spread the original properties
               }));
-                  
+                console.log("slides.value",slides.value);  
               } else if (response.status === 401) {
-                showToastMessage( response.data.message);
+               // showToastMessage( response.data.message);
               }
             })
             .catch((error) => {

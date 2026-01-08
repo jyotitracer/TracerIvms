@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-   appId: 'in.co.tracer.tracerobd_ivms',
+   appId: 'in.co.tracer.tracerobdv2',
   appName: 'Tracer Ivms',
   webDir: 'dist',
   // android: {

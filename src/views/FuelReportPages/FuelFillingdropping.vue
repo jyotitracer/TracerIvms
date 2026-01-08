@@ -11,12 +11,12 @@
         </ion-toolbar>
     </ion-header>
 
-    <div v-if="!isConnected" class="network-status-bar">
+    <!-- <div v-if="!isConnected" class="network-status-bar">
       No Network Connection
     </div>
     <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
       Connected to Network
-    </div>   
+    </div>    -->
 
 
 

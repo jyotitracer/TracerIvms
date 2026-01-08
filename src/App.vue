@@ -242,6 +242,8 @@ const logoutMethod = async () => {
 
       // Clear storage and localStorage
       await storage.clear();
+      await storage.clearAllPreferences();
+
       localStorage.clear();
 
       username.value = '';

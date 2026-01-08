@@ -25,13 +25,22 @@ const storage =
 
     async clear() {
         const { keys } = await Preferences.keys(); // Get all keys in Preferences
-        const keysToRemove = keys.filter((key) => key.startsWith(STORAGE_PREFIX)); // Filter keys with the prefix
+        const keysToRemove = keys.filter((key) =>
+             key.startsWith(STORAGE_PREFIX)
+    ); // Filter keys with the prefix
+
         for (const key of keysToRemove) {
             console.log(key);
           await Preferences.remove({ key });
         }
         
      },
+
+      // ---------- CLEAR *ALL* PREFERENCES ----------
+    async clearAllPreferences() {
+        await Preferences.clear();
+        console.log("All Capacitor preferences cleared!");
+    }
 
     
 };

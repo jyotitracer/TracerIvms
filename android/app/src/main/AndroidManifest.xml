@@ -4,8 +4,8 @@
 
     <application
 
-        android:name="in.co.tracer.tracerobd_ivms.MyApplication"
-        android:allowBackup="true"
+        android:name="in.co.tracer.tracerobdv2.MyApplication"
+        android:allowBackup="false"
         android:icon="@drawable/ic_launcher_new"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher_new"
@@ -14,7 +14,7 @@
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
-            android:name="in.co.tracer.tracerobd_ivms.MainActivity"
+            android:name="in.co.tracer.tracerobdv2.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"

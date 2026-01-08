@@ -223,9 +223,9 @@ export default {
     ];
 
 
-    const saveReportStateToLocalStorage = () => {
-  storage.set('showEfficiencyReport', showEfficiencyReport.value);
-  storage.set('showFillDropReport', showFillDropReport.value);
+    const saveReportStateToLocalStorage = async () => {
+  await storage.set('showEfficiencyReport', showEfficiencyReport.value);
+ await storage.set('showFillDropReport', showFillDropReport.value);
  // storage.set('items', JSON.stringify(items.value));
 };
 
@@ -244,8 +244,8 @@ export default {
   }).then((createdLoading) => {
     loading = createdLoading;
     return loading.present();
-  }).then(() => {
-    return storage.get(Constants.storageValue.key_Fuel_GroupWithStatus);
+  }).then(async () => {
+    return await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus);
   }).then((storedGroups) => {
     const selectedGroups = storedGroups.filter(group => group.checked);
     const groupIds = selectedGroups.length === storedGroups.length ? 'all' : (Array.isArray(selectedGroupIds.value) ? selectedGroupIds.value : [selectedGroupIds.value]);
@@ -366,9 +366,9 @@ export default {
 
     const checkStorageAndSetLabels = async () => {
       const storedGroups = await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus);
-      const savedFromDate = storage.get('savedFuelReportFromDate');
-      const savedToDate = storage.get('savedFuelReportToDate');
-      const selectedVehicle = storage.get('selectedFuelVehicle');
+      const savedFromDate = await storage.get('savedFuelReportFromDate');
+      const savedToDate = await storage.get('savedFuelReportToDate');
+      const selectedVehicle = await storage.get('selectedFuelVehicle');
 
       if (storedGroups && storedGroups.length > 0) {
         const selectedGroups = storedGroups.filter(group => group.checked);
@@ -435,10 +435,10 @@ export default {
       }
     };
     const loadReportStateFromLocalStorage = async () => {
-  const storedShowEfficiencyReport = storage.get('showEfficiencyReport');
-  const storedShowFillDropReport = storage.get('showFillDropReport');
+  const storedShowEfficiencyReport =await storage.get('showEfficiencyReport');
+  const storedShowFillDropReport = await storage.get('showFillDropReport');
   const fuelData= await storage.get('fuelReport');
-  const savedOption = storage.get('selectedFuelReportOption');
+  const savedOption = await storage.get('selectedFuelReportOption');
 
   if(savedOption=="point1")
   {
@@ -504,7 +504,7 @@ export default {
 
           alertMessage.value = 'Please select Report Type';
           showAlert.value = true;
-          console.log(alertMessage.value);
+          console.log(selectedOption.value);
 
           return;
 
@@ -546,7 +546,7 @@ export default {
             router.replace('/today');
             });
       
-      const savedOption = storage.get('selectedFuelReportOption');
+      const savedOption = await storage.get('selectedFuelReportOption');
       if (savedOption) {
         selectedOption.value = savedOption;
       }
@@ -557,8 +557,8 @@ export default {
 
 });
 
-watch(selectedOption, (newValue) => {
-  storage.set('selectedFuelReportOption', newValue);
+watch(selectedOption, async (newValue) => {
+ await storage.set('selectedFuelReportOption', newValue);
 });
 
 

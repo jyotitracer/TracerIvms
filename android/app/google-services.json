@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "193964130261",
     "project_id": "tracerivmsmobile",
-    "storage_bucket": "tracerivmsmobile.appspot.com"
+    "storage_bucket": "tracerivmsmobile.firebasestorage.app"
   },
   "client": [
     {
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:193964130261:android:e0d686b4f7c80d2bba875c",
+        "mobilesdk_app_id": "1:193964130261:android:069a0dacfede5dd9ba875c",
         "android_client_info": {
-          "package_name": "in.co.tracer.tracerobd_vue"
+          "package_name": "in.co.tracer.tracerobdv2"
         }
       },
       "oauth_client": [],

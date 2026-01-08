@@ -169,9 +169,9 @@ export default {
     let endRecordId = ref(0);
 
     // Selected IDs
-    const selectedEventIds = ref([]);
-    const selectedGroupIds = ref([]);
-    const selectedVehicleId = ref('');
+const selectedEventIds = ref('all');
+const selectedGroupIds = ref('all');
+const selectedVehicleId = ref('all');
 
     // Items list
     const items = ref([]);
@@ -222,7 +222,7 @@ export default {
     };
 
     return fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Event_Report, params);
-  }).then((response) => {
+  }).then(async (response) => {
     const responsejson = response.data;
 
     if (response.status === 200) {
@@ -265,7 +265,7 @@ export default {
 
         items.value = items1;
         console.log('Data:', items.value);
-        storage.set('eventReport',items1);
+        await storage.set('eventReport',items1);
       }
     } else if (response.status === 401) {
       this.toastMessage = responsejson.message;
@@ -283,53 +283,18 @@ export default {
     const checkStorageAndSetLabels = async () => {
       const storedEventItems = await storage.get('eventItems');
       const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus);
-      const savedFromDate = storage.get('savedEventReportFromDate');
-      const savedToDate = storage.get('savedEventReportToDate');
-      const selectedVehicle = storage.get('selectedVehicle');
+      const savedFromDate = await storage.get('savedEventReportFromDate');
+      const savedToDate = await storage.get('savedEventReportToDate');
+      const selectedVehicle = await storage.get('selectedVehicle');
 
-      // Set event label
-      if (storedEventItems && storedEventItems.length > 0) {
-        const selectedEvents = storedEventItems.filter((item) => item.checked);
-        selectedEventIds.value = selectedEvents.map((item) => item.eventid);
-        selectEventLabel.value =
-          selectedEvents.length === storedEventItems.length
-            ? 'All Events'
-            : `${selectedEvents[0].eventname} +${selectedEvents.length - 1}`;
-      }else{
-        console.log("event api");
-        selectedEventIds.value ='all';
-        selectEventLabel.value='All Events';
-      
-      }
 
-      // Set group label
-      if (storedGroups && storedGroups.length > 0) {
-        const selectedGroups = storedGroups.filter((group) => group.checked);
-        selectedGroupIds.value = selectedGroups.map((group) => group.groupId);
-        selectGroupLabel.value =
-          selectedGroups.length === storedGroups.length
-            ? 'All Groups'
-            : `${selectedGroups[0].group} +${selectedGroups.length - 1}`;
-      }
 
-      // Set vehicle label
-      if (selectedVehicle) {
-        const vehicle = JSON.parse(selectedVehicle);
-        selectedVehicleId.value = vehicle.vehicleId;
-        selectVehicleLabel.value = vehicle.vehicleName;
 
-        console.log("selectedVehicle");
-
-      }else{
-        selectVehicleLabel.value='All Vehicles';
-        selectedVehicleId.value='all';
-        console.log("selectedVehicle else");
-
-      }
-
-      
+        
       // Set date labels
       if (savedFromDate && savedToDate) {
+
+
         const formatDate = (dateStr) => {
           const date = new Date(dateStr);
           return new Intl.DateTimeFormat('en-US', {
@@ -353,6 +318,8 @@ export default {
         selectDateLabel.value = `${formatDate(savedFromDate)} to ${formatDate(savedToDate)}`;
       }else{
         
+
+
         // Use the current date if savedFromDate and savedToDate are not available
           const now = new Date();
           const formatDate = (dateStr) => {
@@ -374,8 +341,61 @@ export default {
           ToDateAPI.value = get_Date_API(now);
 
           selectDateLabel.value = `${formatDate(now)} to ${formatDate(now)}`;
+              console.log("selectDateLabel.value",selectDateLabel.value);
+
 
       }
+
+
+         // Set group label
+      if (storedGroups && storedGroups.length > 0) {
+        const selectedGroups = storedGroups.filter((group) => group.checked);
+        selectedGroupIds.value = selectedGroups.map((group) => group.groupId);
+        selectGroupLabel.value =
+          selectedGroups.length === storedGroups.length
+            ? 'All Groups'
+            : `${selectedGroups[0].group} +${selectedGroups.length - 1}`;
+      }
+
+      // Set vehicle label
+      if (selectedVehicle) {
+        const vehicle = JSON.parse(selectedVehicle);
+        selectedVehicleId.value = vehicle.vehicleId;
+        selectVehicleLabel.value = vehicle.vehicleName;
+
+        console.log("selectedVehicle");
+
+      }else{
+        selectVehicleLabel.value='All Vehicles';
+        selectedVehicleId.value='all';
+        console.log("selectedVehicle else");
+
+      }
+let selectedEvents;
+
+      // Set event label
+      if(storedEventItems!=null){
+         selectedEvents = storedEventItems.filter((item) => item.checked);
+      }
+        console.log("selectedEvents",selectedEvents);
+        
+      if (selectedEvents && selectedEvents.length > 0) {
+
+                selectedEventIds.value = selectedEvents.map((item) => item.eventid);
+
+
+        selectEventLabel.value =
+          selectedEvents.length === storedEventItems.length
+            ? 'All Events'
+            : `${selectedEvents[0].eventname} +${selectedEvents.length - 1}`;
+      }else{
+        selectedEventIds.value ='all';
+        selectEventLabel.value='All Events';
+      
+      }
+
+   
+    
     };
 
     // Navigation logic

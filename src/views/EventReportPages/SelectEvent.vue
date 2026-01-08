@@ -99,9 +99,10 @@ export default defineComponent({
         const arrData = responsejson.arr_data;
 
         if (arrData && arrData.length > 0) {
-
-
+          
           const storedItems = await storage.get('eventItems');
+
+          console.log("storedItems",storedItems);
           
               const storedItemsMap = new Map(
                 (storedItems || []).map((item) => [item.eventid, item.checked])
@@ -116,11 +117,19 @@ export default defineComponent({
                     : data.status === 1, // Otherwise, fallback to old logic
               }));
 
-                console.log("displayRespo",selectedItems.value);
+                 /* 🔥 IMPORTANT LOGIC */
+                const anyChecked = selectedItems.value.some(item => item.checked);
 
-               storage.set('eventItems', selectedItems.value);
-              
+                // If ALL are false → force ALL true
+                if (!anyChecked) {
+                  selectedItems.value.forEach(item => {
+                    item.checked = true;
+                  });
+                }
+
+                await storage.set('eventItems', selectedItems.value);
                 checkAllToggled();
+
 
         }
       } else if (response.status === 401) {

@@ -58,10 +58,8 @@
     </ion-alert>
   </ion-page>
 </template>
-
 <script>
-import useNetwork from '@/services/networkService'; // Import the network service
-
+import useNetwork from '@/services/networkService';
 import {
   IonPage,
   IonHeader,
@@ -74,13 +72,11 @@ import {
   IonButton,
   IonAlert
 } from '@ionic/vue';
-import { onMounted, ref } from 'vue';
-
-const fromDate=ref('');
-  const toDate=ref('');
+import storage from "@/services/storagefile";
 
 export default {
   name: 'Calendar',
+
   components: {
     IonPage,
     IonHeader,
@@ -93,171 +89,152 @@ export default {
     IonButton,
     IonAlert
   },
-  
-  setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
-
-    // Reactive state to control the alert visibility
-    const isPrivacyPolicyOpen = ref(false);
-
-    // Define the buttons for the alert
-    const alertButtons = [
-      {
-        text: 'OK',
-        handler: () => {
-          console.log('OK clicked');
-          isPrivacyPolicyOpen.value = false; // Close the alert after clicking OK
-        }
-      }
-    ];
-
-    // Method to show the alert
-    function showPrivacyPolicyAlert() {
-      isPrivacyPolicyOpen.value = true;
-    }
-
-    const savedEventReportFromDate = storage.get('savedEventReportFromDate');
-    const savedEventReportToDate = storage.get('savedEventReportToDate');
-
-    onMounted(()=>{
-      initNetworkListener();
-
-       // Initialize start and end dates if they are stored
-            if (savedEventReportFromDate) {
-              fromDate.value = new Date(savedEventReportFromDate);
-            } else {
-              fromDate.value = new Date(); // Default to current date if not stored
-            }
-
-            if (savedEventReportToDate) {
-              toDate.value = new Date(savedEventReportToDate);
-            } else {
-              toDate.value = new Date(); // Default to current date if not stored
-            }
-    });
-
-    return {
-      isPrivacyPolicyOpen,
-      alertButtons,
-      showPrivacyPolicyAlert,
-      isConnected, showReconnectedMessage, initNetworkListener,fromDate,toDate
-
-    };
-  },
 
   data() {
-    const currentDate = new Date();
+    const today = new Date();
     return {
-      currentYear: currentDate.getFullYear(),
-      currentMonth: currentDate.getMonth(),
-      currentDay: currentDate.getDate(),
+      currentYear: today.getFullYear(),
+      currentMonth: today.getMonth(),
+      currentDay: today.getDate(),
+
       days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       months: [],
-     
-      showAlert: false,
-      alertMessage: ''
+
+      fromDate: null,   // ✅ DEFAULT FROM DATE
+      toDate: null,     // ✅ DEFAULT TO DATE
+
+      isPrivacyPolicyOpen: false,
+      alertButtons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.isPrivacyPolicyOpen = false;
+          }
+        }
+      ],
+
+      // Network
+      isConnected: true,
+      showReconnectedMessage: false
     };
   },
-  
-  created() {
+
+  async mounted() {
+    const network = useNetwork();
+    this.isConnected = network.isConnected;
+    this.showReconnectedMessage = network.showReconnectedMessage;
+    network.initNetworkListener();
+
     this.generateMonths();
+
+    // ✅ LOAD DEFAULT DATES
+    const savedFrom = await storage.get('savedEventReportFromDate');
+    const savedTo = await storage.get('savedEventReportToDate');
+
+    if (savedFrom && savedTo) {
+      this.fromDate = new Date(savedFrom);
+      this.toDate = new Date(savedTo);
+    } else {
+      // Default = Today
+      this.fromDate = new Date();
+      this.toDate = new Date();
+    }
   },
-  
+
   methods: {
     generateMonths() {
       for (let month = 0; month <= this.currentMonth; month++) {
-        let monthDates = this.getDatesInMonth(month, this.currentYear);
-        let firstDay = new Date(this.currentYear, month, 1).getDay();
-        
+        const dates = this.getDatesInMonth(month, this.currentYear);
+        const firstDay = new Date(this.currentYear, month, 1).getDay();
+
         this.months.push({
           name: new Date(this.currentYear, month).toLocaleString('default', { month: 'long' }),
           blanks: Array(firstDay).fill(null),
-          dates: monthDates,
+          dates
         });
       }
     },
-    
+
     getDatesInMonth(month, year) {
-      let date = new Date(year, month, 1);
-      let dates = [];
-      
+      const date = new Date(year, month, 1);
+      const dates = [];
+
       while (date.getMonth() === month) {
         dates.push(new Date(date));
         date.setDate(date.getDate() + 1);
       }
       return dates;
     },
-    
+
     isStartDate(date) {
-      // return this.fromDate && date.getTime() === this.fromDate.getTime();
       return this.fromDate && date.toDateString() === this.fromDate.toDateString();
-
     },
-    
+
     isEndDate(date) {
-      // return this.toDate && date.getTime() === this.toDate.getTime();
       return this.toDate && date.toDateString() === this.toDate.toDateString();
-
     },
-    
+
     isInRange(date) {
       if (!this.fromDate || !this.toDate) return false;
       return date > this.fromDate && date < this.toDate;
     },
-    
+
     isDisabled(date) {
       const today = new Date(this.currentYear, this.currentMonth, this.currentDay);
       return date > today;
     },
-    
+
     selectDate(date) {
       if (this.isDisabled(date)) return;
-      if (!this.fromDate || this.toDate) {
+
+      // Start new selection
+      if (!this.fromDate || (this.fromDate && this.toDate)) {
         this.fromDate = date;
         this.toDate = null;
+        return;
+      }
+
+      // End date selection
+      if (date < this.fromDate) {
+        this.toDate = this.fromDate;
+        this.fromDate = date;
       } else {
-        if (date < this.fromDate) {
-          this.toDate = this.fromDate;
-          this.fromDate = date;
-        } else {
-          this.toDate = date;
-        }
+        this.toDate = date;
       }
     },
-    
-    goBack() {
+
+    async confirmSelection() {
+      if (this.fromDate && !this.toDate) {
+        this.toDate = this.fromDate;
+      }
+
+      const diffTime = this.toDate - this.fromDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      if (diffDays > 31) {
+        this.isPrivacyPolicyOpen = true;
+        this.clearSelection();
+        return;
+      }
+
+      await storage.set('savedEventReportFromDate', this.fromDate);
+      await storage.set('savedEventReportToDate', this.toDate);
+
       this.$router.back();
     },
-    
-    confirmSelection() {
-  if (this.fromDate && !this.toDate) {
-    // If only a single date is selected, set both fromDate and toDate to this date
-    this.toDate = this.fromDate;
-  }
 
-  if (this.fromDate && this.toDate) {
-    const diffTime = Math.abs(this.toDate - this.fromDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays > 30) {
-      this.showPrivacyPolicyAlert();
-      this.clearSelection();
-    } else {
-      // Proceed with valid date selection logic here
-      storage.set('savedEventReportFromDate', this.fromDate);
-      storage.set('savedEventReportToDate', this.toDate);
-      this.$router.back();
-    }
-  }
-},
-    
     clearSelection() {
       this.fromDate = null;
       this.toDate = null;
+    },
+
+    goBack() {
+      this.$router.back();
     }
-  },
+  }
 };
 </script>
+
 
 <style scoped>
 .month {

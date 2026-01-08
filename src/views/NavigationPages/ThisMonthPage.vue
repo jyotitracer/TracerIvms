@@ -608,7 +608,7 @@ export default {
       let isChangeDate =await storage.get('isChangeDate');
       // Perform your task here
 
-      if (isChangeDate === "true") {
+      if (isChangeDate) {
         
       isPeriodChange=true;
     }
