@@ -1,16 +1,18 @@
 <template>
   <ion-app>
     <ion-menu content-id="main-content" style="background-color: white;">
-      <ion-header style="--background: white;">
+      <ion-header style="--background: white;" translucent>
         <ion-toolbar style="--background: white;">
-            
                 <div class="ion-text-center">
-                <ion-img src="/new_logo.png" style="size: 40%; padding-bottom: 20px; justify-items: center;"></ion-img>
-               <ion-label style="font-size:16px; font-weight: normal;">Welcome {{ username1 }}</ion-label>
+                <ion-img
+  src="/new_logo.png"
+  class="menu-logo">
+</ion-img>
+                <ion-label style="font-size:16px; font-weight: normal;">Welcome {{ username1 }}</ion-label>
                 </div>
         </ion-toolbar>
       </ion-header>
-      <ion-content>
+      <ion-content fullscreen class="menu-content safe-bottom">
         <ion-list>
           <ion-item v-for="(page, index) in filteredPages" :key="index" @click="navigateToPage(page.route, page.title,page.pageid)">
             <!-- <ion-icon slot="start" :ios="page.iosIcon" :md="page.mdIcon"></ion-icon> -->
@@ -53,7 +55,6 @@ import Constants from '@/common/constants';
 import { Network } from '@capacitor/network';
 import { showToast,showToastMessage } from '@/services/toast'; // Custom toast utility
 import { username, selectedPage,isFuelEnabled } from '@/services/userstate'; // Import the global state
-
 
 
 
@@ -278,7 +279,8 @@ const logoutMethod = async () => {
 
 </script>
 
-<style>
+<style scoped>
+
 :root {
   --ion-color-primary: #ffffff;
   --ion-background-color: #fff;
@@ -298,4 +300,11 @@ body {
   justify-items: center;
   margin: 10px;
 }
+
+.menu-logo {
+  width: 80px;
+  height: 60px;
+  margin: 0 auto 20px auto;
+}
+
 </style>

@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -15,15 +15,20 @@
       Connected to Network
     </div>   
 
-    <ion-content>
-      <div ref="mapContainer" id="map" style="height: 100%;"></div>
+<ion-content fullscreen class="safe-bottom" >
+
+  <div class="page-wrapper">
+
+     <div ref="mapContainer" id="map" class="map-container"></div>
+
+ <ion-button expand="full" @click="backPage" class="save-button">
+      Save
+    </ion-button>
+</div>
     </ion-content>
 
-    <ion-footer class="footer-style">
-      <ion-toolbar>
-        <ion-button expand="full" @click="backPage" class="save-button">Save</ion-button>
-      </ion-toolbar>
-    </ion-footer>
+  
+   
   </ion-page>
 </template>
 
@@ -173,7 +178,29 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
+
+
+
+/* Wrapper controls layout */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Map takes all remaining space */
+.map-container {
+  flex: 1;
+  width: 100%;
+}
+
+/* Save button spacing */
+.save-button {
+}
+
+
+
 .network-status-bar {
   background-color: red;
   color: white;

@@ -1,6 +1,6 @@
 <template>
   <ion-page id="main-content">
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -30,14 +30,17 @@
       </div>
     </ion-header>
 
-    <div v-if="!isConnected" class="network-status-bar">
+   
+
+<ion-content fullscreen class="safe-bottom">
+
+  <div v-if="!isConnected" class="network-status-bar">
       No Network Connection
     </div>
     <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
       Connected to Network
-    </div>  
+    </div> 
 
-    <ion-content>
       <div class="month-below1">
         <div class="month-total date">{{ FromDate }} to {{ ToDate }}</div>
         <ion-searchbar 
@@ -263,9 +266,12 @@ export default defineComponent({
 
       if (response.status === 200) {
         const arrData = responsejson.arr_data;
-        storage.set('APIcalledMonthGroupDate', new Date() + "");
 
         if (arrData && arrData.length > 0) {
+                    const currentDateTime = new Date();
+
+                  storage.set('APIcalledMonthGroupDate', currentDateTime);
+
           // Store data in storage and map it to items
           return storage.set(Constants.storageValue.Key_MonthGroup, arrData)
             .then(() => {
@@ -319,9 +325,10 @@ export default defineComponent({
     onMounted(async () => {
       initNetworkListener();
 
-      const ApiCalledDate = storage.get('APIcalledMonthGroupDate');
+      const ApiCalledDate = await storage.get('APIcalledMonthGroupDate');
 
       if (ApiCalledDate !== null) {
+        console.log("APICalledDateNotempty");
         const isMinDoneOrNot = checkTimeDifference(ApiCalledDate);
 
         if (isMinDoneOrNot) {
@@ -337,6 +344,8 @@ export default defineComponent({
           DisplayStoredData();
         }
       } else {
+                console.log("APICalledDateEmpty");
+
         DisplayStoredData();
         CallAPIForGroupTodayData();
       }

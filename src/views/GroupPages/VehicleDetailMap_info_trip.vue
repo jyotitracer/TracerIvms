@@ -1,7 +1,7 @@
 <template>
   <ion-page>
    
-      <ion-header>
+      <ion-header translucent>
         <ion-toolbar>
           <!-- <ion-buttons slot="start">
             <ion-back-button default-href="#"></ion-back-button>
@@ -16,7 +16,7 @@
         </ion-toolbar>
       </ion-header>
 
-            <ion-content>
+<ion-content fullscreen class="no-safe-bottom">>
         <div v-if="!isConnected" class="network-status-bar">
       No Network Connection
     </div>
@@ -203,15 +203,7 @@ export default defineComponent({
 
 
 
-::v-deep(ion-tab-button ion-icon) {
-  font-size: 24px; /* Increase icon size */
-  margin: 0 !important; /* Remove margin */
 
-}
-
-::v-deep(ion-tab-button ion-label) {
-  font-size: 14px; /* Increase text size */
-}
 
 .tab-selected ion-icon,
 .tab-selected ion-label {

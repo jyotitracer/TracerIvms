@@ -1,7 +1,7 @@
 <template>
   <ion-page id="main-content" style="background-color: #ffffff;">
    
-    <ion-header v-if="showHeader">
+<ion-header v-if="showHeader" translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-menu-button></ion-menu-button>
@@ -44,8 +44,8 @@
     <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
       Connected to Network
     </div>
-      
-    <router-view :pageTitle="pageTitle" />
+
+<router-view :pageTitle="pageTitle"/>
   </ion-page>
 </template>
 
@@ -310,24 +310,34 @@ const handleBackButton = async () => {
 }
 
 .tooltip {
-  display: flex;
-  top: 0;
+  position: fixed; /* 🔥 REQUIRED */
+  top: calc(var(--ion-safe-area-top) + 50px); /* below header */
   left: 0;
+  width: 100%;
+  margin:0px;
+  padding:0;
+  
+  display: flex;
   align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
-  z-index: 1000; /* Higher z-index to ensure it overlays other elements */
-  opacity: 1; /* Ensure it's visible when shown */
-  pointer-events: auto;
+  justify-content: space-around;
+
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity:1;
+  z-index: 1000; /* 🔥 very high */
 }
 
+
 .tooltip-section {
+
+   --background: #dbd7d7;
+  background: var(--background);
+
+  
   display: flex;
   flex-direction: column; /* Stack items vertically */
   align-items: center; /* Center items horizontally */
   justify-content: center; /* Center items vertically */
   flex: 1;
-  padding: 5px;
   text-align: center;
   cursor: pointer;
   font-size: 14px;
@@ -362,4 +372,6 @@ const handleBackButton = async () => {
 .network-status-bar.connected {
   background-color: green;
 }
+
+
 </style>

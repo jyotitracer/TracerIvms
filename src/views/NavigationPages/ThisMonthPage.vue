@@ -1,6 +1,6 @@
 <template>
   
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <div class="month-below1">
         <div  class="month-total date" @click="clickForDatePage">{{monthFromDate}} to {{monthToDate}}</div>
         <div class="right-group" @click="openGroup">

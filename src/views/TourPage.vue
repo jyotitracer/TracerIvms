@@ -7,7 +7,7 @@
       Connected to Network
     </div>
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <div class="swiper-container">
         <swiper
           :modules="[Pagination]"

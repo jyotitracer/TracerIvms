@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header tran>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="/group"></ion-back-button>
@@ -15,7 +15,7 @@
       Connected to Network
     </div>   
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <ion-searchbar 
         placeholder="Search Vehicle"
         v-model="searchQuery"

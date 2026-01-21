@@ -1,13 +1,8 @@
 <!-- This Page is menu Fuel Report Page. -->
 
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <!-- You can add your toolbar content here -->
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
+    
+<ion-content fullscreen class="safe-bottom">
       <ion-grid>
         <ion-row>
           <ion-col>
@@ -138,7 +133,7 @@
           
       </ion-grid>
     </ion-content>
-  </ion-page>
+  
 </template>
 
 <script>

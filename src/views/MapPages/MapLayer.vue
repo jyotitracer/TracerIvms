@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-      <ion-header>
+      <ion-header translucent>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -8,7 +8,7 @@
         <ion-title>Set Layer</ion-title>
       </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      <ion-content fullscreen class="safe-bottom ion-padding">
 
     <!-- Radio Buttons for Map Types -->
     <div class="radio-group">

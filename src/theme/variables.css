@@ -266,3 +266,10 @@ html {
   https://ionicframework.com/docs/layout/dynamic-font-scaling */
   --ion-dynamic-font: var(--ion-default-dynamic-font);
 }
+
+
+/* ion-content.safe-bottom::part(scroll) {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
+}*/
+
+

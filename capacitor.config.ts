@@ -4,6 +4,12 @@ const config: CapacitorConfig = {
    appId: 'in.co.tracer.tracerobdv2',
   appName: 'Tracer Ivms',
   webDir: 'dist',
+  plugins: {
+    StatusBar: {
+      overlaysWebView: true,
+      style: 'DARK'
+    }
+  }
   // android: {
   //   googleServicesFile: 'google-services.json', // Ensure this matches the file in android/app
   // },

@@ -1,7 +1,7 @@
 <!-- This Page is menu Favourite Page. -->
 
 <template>
-  <ion-content>
+<ion-content fullscreen class="safe-bottom">
     <ion-list v-if="vehicles.length > 0">
       <template v-for="(vehicle, index) in vehicles" :key="vehicle.id">
         <VehicleItem 

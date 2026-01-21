@@ -1,13 +1,8 @@
 <!-- This Page is menu Event Report Page. -->
 
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <!-- You can add your toolbar content here -->
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
+
+<ion-content fullscreen class="safe-bottom" >
       <ion-grid>
         <ion-row>
           <ion-col>
@@ -46,7 +41,7 @@
           @didDismiss="showAlert = false"
         ></ion-alert>
 
-
+    <div>
       <div v-for="(group, groupIndex) in items" :key="groupIndex" class="group">
         <div class="group-header">{{ group.group }}</div>
         <div v-for="(date, dateIndex) in group.dates" :key="dateIndex" class="date">
@@ -97,8 +92,9 @@
           </div>
         </div>
       </div>
+      </div>
     </ion-content>
-  </ion-page>
+  
 </template>
 
 <script>
@@ -482,6 +478,10 @@ let selectedEvents;
 </script>
 
 <style scoped>
+
+
+
+
 ion-grid{
       -webkit-padding-start: var(--ion-grid-padding-xs, var(--ion-grid-padding, 0px));
     padding-inline-start: var(--ion-grid-padding-xs, var(--ion-grid-padding, 0px)); 
@@ -489,6 +489,7 @@ ion-grid{
     padding-inline-end: var(--ion-grid-padding-xs, var(--ion-grid-padding, 0px));
     padding-top: var(--ion-grid-padding-xs, var(--ion-grid-padding, 0px));
      padding-bottom: var(--ion-grid-padding-xs, var(--ion-grid-padding, 0px));
+
 
 }
 .button_other{
@@ -706,4 +707,9 @@ align-self: top;
 color: #626161;
 
 }
+
+.scrollable-list{
+  padding-bottom: 16px;
+}
+
 </style>

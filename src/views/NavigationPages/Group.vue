@@ -1,7 +1,7 @@
 <!-- This Page is menu Group Page. -->
 
 <template>
-  <ion-content>
+<ion-content fullscreen class="safe-bottom">
     <ion-searchbar placeholder="Search Group" v-model="searchQuery"></ion-searchbar>
     <ion-list v-if="filteredItems.length > 0">
       <custom-item
@@ -709,7 +709,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .no-data {
   text-align: center;
   color: var(--ion-color-medium);

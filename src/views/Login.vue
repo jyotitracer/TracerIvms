@@ -1,14 +1,16 @@
 <template>
   <ion-page>
 
-    <ion-content>
+    <ion-content class="login-content">
+
           <div v-if="!isConnected" class="network-status-bar">
           No Network Connection
         </div>
         <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
           Connected to Network
         </div>
-        
+          <div class="login-wrapper">
+
       <form @submit.prevent="login" text-align="center" id="container">
       
         <!-- Logo -->
@@ -64,6 +66,7 @@
           :message="toastMessage" />
         
       </form>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -329,6 +332,24 @@ export default {
 </script>
 
 <style scoped>
+
+.login-content {
+  --background: #fff;
+}
+
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+#container {
+  width: 100%;
+  max-width: 360px;
+  padding: 0 16px;
+}
+
   ion-button {
     --background: #ca0505;
     --background-hover: #ca0505;
@@ -349,15 +370,7 @@ export default {
     color: #fff;
   }
 
-  #container {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    padding-left: 5%;
-    transform: translateY(-50%);
-  }
-
+  
   .img-container {
     display: flex;
     justify-content: center;

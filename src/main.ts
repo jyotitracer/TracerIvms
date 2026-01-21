@@ -47,6 +47,11 @@ import './theme/variables.css';
  import {GroupIntervalRefresh, stopInterval,intervalRunning} from '@/services/GrouprefreshService';
  import{MapIntervalRefresh,stopInterval1Min,intervalRunning1Min} from '@/services/MaprefreshService';
 
+import { StatusBar } from '@capacitor/status-bar';
+
+if (Capacitor.getPlatform() === 'ios') {
+  StatusBar.setOverlaysWebView({ overlay: true });
+}
 
 
 

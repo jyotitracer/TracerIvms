@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -17,7 +17,7 @@
     </div>   
 
 
-    <ion-content :fullscreen="true">
+<ion-content fullscreen class="safe-bottom">
       <!-- Button group for filter -->
       <div class="button-group">
         <ion-button

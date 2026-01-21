@@ -1,6 +1,6 @@
 <template>
   <ion-page id="main-content">
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -37,7 +37,7 @@
       Connected to Network
     </div>  
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <div class="month-below1">
         <div class="month-total date">{{ currentDate }}</div>
         <ion-searchbar 
@@ -208,6 +208,9 @@ export default defineComponent({
         const arrData = response.data.arr_data;
 
         if (arrData && arrData.length > 0) {
+             const currentDateTime = new Date();
+            storage.set('APIcalledTodaysGroupDate', currentDateTime);
+
           return storage.set(Constants.storageValue.Key_TodaysGroup, arrData)
             .then(() => {
               items.value = arrData.map((data, index) => ({
@@ -255,7 +258,7 @@ export default defineComponent({
     onMounted(async () => {
       initNetworkListener();
 
-      const ApiCalledDate = localStorage.getItem("APIcalledTodaysGroupDate");
+      const ApiCalledDate = await storage.get('APIcalledTodaysGroupDate');
 
       if (ApiCalledDate !== null) {
         const isMinDoneOrNot = checkTimeDifference(ApiCalledDate);
@@ -304,7 +307,7 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
 
 .subtitle {
   cursor: pointer;

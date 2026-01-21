@@ -1,7 +1,7 @@
 
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
         <ion-toolbar>
         <ion-buttons slot="start">
         <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -21,7 +21,7 @@
 
 
     
-    <ion-content :fullscreen="true">
+<ion-content fullscreen class="safe-bottom">
       <div class="button-group">
         <ion-button
           v-for="(label, index) in labels"

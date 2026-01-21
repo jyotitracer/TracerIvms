@@ -3,7 +3,7 @@
 
 <template>
   
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <ion-list>
         <ion-item  @click="navigateTo('1')">
           <ion-label>Vehicle Status Color</ion-label>

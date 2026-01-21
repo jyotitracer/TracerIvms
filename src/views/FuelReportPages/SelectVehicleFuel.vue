@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -14,7 +14,7 @@
     <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
       Connected to Network
     </div>   
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <div class="search-toggle-container">
         <ion-searchbar v-model="searchQuery" placeholder="Search Vehicle"></ion-searchbar>
       </div>

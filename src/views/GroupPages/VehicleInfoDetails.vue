@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     
-    <ion-content>
+<ion-content fullscreen class="no-safe-bottom">>
       <div class="header-container">
         <div class="month-info">
           <div class="month-year">{{ monthName }} {{ year }}</div>

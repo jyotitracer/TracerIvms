@@ -1,7 +1,7 @@
 <template>
   <ion-page>
    
-    <ion-content>
+<ion-content fullscreen class="no-safe-bottom">
       <div ref="mapContainer" id="map" style="height: 100%;"></div>
 
       <!-- Pass the vehicleObject directly to InfoBox, and only display it if vehicleObject is present -->
@@ -565,7 +565,7 @@ const RunData = async (vehicleObject: any) => {
 });
 </script>
 
-<style>
+<style scoped>
 .fab-image{
   height: 32px;
   width: 32px;

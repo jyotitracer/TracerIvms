@@ -1,6 +1,6 @@
 <template>
   <ion-page>
- <ion-header>
+ <ion-header translucent>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -17,7 +17,7 @@
     </div>   
 
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
           <ion-list>
             <ion-item @click="navigateToPage('maplayer')">Select Map Layer</ion-item>
             <ion-item @click="navigateToPage('vehistatus')">Configure Clustering for vehicle status</ion-item>
@@ -95,7 +95,7 @@
   };
   </script>
 
-  <style>
+  <style scoped>
 .network-status-bar {
   background-color: red;
   color: white;

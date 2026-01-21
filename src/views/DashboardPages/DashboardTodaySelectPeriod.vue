@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -16,7 +16,7 @@
       Connected to Network
     </div>
 
-    <ion-content class="ion-padding" ref="contentRef">
+    <ion-content fullscreen class="safe-bottom ion-padding"  ref="contentRef">
       <div v-for="month in months" :key="month.name" class="month" >
         <h5>{{ month.name }} {{ currentYear }}</h5>
         <div class="days-row">

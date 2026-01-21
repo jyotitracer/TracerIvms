@@ -1,10 +1,8 @@
 <!-- This Page is menu Map  Page. -->
 <template>
-  <ion-content>
+<ion-content class="safe-bottom" >
     <!-- Attach the ref to the map container -->
-  
-      <!-- <div :class="ishowPath ? 'map-fab-container-small' : 'map-fab-container-full'"> -->
-  
+    
         <div :style="{ height: mapFabContainerHeight }" class="map-fab-container-full">
         <div ref="mapContainer" class="map-container">
           <div id="map"></div> 
@@ -208,10 +206,10 @@
     </div>
   
     </ion-content>
+
 </template>
   
-   <style scoped>
-  
+  <style scoped>
   
   ion-range{
     --knob-size: 16px;
@@ -257,20 +255,20 @@
   
   ion-content {
     --padding-top: 0;
-    --padding-bottom: 0;
-    overflow: hidden;
+
   }
-  
-  
   
   
   
   .map-container {
-    height: 100%; /* Default height */
-  }
+  height: calc(100%); /* adjust 120px for controls */
+}
+
+  
   
   .full-screen-map {
-    height: 100%; /* Full screen height when isShowPath is false */
+      height: 100%; 
+ /* Full screen height when isShowPath is false */
   }
   
   .filter-section {
@@ -278,7 +276,8 @@
     position: relative;
     z-index: 5;
     margin-top: 5px;
-  
+      background-color: #4d4d4d;
+
   }
   
   
@@ -370,11 +369,6 @@
   
   
   
-  
-  .filter-section
-  {
-    background-color: #4d4d4d;
-  }
   
   .from-to-section {
     bottom: 0;

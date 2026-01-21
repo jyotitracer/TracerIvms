@@ -5,7 +5,7 @@
      <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
        Connected to Network
      </div> -->
- <ion-content>
+<ion-content fullscreen class="safe-bottom">
    <div class="month-below1">
      <div class="month-total date" @click="clickForDatePage">
        {{ formattedCurrentDate }}

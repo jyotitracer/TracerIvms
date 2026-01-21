@@ -1,8 +1,7 @@
 <template>
   <ion-page>
-   
-
-    <ion-content>
+  
+<ion-content fullscreen class="no-safe-bottom">>
       <!-- Button group for filter -->
       <div class="button-group">
         <ion-button

@@ -205,7 +205,7 @@ const handleIosUpdateLater = async () => {
 </script>
 
 
-<style>
+<style scoped>
 .splash-screen {
   display: flex;
   justify-content: center;

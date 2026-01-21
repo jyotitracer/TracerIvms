@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -17,7 +17,7 @@
       Connected to Network
     </div>   
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <!-- Search Bar -->
       <ion-searchbar 
         placeholder="Search for a landmark" 

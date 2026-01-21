@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -16,15 +16,20 @@
       Connected to Network
     </div>   
 
-    <ion-content>
-      <div ref="mapContainer" id="map" style="height: 100%;"></div>
+<ion-content fullscreen class="safe-bottom" >
+
+  <div class="page-wrapper">
+     <div ref="mapContainer" id="map" class="map-container"></div>
+ <ion-button expand="full" @click="saveHomeLocation" 
+ class="save-button">
+      Save Home Location
+    </ion-button>
+
+
+</div>
     </ion-content>
 
-    <ion-footer class="footer-style">
-      <ion-toolbar>
-        <ion-button expand="full" @click="saveHomeLocation" class="save-button">Save Home Location</ion-button>
-      </ion-toolbar>
-    </ion-footer>
+   
   </ion-page>
 </template>
 
@@ -196,20 +201,25 @@ export default defineComponent({
 </script>
 
 <style scoped>
-#map {
+
+
+/* Wrapper controls layout */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
-/* Styling the footer */
-.footer-style {
-  --background: #3880ff; /* You can change this to the desired color */
+/* Map takes all remaining space */
+.map-container {
+  flex: 1;
+  width: 100%;
 }
 
-/* Make the button inherit the footer's background */
+/* Save button spacing */
 .save-button {
-  --background: inherit; /* Button will inherit the footer's background color */
-  color: white; /* You can adjust text color if necessary */
 }
+
 
 .network-status-bar {
   background-color: red;

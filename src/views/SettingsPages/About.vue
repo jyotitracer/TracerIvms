@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -16,7 +16,7 @@
       Connected to Network
     </div>   
 
-    <ion-content>
+<ion-content fullscreen class="safe-bottom">
       <ion-list>
         <ion-item>
           <ion-label>App Version: 1.0.0</ion-label>

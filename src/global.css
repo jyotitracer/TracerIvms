@@ -1,6 +1,12 @@
 /* global.css or global.scss */
 
-
+/* ion-footer,
+ion-footer ion-toolbar {
+  --background: transparent;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+} */
   ion-toolbar ,ion-toolbar,ion-header
   {
     --background: #f31212; /* Set the background color of the header */
@@ -27,6 +33,46 @@
     --background: #fff; /* Set the background color of the header */
 
   }
+
+  /* iOS absolute final fix */
+html,
+body,
+ion-app,
+ion-router-outlet,
+ion-page {
+  height: 100%;
+}
+
+/* Prevent 100vh breaking iOS */
+.full-height {
+  height: 100%;
+  min-height: 100%;
+}
+
+ion-content.safe-bottom {
+  --offset-top: 0px !important;
+  --offset-bottom: 0px !important;
+}
+
+
+
+
+/* Fix fixed bottom elements */
+/* .safe-bottom::part(scroll){
+      margin-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
+
+} */
+
+
+ion-content.safe-bottom::part(scroll) {
+    margin-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
+}
+
+/* Put this in global.css */
+ion-content.no-safe-bottom::part(scroll) {
+  margin-bottom: 0 !important;
+}
+
 
  
 

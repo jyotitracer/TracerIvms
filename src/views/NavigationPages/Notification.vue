@@ -1,6 +1,6 @@
 <!-- This Page is menu Notification Page. -->
 <template>
-  <ion-content>
+<ion-content fullscreen class="safe-bottom">
     <ion-list v-if="selectedItems.length > 0" style="margin-bottom: 40px;">
       <ion-card v-for="(page, index) in selectedItems" :key="index" class="notification-card">
         <ion-card-content style="padding: 5px 5px 2px 5px;">
@@ -22,14 +22,17 @@
       Notifications not available
     </div>
 
-    <ion-footer class="footer-buttons" v-if="selectedItems.length > 0" style="margin-top: 0px;">
-      <ion-button expand="block" @click="confirmDeleteAll" class="footer-button">
-        Delete All
-      </ion-button>
-      <ion-button expand="block" @click="confirmDeleteSelected" class="footer-button">
-        Delete Selected
-      </ion-button>
-    </ion-footer>
+     <!-- 🔥 FIXED BOTTOM BUTTON BAR -->
+  <div v-if="selectedItems.length > 0" class="bottom-action-bar">
+    <ion-button expand="block" @click="confirmDeleteAll" class="footer-button">
+      Delete All
+    </ion-button>
+    <ion-button expand="block" @click="confirmDeleteSelected" class="footer-button">
+      Delete Selected
+    </ion-button>
+  </div>
+
+   
   </ion-content>
 </template>
 
@@ -236,6 +239,37 @@ export default defineComponent({
 
 <style scoped>
 
+/* Bottom fixed action bar */
+.bottom-action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: row;        /* ✅ SINGLE LINE */
+  justify-content: center;    /* ✅ CENTER BOTH BUTTONS */
+  align-items: center;
+  gap: 12px;
+  background: #d32f2f;
+  z-index: 100;
+}
+
+/* Control button width */
+.footer-button {
+  flex: 1;                    /* ✅ equal width */
+  max-width: 220px;           /* keeps them centered */
+  --background: transparent;
+  --color: white;
+  --ripple-color: white;
+  text-transform: none;
+    justify-content: center;    /* ✅ CENTER BOTH BUTTONS */
+  align-items: center;
+  align-text:center;
+  background: #000000;
+
+}
+
+
 .large-checkbox {
   --size: 22px; /* Adjust this value to increase or decrease the checkbox size */
 }
@@ -291,23 +325,6 @@ color: black;
   padding: 0 0 0 0;
 }
 
-.footer-buttons {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  background-color: red;
-}
 
-.footer-button {
-  flex: 1;
-  --background: transparent;
-  background-color: transparent;
-  --color: white;
-  --ripple-color: white;
-  text-transform: none;
-
-}
 </style>
 
