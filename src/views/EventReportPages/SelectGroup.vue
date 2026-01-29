@@ -19,14 +19,14 @@
 <ion-content fullscreen class="safe-bottom">
       <div class="search-toggle-container">
         <ion-searchbar v-model="searchQuery" placeholder="Search Group"></ion-searchbar>
-        <ion-toggle
+        <ion-toggle  mode="md"
           @ionChange="toggleAllItems"
           :checked="allToggled"
         ></ion-toggle>
       </div>
       <ion-list>
         <ion-item v-for="(page, index) in filteredItems" :key="index">
-          <ion-toggle
+          <ion-toggle  mode="md"
             v-model="page.checked"
             @ionChange="(event) => updateGroupStatus(page, event)"
           >

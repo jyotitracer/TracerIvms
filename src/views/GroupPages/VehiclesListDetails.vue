@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header tran>
+    <ion-header translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="/group"></ion-back-button>

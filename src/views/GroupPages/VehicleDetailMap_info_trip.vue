@@ -1,6 +1,5 @@
 <template>
   <ion-page>
-   
       <ion-header translucent>
         <ion-toolbar>
           <!-- <ion-buttons slot="start">
@@ -16,18 +15,18 @@
         </ion-toolbar>
       </ion-header>
 
-<ion-content fullscreen class="no-safe-bottom">>
-        <div v-if="!isConnected" class="network-status-bar">
+<ion-content class="safe-bottom">
+
+    <div v-if="!isConnected" class="network-status-bar">
       No Network Connection
     </div>
     <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
       Connected to Network
     </div>   
       
-
       <ion-tabs>
   <ion-router-outlet></ion-router-outlet>
-  <ion-tab-bar slot="bottom">
+  <ion-tab-bar slot="bottom" class="ios-tab-bar">
     <ion-tab-button 
       @click="selectTab('map')" 
       :class="{ 'tab-selected': selectedTab === 'map' }"
@@ -202,7 +201,35 @@ export default defineComponent({
 <style scoped>
 
 
+/* iOS tab bar container */
+.ios-tab-bar {
+  padding-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
 
+/* Default tab style */
+ion-tab-button {
+  --color: #8e8e93;              /* iOS gray */
+  --color-selected: #007aff;     /* iOS blue */
+  font-size: 11px;
+}
+
+/* Icon size for iOS */
+ion-tab-button ion-icon {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+/* Label spacing */
+ion-tab-button ion-label {
+  font-size: 11px;
+}
+
+/* Selected tab */
+.tab-selected ion-icon,
+.tab-selected ion-label {
+  color: #007aff !important; /* iOS native blue */
+}
 
 
 .tab-selected ion-icon,

@@ -24,7 +24,7 @@
           v-model="searchQuery" 
           placeholder="Search Events"
         ></ion-searchbar>
-        <ion-toggle 
+        <ion-toggle  mode="md" 
           @ionChange="toggleAllItems" 
           :checked="allToggled"
         ></ion-toggle>
@@ -35,7 +35,7 @@
           v-for="(page, index) in filteredItems" 
           :key="index"
         >
-          <ion-toggle 
+          <ion-toggle  mode="md" 
             justify="space-between" 
             v-model="page.checked" 
             @ionChange="updateToggleStatus(page)"

@@ -19,7 +19,7 @@
         <ion-item v-for="(statuscolor, index) in statusList" :key="index">
           <ion-label>{{ statuscolor.status }}</ion-label>
           <!-- Toggle button for each status -->
-          <ion-toggle slot="end"
+          <ion-toggle  mode="md" slot="end"
                       :checked="statuscolor.isEnabled"
                       @ionChange="toggleStatus(index, $event)"
                       color="danger">

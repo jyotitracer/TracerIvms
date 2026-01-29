@@ -7,11 +7,21 @@ ion-footer ion-toolbar {
   box-shadow: none;
   border: none;
 } */
-  ion-toolbar ,ion-toolbar,ion-header
+
+ion-footer,
+ion-footer ion-toolbar {
+  --background: transparent;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+  ion-header, ion-header ion-toolbar
   {
     --background: #f31212; /* Set the background color of the header */
   }
-  
+
+ 
   ion-title {
     color: white !important; /* Set the text color of the title */
   }
@@ -55,7 +65,10 @@ ion-content.safe-bottom {
 }
 
 
-
+ion-content.no-safe-bottom {
+  --offset-top: 0px !important;
+  --offset-bottom: 0px !important;
+}
 
 /* Fix fixed bottom elements */
 /* .safe-bottom::part(scroll){

@@ -18,12 +18,12 @@
 <ion-content fullscreen class="safe-bottom">
       <div class="search-toggle-container">
         <ion-searchbar v-model="searchQuery" placeholder="Search Events"></ion-searchbar>
-        <ion-toggle @ionChange="toggleAllItems" :checked="allToggled"></ion-toggle>
+        <ion-toggle  mode="md" @ionChange="toggleAllItems" :checked="allToggled"></ion-toggle>
       </div>
       
       <ion-list>
         <ion-item v-for="(page, index) in filteredItems" :key="index">
-          <ion-toggle justify="space-between" v-model="page.checked" @ionChange="updateToggleStatus(page)">
+          <ion-toggle  mode="md" justify="space-between" v-model="page.checked" @ionChange="updateToggleStatus(page)">
             {{ page.eventname }}
           </ion-toggle>
         </ion-item>
