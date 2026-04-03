@@ -341,7 +341,7 @@ const handleBackButton = async () => {
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  color: red; /* Text color */
+  color: #D01526;; /* Text color */
   background-color: #dbd7d7; /* Background for the text */
 }
 
@@ -361,7 +361,7 @@ const handleBackButton = async () => {
 
 
 .network-status-bar {
-  background-color: red;
+  background-color: #D01526;;
   color: white;
   text-align: center;
   padding: 5px;

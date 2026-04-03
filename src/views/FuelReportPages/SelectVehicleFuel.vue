@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -164,7 +164,7 @@ ion-item {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

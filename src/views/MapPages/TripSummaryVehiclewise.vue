@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -89,7 +89,7 @@
       <div v-else-if="selectedLabel === 'Week'">
         <!-- Check if weekItems is empty -->
         <p v-if="weekItems.length === 0">Data not available</p>
-        <div v-for="(item, index) in weekItems" :key="index" class="item" @click="openSection">
+        <div v-for="(item, index) in weekItems" :key="index" class="item">
           <div class="item-header">
             <span>{{ item.dateString }}</span>
           </div>
@@ -192,7 +192,9 @@ export default {
     IonBackButton
   },
  
-  setup(props) {
+   setup(props) {
+    let isFirstTimeDataCall = true;
+
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     // Reactive data
@@ -250,7 +252,9 @@ export default {
             })
             .then(loading => {
               // Present the loading spinner
-              loading.present();
+               if(isFirstTimeDataCall){
+         loading.present();
+    }
 
 
 
@@ -398,7 +402,8 @@ export default {
                 })
                 .finally(() => {
                   // Dismiss the loading spinner after the API call finishes
-                  loading.dismiss();
+                   if(isFirstTimeDataCall){
+loading.dismiss();    }
                 });
             })
             .catch(error => {
@@ -436,7 +441,11 @@ export default {
       })
       .then((load) => {
         loading = load;
-        return loading.present();
+        return;
+        
+        if(isFirstTimeDataCall){
+         loading.present();
+    }
       })
       .then(() => {
         if (selectedLabel.value === "Today") req_period_type = '1';
@@ -505,7 +514,8 @@ export default {
       })
       .finally(() => {
         if (loading) {
-          loading.dismiss();
+           if(isFirstTimeDataCall){
+loading.dismiss();    }
         }
       });
     };
@@ -568,10 +578,10 @@ export default {
 }
 
 ion-button {
-  --border-color: red;
+  --border-color:#D01526;
   --border-width: 1px;
   --border-style: solid;
-  --color: red;
+  --color:#D01526;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -582,7 +592,8 @@ ion-button {
 }
 
 ion-button.selected {
-  --background: red;
+   --background:#D01526;
+
   --color: white;
   font-size: 10px;
 }
@@ -696,7 +707,7 @@ ion-button.selected {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

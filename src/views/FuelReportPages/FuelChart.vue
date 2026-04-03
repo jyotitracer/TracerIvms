@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-      <ion-header translucent>
+      <ion-header>
         <ion-toolbar>
           <ion-buttons slot="start">
             <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -60,7 +60,8 @@ export default defineComponent({
   },
 
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;
+       const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     const route = useRoute();
 
@@ -82,7 +83,8 @@ export default defineComponent({
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+         loading.present();
+    
 
     const params = {
       allPath: "1",
@@ -128,7 +130,8 @@ export default defineComponent({
     }).catch(error => {
       console.error("Error:", error);
     }).finally(() => {
-      loading.dismiss();
+loading.dismiss();  
+  
     });
   }).catch(error => {
     console.error("Error creating loading:", error);
@@ -179,7 +182,7 @@ export default defineComponent({
 <style scoped>
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

@@ -64,11 +64,11 @@ const updateAlertMessage = ref('');
 // This function runs once when the component is mounted.
 onMounted(() => {
   // Uncomment for production on the app store
- //  startAppFlow();
+   startAppFlow();
   
   // Comment out for production
   // This is your testing path that skips the update check
-  initializeAppLogic();
+  // initializeAppLogic();
 });
 
 

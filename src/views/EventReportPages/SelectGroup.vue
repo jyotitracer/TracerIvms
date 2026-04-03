@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -16,17 +16,17 @@
       Connected to Network
     </div>   
 
-<ion-content fullscreen class="safe-bottom">
+    <ion-content fullscreen class="safe-bottom">
       <div class="search-toggle-container">
         <ion-searchbar v-model="searchQuery" placeholder="Search Group"></ion-searchbar>
-        <ion-toggle  mode="md"
+        <ion-toggle mode="md"
           @ionChange="toggleAllItems"
           :checked="allToggled"
         ></ion-toggle>
       </div>
       <ion-list>
         <ion-item v-for="(page, index) in filteredItems" :key="index">
-          <ion-toggle  mode="md"
+          <ion-toggle mode="md"
             v-model="page.checked"
             @ionChange="(event) => updateGroupStatus(page, event)"
           >
@@ -39,9 +39,8 @@
 </template>
 
 <script lang="ts">
-import useNetwork from '@/services/networkService'; // Import the network service
-
-import { defineComponent, onMounted, ref, watch, computed } from 'vue';
+import useNetwork from '@/services/networkService';
+import { defineComponent, onMounted, ref, computed } from 'vue';
 import {
   IonButtons,
   IonBackButton,
@@ -53,10 +52,11 @@ import {
   IonItem,
   IonList,
   IonToggle,
-  IonSearchbar
+  IonSearchbar,loadingController
 } from '@ionic/vue';
 import storage from "@/services/storagefile";
 import Constants from "@/common/constants";
+import { fetchData } from "@/services/ApiService";
 import router from '@/router/index';
 
 export default defineComponent({
@@ -71,84 +71,134 @@ export default defineComponent({
     IonItem,
     IonList,
     IonToggle,
-    IonSearchbar
+    IonSearchbar,loadingController
   },
   setup() {
-
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
 
     const selectedItems = ref([]);
     const searchQuery = ref('');
     const allToggled = ref(false);
+    let isFirstTimeDataCall = true;
 
+    /** 🔹 Fetch Groups from API & Merge with Stored Values */
+    const fetchGroupData = async () => {
+
+                const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus) || [];
+              if(storedGroups)
+              {
+
+                isFirstTimeDataCall=false;
+              }
+
+      // Show loading
+  const loading = await loadingController.create({
+    message: 'Loading...',
+    spinner: 'crescent',
+    backdropDismiss: false
+  });
+
+  if(isFirstTimeDataCall)
+  {
+  await loading.present();
+  }
+      const params = { grping: '2' };
+
+      try {
+        const response = await fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Group_v1, params);
+        const arrData = response.data?.arr_data;
+
+        if (response.status === 200 && arrData?.length) {
+          const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus) || [];
+
+          // Map stored values for quick lookup
+          const storedMap = new Map(
+            storedGroups.map(g => [g.groupId, g])
+          );
+
+          selectedItems.value = arrData.map(data => {
+            const stored = storedMap.get(data.id);
+            return {
+              groupId: data.id,
+              group: data.name,
+              checked: stored?.checked ?? (data.status === 1),
+              status: stored?.status ?? 1,
+              disabled: stored?.disabled ?? false
+            };
+          });
+
+          // Ensure at least one is checked
+          if (!selectedItems.value.some(item => item.checked)) {
+            selectedItems.value.forEach(item => item.checked = true);
+          }
+
+          await storage.set(Constants.storageValue.key_GroupWithStatus, selectedItems.value);
+          checkAllToggled();
+        }
+
+         if(isFirstTimeDataCall){
+          loading.dismiss();  
+  }
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    /** 🔹 Collect groups from storage or API if empty */
     const collectGroup = async () => {
-      const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus);
+      let storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus);
 
-      console.log("storedGroups",storedGroups);
-      
-      if (storedGroups && storedGroups.length > 0) {
+      if (!storedGroups || storedGroups.length === 0) {
+        await fetchGroupData();
+        storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus);
+      }
+
+      if (storedGroups?.length) {
         selectedItems.value = storedGroups.map(data => ({
           groupId: data.groupId,
           group: data.group,
-          checked: data.status === 1, // Set `checked` based on `status`
-          status: data.status, 
+          checked: data.checked ?? (data.status === 1),
+          status: data.status,
+          disabled: data.disabled ?? false
         }));
       } else {
         selectedItems.value = [];
       }
+
+      checkAllToggled();
     };
 
-    onMounted(() => {
-      initNetworkListener();
+    /** 🔹 Update All Toggle State */
+    const checkAllToggled = () => {
+      allToggled.value = selectedItems.value.length > 0 && selectedItems.value.every(item => item.checked);
+    };
 
-      collectGroup();
-    });
-
-    watch(selectedItems, (newItems) => {
-      if (newItems.length === 0) {
-        allToggled.value = false;
-        return;
-      }
-      allToggled.value = newItems.every(item => item.checked);
-    }, { deep: true });
-
+    /** 🔹 Toggle All Groups */
     const toggleAllItems = async (event) => {
       const isChecked = event.detail.checked;
-      console.log("displaydata",selectedItems.value+" "+isChecked);
-
       allToggled.value = isChecked;
 
       selectedItems.value.forEach(item => {
-        item.checked = isChecked;
-        item.status = isChecked ? 1 : 0; // Update status based on checked state
+        if (!item.disabled) {
+          item.checked = isChecked;
+          item.status = isChecked ? 1 : 0;
+        }
       });
 
-      console.log("after change",selectedItems.value);
-
-      // Save the updated groups to storage
       await storage.set(Constants.storageValue.key_GroupWithStatus, selectedItems.value);
     };
 
+    /** 🔹 Update Single Group Toggle */
     const updateGroupStatus = async (page, event) => {
-
-
       const isChecked = event.detail.checked;
       page.checked = isChecked;
-      page.status = isChecked ? 1 : 0; // Update status based on checked state
+      page.status = isChecked ? 1 : 0;
 
-
-
-    // Update the allToggled state based on current items
-    const allChecked = selectedItems.value.every(item => item.checked);
-    allToggled.value = allChecked;
-
-    // Save the updated group to storage
-    await storage.set(Constants.storageValue.key_GroupWithStatus, selectedItems.value);
-
-    console.log("selectedItems.value", selectedItems.value);
-
+      checkAllToggled();
+      await storage.set(Constants.storageValue.key_GroupWithStatus, selectedItems.value);
     };
 
+    /** 🔹 Filtered Items for Search */
     const filteredItems = computed(() => {
       if (searchQuery.value) {
         return selectedItems.value.filter(item =>
@@ -162,6 +212,11 @@ export default defineComponent({
       router.back();
     };
 
+    onMounted(async () => {
+      initNetworkListener();
+      await collectGroup();
+    });
+
     return {
       selectedItems,
       searchQuery,
@@ -170,8 +225,9 @@ export default defineComponent({
       updateGroupStatus,
       filteredItems,
       goBack,
-      isConnected, showReconnectedMessage, initNetworkListener
-
+      isConnected,
+      showReconnectedMessage,
+      initNetworkListener
     };
   }
 });
@@ -192,16 +248,14 @@ ion-item {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color: #D01526;
   color: white;
   text-align: center;
   padding: 5px;
   font-size: 14px;
 }
 
-
 .network-status-bar.connected {
   background-color: green;
 }
-
 </style>

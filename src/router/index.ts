@@ -174,10 +174,10 @@ const routes: Array<RouteRecordRaw> = [
     component: FuelChart,
   },
   {
-    path: '/vehlistdet/:group',
+    path: '/vehlistdet',
     name: 'DetailVehicle',
     component: VehiclesListDetails,
-    props: true,
+    props:true,
   },
  
   {

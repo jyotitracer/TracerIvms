@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -216,7 +216,7 @@ return {
 }
 
 .month h5 {
-  color: red;
+  color: #D01526;;
   font-size: 16px;
   text-align: center;
 }
@@ -246,7 +246,7 @@ return {
 }
 
 .selected-date {
-  background-color: red;
+  background-color: #D01526;;
   color: white;
   border-radius: 50%;
 }
@@ -258,7 +258,7 @@ return {
 }
 
 .custom-button {
-  --background: red;
+  --background: #D01526;;
   --border-radius: 0;
   --border-color: black;
   --border-width: 1px;
@@ -266,7 +266,7 @@ return {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color: #D01526;;
   color: white;
   text-align: center;
   padding: 5px;

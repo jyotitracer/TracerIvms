@@ -127,8 +127,13 @@
       <!-- New Play/Pause Section -->
       <div class="play-pause-section" v-if="isLoadPath" :style="{ height: playPauseSection }">
         <div class="first-div">
-        <ion-button @click="togglePlayPause" class="play-pause-icon">
+        <ion-button
+         @click="togglePlayPause"
+          class="play-pause-icon"
+          :disabled="!canPlay">
+
              <ion-icon :icon="isPlaying ? pauseIcon : playIcon" style="color: white;"></ion-icon>
+
           </ion-button> 
         </div>   
         <div class="second-div">
@@ -206,11 +211,9 @@
     </div>
   
     </ion-content>
-
 </template>
   
   <style scoped>
-  
   ion-range{
     --knob-size: 16px;
     --height: 38px;
@@ -331,7 +334,7 @@
   
   ion-icon {
     font-size: 24px;
-    color: red;
+    color:#D01526;
   }
   
   
@@ -444,7 +447,8 @@
     height: 40px;  /* Height of the circle */
     display: flex;
     align-items: center;
-    --background: red;
+     --background:#D01526;
+
       --color: white;
       padding: 0px;
       --padding-top: 0px; 
@@ -478,7 +482,8 @@
     font-size: 12px;
     align-items:end;
     color: white;
-    --background: red;
+     --background:#D01526;
+
     text-transform: none;
     width: auto;
     margin: 0px 0px 0px 0px;
@@ -539,273 +544,488 @@
   </style>
   
 
-    <script lang="ts">
+  <script lang="ts">
 
-    import InfoBoxNearestVeh from '@/components/InfoBoxNearestVeh.vue';
-    import InfoBoxSummaryTrip from '@/components/InfoBoxSummeryTrip.vue';
-    import { IonContent, IonFab, IonFabButton, IonFabList, IonHeader, IonIcon, IonTitle, IonToolbar,IonLabel,
-      loadingController,IonProgressBar,IonRange,IonCheckbox, useBackButton} from '@ionic/vue';
-    import {  chevronUpCircle,    colorPalette,    globe, playCircle, pauseCircle, star, close, closeCircle } from 'ionicons/icons';
-    import router from '@/router/index'; // Assuming your router file is named router.js
-    import{MapIntervalRefresh,stopInterval1Min} from '@/services/MaprefreshService';
-    import { ref, onMounted, onUnmounted,nextTick, watch } from 'vue';
-    import Constants from '@/common/constants';
-    import { fetchData } from '@/services/ApiService';
-    import storage from '@/services/storagefile';
-    import { Network } from '@capacitor/network';
-    import { useRoute } from 'vue-router';
-    import { showToast,showToastMessage } from '@/services/toast'; // Import the toast utility function
-    import axios from 'axios';
-    import { Loader } from "@googlemaps/js-api-loader";
-    import InfoWindowMapMarker from '@/components/InfoWindowMapMarker.vue';
-    import InfoWindowDorMarker from '@/components/InfoWindowDotMarker.vue';
-    import { createApp } from 'vue';
-    import { format, startOfDay ,formatISO} from 'date-fns';
-    import { IonButton, IonModal, IonDatetime, IonGrid, IonCol, IonItem, IonRow } from '@ionic/vue';
-    import {  selectedPage } from '@/services/userstate'; // Import the global state
-    import { loadGoogleMaps } from '@/services/googleMapsLoader';
-    import * as tz from "date-fns-tz";
+import InfoBoxNearestVeh from '@/components/InfoBoxNearestVeh.vue';
+import InfoBoxSummaryTrip from '@/components/InfoBoxSummeryTrip.vue';
 
-  
-          const selectedVehNo=ref('');
-          const currentIndex = ref(0);  // Track the current index
-        
-          const selectedItems = ref([]);
-          const mapRef = ref<google.maps.Map | null>(null);
-          let newMap: google.maps.Map | null = null;
-         
-          const mapContainer = ref<HTMLElement | null>(null); // Ref for the map container
-          const markersArray = ref<google.maps.Marker[]>([]); // Array to store Google Maps markers
-          const polylineRef = ref<google.maps.Polyline | null>(null);
-          let vehicleLat: string | number | string[],vehicleLon: string | number | string[];
-          
-          const Near_vehicleObject = ref(null);
-          const isnearVehObject = ref(false);
-          const isSumTripObject=ref(false);
-          const summaryTripObject = ref(null);
-          const markersDotsArray: (never[] | google.maps.Marker)[]=[];
-          let currentInfoWindow = null; // Variable to store the currently open infoWindow
-  
-          const isMapBusyWithRoute=ref(false);
-          const items = ref([]);
-          const historyarray = ref([]);
-                  
-          let markerMovingIcon: google.maps.Marker | null
-          let markerId1: google.maps.Marker | null
-          let markerId2: google.maps.Marker | null
+import {
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonFabList,
+  IonHeader,
+  IonIcon,
+  IonTitle,
+  IonToolbar,
+  IonLabel,
+  loadingController,
+  IonProgressBar,
+  IonRange,
+  IonCheckbox,
+  useBackButton,
+  IonButton,
+  IonModal,
+  IonDatetime,
+  IonGrid,
+  IonCol,
+  IonItem,
+  IonRow
+} from '@ionic/vue';
 
-  
-          const intervalRunning1Min = ref(false);
-          
-          const showData = ref(false); // Controls visibility of the toggleable section
-          const vehicleNo = ref('QATAR101849'); // Example Vehicle Number
-          const distance = ref(36.8); // Example distance
-      
-          const isFromPickerVisible = ref(false); // For controlling the visibility of the From DateTime picker
-          const isToPickerVisible = ref(false); // For controlling the visibility of the To DateTime picker
-          const isDateTimeValid = ref(true); // For checking date-time validity
-          const ishowPath=ref(false);
-          const isMarkerShowPath=ref(false);
-          const isLoadPath=ref(false);
-              
-              // Initialize DateTimes
-          const fromDateTime = ref('');
-          const toDateTime = ref('');
-          // Set min and max date
-          const currentDateTime = ref('');
+import {
+  chevronUpCircle,
+  colorPalette,
+  globe,
+  playCircle,
+  pauseCircle,
+  star,
+  close,
+  closeCircle
+} from 'ionicons/icons';
 
-          const fromDateTimeFormatted = ref('');
-          const toDateTimeFormatted = ref('');
-             
-          // Modal control
-          const isDateTimePickerVisible = ref(false);
-          const selectedDateTime = ref(null);
-          const dateType = ref(null);      
-        // Icons
-        const playIcon = playCircle;
-        const pauseIcon = pauseCircle;     
-        const isPlaying= ref(false);
-        const progressValue = ref(0); // Value for progress bar
-        const speedValue = ref(5); // Example speed in km/h
-        
-           // const marker = ref();
-        const polylinePathsForShowPath = ref();
-        const directionsService = ref();
-        const routePoints = ref([]);
-        const middleMarkers = ref([]);
-        const animationIndex = ref(0);
-        const animationTimer = ref();
-        const animationSpeed = ref(600); // Default to 600ms
-        const animationProgress = ref(0);
-        const index_route_array = ref([]);
-  
-        const isSummaryChecked = ref(true); // Default checked
-        const isTripInfoChecked = ref(true); // Default checked
-  
-        // Play/Pause and Progress
-        let interval = 0; // Store the interval ID
-        const fabButton = ref(null);
-        const userTimeZone = ref('Asia/Kolkata'); // default
+import router from '@/router/index';
+import { MapIntervalRefresh, stopInterval1Min } from '@/services/MaprefreshService';
 
-  
-  
-            export default {
-              components: { IonContent, IonFab, IonFabButton, IonFabList, IonHeader, IonIcon, IonTitle, IonToolbar ,IonLabel,  
-                  InfoBoxNearestVeh,  InfoBoxSummaryTrip,  InfoWindowMapMarker,IonButton, IonModal, IonDatetime, IonGrid, IonCol,
-                   IonItem, IonRow,IonProgressBar,IonRange,IonCheckbox,InfoWindowDorMarker},
-  
-                   computed: {
-                        mapFabContainerHeight() {
-                                let height = "100%";
-                                if (ishowPath.value) {
-                                  if(isMarkerShowPath.value){
-                                  height = `calc(${height} - 70px)`;
-                                  }
-                                
-                                }
-      
-                                if (isLoadPath.value) {
-                                  if(isMarkerShowPath.value){
-                                  height = `calc(${height} - 85px)`;
-                                  }else{
-                                  height = `calc(${height} - 120px)`;
-                                  }
-                                }
-      
-      
-                                return height;
-                          },
-  
-                          playPauseSection(){
-                              if(isMarkerShowPath.value){
-                              return `calc(85px)`;
-                                }else{
-                              return `calc(120px)`;
-                                }
-                          }
-                  },
-                  
-                  setup() {
-      
-      
-                      const route = useRoute();
-                      vehicleLat = route.params.vehLat;
-                      vehicleLon = route.params.vehLon;
-                      // historyarray.value = route.params.arrayData;
-                      historyarray.value=[];
-                      historyarray.value = route.params.arrayData
-                      ? JSON.parse(route.params.arrayData)
-                      : [];
-                  
-                
-      
-                      // Function to get the formatted "Last Status Update"
-                      const formatDateToString = (date,timeZone) => {
-                        const parts = new Intl.DateTimeFormat("en-GB", {
-                              timeZone,
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                              hour12: false,
-                            }).formatToParts(date);
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  watch
+} from 'vue';
 
-                            const lookup: any = {};
-                            parts.forEach((p) => {
-                              lookup[p.type] = p.value;
-                            });
+import Constants from '@/common/constants';
+import { fetchData } from '@/services/ApiService';
+import storage from '@/services/storagefile';
 
-                            // Returns ISO-like string in that timezone
-                            return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
+import { Network } from '@capacitor/network';
+import { useRoute } from 'vue-router';
 
-                      };
-                      
-                    watch(
-                            () => routePoints.value.length,
-                            (newLen) => {
-                              if (newLen > 0) {
-                                animationProgress.value = 0;
-                              }
-                            }
-                          );
+import { showToast, showToastMessage } from '@/services/toast';
 
-                      onMounted(async () => {
+import axios from 'axios';
+import { Loader } from "@googlemaps/js-api-loader";
 
-                          const login_data= await storage.get('login_data');
-                          userTimeZone.value=login_data.tz_idfier;
+import InfoWindowMapMarker from '@/components/InfoWindowMapMarker.vue';
+import InfoWindowDorMarker from '@/components/InfoWindowDotMarker.vue';
 
-                            currentDateTime.value = formatDateToString(new Date(),userTimeZone.value);
+import { createApp } from 'vue';
+
+import { format, startOfDay, formatISO } from 'date-fns';
+import * as tz from "date-fns-tz";
+
+import { selectedPage } from '@/services/userstate';
+import { loadGoogleMaps } from '@/services/googleMapsLoader';
 
 
-                          useBackButton(9999, async () => {
-                            const title='';
-                          const pageid='';
-                          const path='';
-                          selectedPage.value = { title, pageid,path }; // Update the shared state
-      
-                          router.replace('/today');
-                        });
-                      await CallOnlyAPI();
-                        await MapDisplay();
-                      await MapIntervalRefresh();
-                                  
-                          console.log("uerhter");
-              
-                      });
-                
-                          // Stop timer when component is unmounted
-                      onUnmounted(() => {
-                        // Destroy the map when the component is unmounted
-                        if (mapRef.value) {
-                          mapRef.value = null;
-                        }
-                        closeShowPath(1);
-      
-                        stopInterval1Min();
-                      });
-      
-      
-                      // Method to clear the polyline
-                        const clearPolyline = () => {
-                          if (polylineRef.value) {
-                            polylineRef.value.setMap(null); // Remove polyline from the map
-                            polylineRef.value = null; // Clear the reference
-                          }
-                          isnearVehObject.value = false; // Also hide the info box
-                        };
-      
-                
-              
-                      return {
-                        closeCircle,chevronUpCircle, colorPalette,globe, mapContainer,navigateToPage, closeShowPath,ishowPath,isMarkerShowPath,isLoadPath,
-                          moveCameraToLocation, MapDisplay,getDirections, Near_vehicleObject, summaryTripObject,isnearVehObject,isSumTripObject,
-                            clearPolyline,showData,isPlaying,vehicleNo,distance,fromDateTime,toDateTime,loadData,togglePlayPause,playIcon,
-                        pauseIcon,isFromPickerVisible,isToPickerVisible,isDateTimeValid,fromDateTimeFormatted,toDateTimeFormatted,
-                      openDatePicker,validateDateTime,closeModal,selectedDateTime,
-                      openModal,progressValue,speedValue,isSummaryChecked,isTripInfoChecked,isDateTimePickerVisible,
-                      currentDateTime,updateDateTime,saveDateTime,interval,historyarray,currentIndex,fabButton,
-                      markerMovingIcon,isMapBusyWithRoute,formatDateToString, extractRoutePoints,animateRoute,getCurrentWaypointIndex,
-            polylinePathsForShowPath,  directionsService, routePoints, middleMarkers, animationIndex, animationTimer, animationSpeed, fetchRoute,processWaypoints,
-            updateSpeed,updateAnimationProgress,animationProgress,
-                            };
-                      },
-          };
-  
-  
-  
-      //this function called on click of loadData Button of show trip point. 
-      const loadData = () => {
-          CallTripPath();
-  
-         // console.log('Loading data...');
-  
-      };
-  
+/* ===========================
+   REFS & STATE VARIABLES
+=========================== */
 
-    const processWaypoints = async (waypoints) => {
-  routePoints.value = [];   // 🔴 REQUIRED
+const selectedVehNo = ref('');
+const currentIndex = ref(0);
+
+const selectedItems = ref([]);
+
+const mapRef = ref<google.maps.Map | null>(null);
+let newMap: google.maps.Map | null = null;
+
+const mapContainer = ref<HTMLElement | null>(null);
+const markersArray = ref<google.maps.Marker[]>([]);
+const polylineRef = ref<google.maps.Polyline | null>(null);
+
+let vehicleLat: string | number | string[];
+let vehicleLon: string | number | string[];
+
+const Near_vehicleObject = ref(null);
+const isnearVehObject = ref(false);
+
+const isSumTripObject = ref(false);
+const summaryTripObject = ref(null);
+
+const markersDotsArray: (never[] | google.maps.Marker)[] = [];
+
+let currentInfoWindow = null;
+
+const isMapBusyWithRoute = ref(false);
+
+const items = ref([]);
+const historyarray = ref([]);
+
+let markerMovingIcon: google.maps.Marker | null;
+let markerId1: google.maps.Marker | null;
+let markerId2: google.maps.Marker | null;
+
+
+/* ===========================
+   INTERVAL / FLAGS
+=========================== */
+
+const intervalRunning1Min = ref(false);
+
+const showData = ref(false);
+const vehicleNo = ref('QATAR101849');
+const distance = ref(36.8);
+
+
+/* ===========================
+   DATE TIME CONTROLS
+=========================== */
+
+const isFromPickerVisible = ref(false);
+const isToPickerVisible = ref(false);
+
+const isDateTimeValid = ref(true);
+
+const ishowPath = ref(false);
+const isMarkerShowPath = ref(false);
+const isLoadPath = ref(false);
+
+const fromDateTime = ref('');
+const toDateTime = ref('');
+
+const currentDateTime = ref('');
+
+const fromDateTimeFormatted = ref('');
+const toDateTimeFormatted = ref('');
+
+const isDateTimePickerVisible = ref(false);
+const selectedDateTime = ref(null);
+const dateType = ref(null);
+
+
+/* ===========================
+   PLAYER CONTROLS
+=========================== */
+
+const playIcon = playCircle;
+const pauseIcon = pauseCircle;
+
+const isPlaying = ref(false);
+const canPlay = ref(false);
+
+const progressValue = ref(0);
+const speedValue = ref(5);
+
+
+/* ===========================
+   ROUTE & ANIMATION
+=========================== */
+
+const polylinePathsForShowPath = ref();
+const directionsService = ref();
+
+const routePoints = ref([]);
+const middleMarkers = ref([]);
+
+const animationIndex = ref(0);
+const animationTimer = ref();
+
+const animationSpeed = ref(600);
+const animationProgress = ref(0);
+
+const index_route_array = ref([]);
+
+
+/* ===========================
+   CHECKBOX CONTROLS
+=========================== */
+
+const isSummaryChecked = ref(true);
+const isTripInfoChecked = ref(true);
+
+
+/* ===========================
+   FAB / INTERVAL
+=========================== */
+
+let interval = 0;
+const fabButton = ref(null);
+
+const userTimeZone = ref('Asia/Kolkata');
+
+    let isFirstTimeDataCall = true;  
+
+
+    export default {
+  components: {
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonHeader,
+    IonIcon,
+    IonTitle,
+    IonToolbar,
+    IonLabel,
+
+    InfoBoxNearestVeh,
+    InfoBoxSummaryTrip,
+    InfoWindowMapMarker,
+    InfoWindowDorMarker,
+
+    IonButton,
+    IonModal,
+    IonDatetime,
+    IonGrid,
+    IonCol,
+    IonItem,
+    IonRow,
+    IonProgressBar,
+    IonRange,
+    IonCheckbox
+  },
+
+  computed: {
+    mapFabContainerHeight() {
+      let height = "100%";
+
+      if (ishowPath.value) {
+        if (isMarkerShowPath.value) {
+          height = `calc(${height} - 70px)`;
+        }
+      }
+
+      if (isLoadPath.value) {
+        if (isMarkerShowPath.value) {
+          height = `calc(${height} - 85px)`;
+        } else {
+          height = `calc(${height} - 120px)`;
+        }
+      }
+
+      return height;
+    },
+
+    playPauseSection() {
+      if (isMarkerShowPath.value) {
+        return `calc(85px)`;
+      } else {
+        return `calc(120px)`;
+      }
+    }
+  },
+
+  setup() {
+    const route = useRoute();
+
+    vehicleLat = route.params.vehLat;
+    vehicleLon = route.params.vehLon;
+
+    // historyarray.value = route.params.arrayData;
+    historyarray.value = [];
+    historyarray.value = route.params.arrayData
+      ? JSON.parse(route.params.arrayData)
+      : [];
+
+    /* ===========================
+       DATE FORMAT FUNCTION
+    =========================== */
+
+    const formatDateToString = (date, timeZone) => {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).formatToParts(date);
+
+      const lookup: any = {};
+
+      parts.forEach((p) => {
+        lookup[p.type] = p.value;
+      });
+
+      return `${lookup.year}-${lookup.month}-${lookup.day}T${lookup.hour}:${lookup.minute}:${lookup.second}`;
+    };
+
+    /* ===========================
+       WATCHERS
+    =========================== */
+
+    watch(
+      () => routePoints.value.length,
+      (newLen) => {
+        if (newLen > 0) {
+          animationProgress.value = 0;
+        }
+      }
+    );
+
+    /* ===========================
+       LIFECYCLE - MOUNT
+    =========================== */
+
+    onMounted(async () => {
+      const login_data = await storage.get("login_data");
+      userTimeZone.value = login_data.tz_idfier;
+
+      currentDateTime.value = formatDateToString(
+        new Date(),
+        userTimeZone.value
+      );
+
+      await MapDisplay();
+      await CallOnlyAPI();
+
+      await MapIntervalRefresh();
+
+      useBackButton(9999, async () => {
+        const title = "";
+        const pageid = "";
+        const path = "";
+
+        selectedPage.value = { title, pageid, path };
+
+        router.replace("/today");
+      });
+    });
+
+    /* ===========================
+       LIFECYCLE - UNMOUNT
+    =========================== */
+
+    onUnmounted(() => {
+      if (mapRef.value) {
+        mapRef.value = null;
+      }
+
+      closeShowPath(1);
+      stopInterval1Min();
+    });
+
+    /* ===========================
+       METHODS
+    =========================== */
+
+    const clearPolyline = () => {
+      if (polylineRef.value) {
+        polylineRef.value.setMap(null);
+        polylineRef.value = null;
+      }
+
+      isnearVehObject.value = false;
+    };
+
+    /* ===========================
+       RETURN
+    =========================== */
+
+    return {
+      closeCircle,
+      chevronUpCircle,
+      colorPalette,
+      globe,
+
+      mapContainer,
+      navigateToPage,
+      closeShowPath,
+
+      ishowPath,
+      isMarkerShowPath,
+      isLoadPath,
+
+      moveCameraToLocation,
+      MapDisplay,
+      getDirections,
+
+      Near_vehicleObject,
+      summaryTripObject,
+      isnearVehObject,
+      isSumTripObject,
+
+      clearPolyline,
+
+      showData,
+      isPlaying,
+      vehicleNo,
+      distance,
+
+      fromDateTime,
+      toDateTime,
+      loadData,
+      togglePlayPause,
+
+      playIcon,
+      pauseIcon,
+
+      isFromPickerVisible,
+      isToPickerVisible,
+      isDateTimeValid,
+
+      fromDateTimeFormatted,
+      toDateTimeFormatted,
+
+      openDatePicker,
+      validateDateTime,
+      closeModal,
+      selectedDateTime,
+      canPlay,
+
+      openModal,
+      progressValue,
+      speedValue,
+
+      isSummaryChecked,
+      isTripInfoChecked,
+
+      isDateTimePickerVisible,
+      currentDateTime,
+
+      updateDateTime,
+      saveDateTime,
+
+      interval,
+      historyarray,
+      currentIndex,
+      fabButton,
+
+      markerMovingIcon,
+      isMapBusyWithRoute,
+
+      formatDateToString,
+
+      extractRoutePoints,
+      animateRoute,
+      getCurrentWaypointIndex,
+
+      polylinePathsForShowPath,
+      directionsService,
+      routePoints,
+      middleMarkers,
+      animationIndex,
+      animationTimer,
+      animationSpeed,
+
+      fetchRoute,
+      processWaypoints,
+
+      updateSpeed,
+      updateAnimationProgress,
+      animationProgress
+    };
+  }
+};
+  
+    // this function called on click of loadData Button of show trip point
+const loadData = () => {
+  CallTripPath();
+
+  // console.log('Loading data...');
+};
+
+
+/* ===========================
+   PROCESS WAYPOINTS
+=========================== */
+
+const processWaypoints = async (waypoints) => {
+  routePoints.value = []; // 🔴 REQUIRED
 
   for (let i = 0; i < waypoints.length - 1; i++) {
     const origin = new google.maps.LatLng(
@@ -825,141 +1045,137 @@
   animationProgress.value = 0;
 };
 
-      const fetchRoute = (origin, destination,wayPointIndex) => {
 
-          
-                      
-        return new Promise((resolve, reject) => {
-          const request = {
-            origin,
-            destination,
-            travelMode: google.maps.TravelMode.DRIVING,
-          };
-      
-          directionsService.value.route(request, (response, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
-              extractRoutePoints(response,wayPointIndex);
+/* ===========================
+   FETCH ROUTE
+=========================== */
 
-              resolve();
-            } else {
-              // showToastMessage('Directions failed');
-              console.error("Directions request failed:", status);
-              reject(status);
-            }
-          });
-        });
-       };
-      
- const extractRoutePoints = (response,wayPointIndex) => {
-        const route = response.routes[0];
-        const legs = route.legs;
-
-      
-          legs.forEach((leg,legIndex) => {
-
-
-            leg.steps.forEach((step,stepIndex) => {
-
-              const stepPoints = google.maps.geometry.encoding.decodePath(step.polyline.points);
-              routePoints.value.push(...stepPoints);
-            });
-          });
-
-
-       };
-
-      
-
-  
-      //this function used for play pause button
-      const togglePlayPause = () => {
-
-      
-        // if (animationIndex.value === 0 && animationProgress.value === 0 && !isPlaying.value) {
-        //   polylinePathsForShowPath.value.setPath([]);
-        //   const s1 ={lat:historyarray.value[0].lat,lng:historyarray.value[0].lon}
-
-        //   markerMovingIcon.setPosition(s1);
-        //   newMap?.panTo(s1);
-        // }
-
-        if (animationIndex.value === 0 && animationProgress.value === 0 && !isPlaying.value) {
-        polylinePathsForShowPath.value.setPath([]);
-      }
-  
-        isPlaying.value = !isPlaying.value;
-  
-        if (isPlaying.value) {
-          animateRoute();
-        } else {
-          clearTimeout(animationTimer.value);
-        }
-      };
-
-
-        const animateRoute = () => {
-      if (!isPlaying.value || animationIndex.value >= routePoints.value.length) {
-        clearTimeout(animationTimer.value);
-        animationIndex.value = 0;
-        animationProgress.value = 0;
-        isPlaying.value = false;
-        markerMovingIcon.setPosition(routePoints.value[0]);
-        newMap?.panTo(routePoints.value[0]);
-        return;
-      }
-
-       
-    const currentPoint = routePoints.value[animationIndex.value];
-   // const prevPoint = animationIndex.value > 0 ? routePoints.value[animationIndex.value - 1] : currentPoint;
-     // const heading = google.maps.geometry.spherical.computeHeading(prevPoint, currentPoint);
-
-      const nextPoint = animationIndex.value < routePoints.value.length - 1
-        ? routePoints.value[animationIndex.value + 1]
-        : currentPoint;
-
-      // Compute heading based on current → next
-      const heading = google.maps.geometry.spherical.computeHeading(currentPoint, nextPoint);
-
-        markerMovingIcon.setPosition(currentPoint);
-
-        // Move and rotate the marker
-        markerMovingIcon.setIcon({
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 3.5,
-          strokeColor: "#FF0000",
-          rotation: heading,
-        });
-                
-        newMap?.panTo(currentPoint);
-
-       
-
-      const waypointIndex = getCurrentWaypointIndex(currentPoint);
-        // console.log("Current Waypoint Index:", waypointIndex);
-
-      const path = polylinePathsForShowPath.value.getPath();
-      path.push(currentPoint);
-
-      animationProgress.value = animationIndex.value;
-      animationIndex.value++;
-
-      animationTimer.value = setTimeout(animateRoute, animationSpeed.value);
-
-
-
+const fetchRoute = (origin, destination, wayPointIndex) => {
+  return new Promise((resolve, reject) => {
+    const request = {
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING
     };
 
-  
-    const getCurrentWaypointIndex = (point) => {
+    directionsService.value.route(request, (response, status) => {
+      if (status === google.maps.DirectionsStatus.OK) {
+        extractRoutePoints(response, wayPointIndex);
+        resolve();
+      } else {
+        // showToastMessage('Directions failed');
+        console.error("Directions request failed:", status);
+        reject(status);
+      }
+    });
+  });
+};
+
+
+/* ===========================
+   EXTRACT ROUTE POINTS
+=========================== */
+
+const extractRoutePoints = (response, wayPointIndex) => {
+  const route = response.routes[0];
+  const legs = route.legs;
+
+  legs.forEach((leg, legIndex) => {
+    leg.steps.forEach((step, stepIndex) => {
+      const stepPoints = google.maps.geometry.encoding.decodePath(
+        step.polyline.points
+      );
+
+      routePoints.value.push(...stepPoints);
+    });
+  });
+};
+
+
+/* ===========================
+   PLAY / PAUSE CONTROL
+=========================== */
+
+// this function used for play pause button
+const togglePlayPause = () => {
+
+  // if (animationIndex.value == 0 && animationProgress.value == 0 && !isPlaying.value) {
+  //   polylinePathsForShowPath.value.setPath([]);
+  //   const s1 ={lat:historyarray.value[0].lat,lng:historyarray.value[0].lon}
+  //   markerMovingIcon.setPosition(s1);
+  //   newMap?.panTo(s1);
+  // }
+
+  if (
+    animationIndex.value == 0 &&
+    animationProgress.value == 0 &&
+    !isPlaying.value
+  ) {
+    polylinePathsForShowPath.value.setPath([]);
+  }
+
+  isPlaying.value = !isPlaying.value;
+
+  if (isPlaying.value) {
+    animateRoute();
+  } else {
+    clearTimeout(animationTimer.value);
+  }
+};
+
+
+/* ===========================
+   ANIMATE ROUTE
+=========================== */
+const animateRoute = () => {
+  if (!isPlaying.value || animationIndex.value >= routePoints.value.length) {
+    clearTimeout(animationTimer.value);
+    animationIndex.value = 0;
+    animationProgress.value = 0;
+    isPlaying.value = false;
+
+    markerMovingIcon.setPosition(routePoints.value[0]);
+    newMap?.panTo(routePoints.value[0]);
+    return;
+  }
+
+  const currentPoint = routePoints.value[animationIndex.value];
+  const nextPoint =
+    animationIndex.value < routePoints.value.length - 1
+      ? routePoints.value[animationIndex.value + 1]
+      : currentPoint;
+
+  const heading = google.maps.geometry.spherical.computeHeading(currentPoint, nextPoint);
+
+  markerMovingIcon.setPosition(currentPoint);
+
+  markerMovingIcon.setIcon({
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    scale: 3.5,
+    strokeColor: "#FF0000",
+    rotation: heading,
+  });
+
+  newMap?.panTo(currentPoint);
+
+  const path = polylinePathsForShowPath.value.getPath();
+  path.push(currentPoint);
+
+  animationProgress.value = animationIndex.value;
+  animationIndex.value++;
+
+  animationTimer.value = setTimeout(animateRoute, animationSpeed.value);
+};
+
+/* ===========================
+   GET CURRENT WAYPOINT INDEX
+=========================== */
+const getCurrentWaypointIndex = (point) => {
   let closestIndex = -1;
   let closestDistance = Infinity;
 
   for (let i = 0; i < routePoints.value.length; i++) {
-    const distance = google.maps.geometry.spherical.computeDistanceBetween(
-      point,
-      routePoints.value[i]
-    );
-
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(point, routePoints.value[i]);
     if (distance < closestDistance) {
       closestDistance = distance;
       closestIndex = i;
@@ -967,1566 +1183,1002 @@
   }
 
   return closestIndex;
-      };
-          
-  
-      //update speed based on used change speed progress
-      const updateSpeed = (event: { detail: { value: number; }; }) => {
-        speedValue.value = event.detail.value;
-  
-        const speeds = {
-          1: 1000,
-          2: 900,
-          3: 800,
-          4: 700,
-          5: 600,
-          6: 500,
-          7: 400,
-          8: 300,
-          9: 200,
-          10: 200,
-        };
-  
-       // console.log("display",speedValue.value);
-        animationSpeed.value = speeds[speedValue.value];
-       // console.log("animationSpeed.value",animationSpeed.value);
-  
-      };
-  
-     //update moving location based on used change progress
+};
 
-      const updateAnimationProgress = (event: { detail: { value: number; }; }) => {
+/* ===========================
+   UPDATE SPEED
+=========================== */
+const updateSpeed = (event: { detail: { value: number } }) => {
+  speedValue.value = event.detail.value;
 
-         animationIndex.value = event.detail.value;
-      animationProgress.value = animationIndex.value;
+  const speeds = {
+    1: 1000, 2: 900, 3: 800, 4: 700, 5: 600,
+    6: 500, 7: 400, 8: 300, 9: 200, 10: 200,
+  };
 
-      if (animationIndex.value < routePoints.value.length) {
-        markerMovingIcon.setPosition(routePoints.value[animationIndex.value]);
-        newMap.panTo(routePoints.value[animationIndex.value]);
+  animationSpeed.value = speeds[speedValue.value];
+};
 
-        const path = polylinePathsForShowPath.value.getPath();
-        path.clear();
-        for (let i = 0; i <= animationIndex.value; i++) {
-          path.push(routePoints.value[i]);
-        }
-      }
+/* ===========================
+   WATCH PROGRESS
+=========================== */
+watch(animationProgress, (newIndex) => {
+  applyAnimationProgress(newIndex);
+});
 
-       
-      };
+/* ===========================
+   APPLY PROGRESS
+=========================== */
+const applyAnimationProgress = (index: number) => {
+  if (index >= routePoints.value.length) return;
 
+  markerMovingIcon.setPosition(routePoints.value[index]);
+  newMap.panTo(routePoints.value[index]);
 
- // ✅ Convert it to ISO **without changing local time**
-function formatForIonDatetime(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  // 👉 build a valid ISO string (no UTC conversion)
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
-}
-  
- const openModal = (type: 'from' | 'to') => {
-  dateType.value = type;
-   let originalDate = new Date();
+  const path = polylinePathsForShowPath.value.getPath();
+  path.clear();
 
-  if (type === 'from') {
-    originalDate = fromDateTime.value
-      ? new Date(fromDateTime.value)
-      : new Date();
-  } else {
-    originalDate = toDateTime.value
-      ? new Date(toDateTime.value)
-      : new Date();
+  for (let i = 0; i <= index; i++) {
+    path.push(routePoints.value[i]);
   }
-   selectedDateTime.value = formatForIonDatetime(originalDate);
+};
 
-    console.log("selectedDateTime1",selectedDateTime.value);
+/* ===========================
+   UPDATE PROGRESS (SLIDER)
+=========================== */
+const updateAnimationProgress = (event: { detail: { value: number } }) => {
+  const index = event.detail.value;
 
- 
+  animationIndex.value = index;
+  animationProgress.value = index;
+
+  applyAnimationProgress(index);
+};
+
+/* ===========================
+   FORMAT DATE (NO UTC CHANGE)
+=========================== */
+function formatForIonDatetime(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
+/* ===========================
+   MODAL CONTROLS
+=========================== */
+const openModal = (type: "from" | "to") => {
+  dateType.value = type;
+
+  let originalDate = type === "from" 
+    ? (fromDateTime.value ? new Date(fromDateTime.value) : new Date())
+    : (toDateTime.value ? new Date(toDateTime.value) : new Date());
+
+  selectedDateTime.value = formatForIonDatetime(originalDate);
   isDateTimePickerVisible.value = true;
 };
 
-  
-  // Function to close the modal
-  const closeModal = () => {
-    isDateTimePickerVisible.value = false;
-  };
-  
-  // Function to update DateTime based on selection in the modal
-  const updateDateTime = (event: any) => {
-  selectedDateTime.value = event.detail.value; // Always ISO string
+const closeModal = () => {
+  isDateTimePickerVisible.value = false;
 };
 
-  
-  // Function to save DateTime and close modal
+const updateDateTime = (event: any) => {
+  selectedDateTime.value = event.detail.value;
+};
+
 const saveDateTime = () => {
   if (!selectedDateTime.value) return;
 
-  if (dateType.value === 'from') {
+  if (dateType.value === "from") {
     fromDateTime.value = selectedDateTime.value;
-    fromDateTimeFormatted.value = format(new Date(selectedDateTime.value), 'dd/MM/yyyy HH:mm');
+    fromDateTimeFormatted.value = format(new Date(selectedDateTime.value), "dd/MM/yyyy HH:mm");
   } else {
     toDateTime.value = selectedDateTime.value;
-    toDateTimeFormatted.value = format(new Date(selectedDateTime.value), 'dd/MM/yyyy HH:mm');
+    toDateTimeFormatted.value = format(new Date(selectedDateTime.value), "dd/MM/yyyy HH:mm");
   }
 
   validateDateTime();
   closeModal();
 };
-  // Function to validate From/To DateTime
-  const validateDateTime = () => {
-    isDateTimeValid.value = new Date(fromDateTime.value) <= new Date(toDateTime.value); // Ensure From is before To
-  };
+
+const validateDateTime = () => {
+  isDateTimeValid.value = new Date(fromDateTime.value) <= new Date(toDateTime.value);
+};
+
+/* ===========================
+   DATE PICKER
+=========================== */
+const openDatePicker = (type: string) => {
+  isFromPickerVisible.value = type === "from";
+  isToPickerVisible.value = type !== "from";
+};
+
+/* ===========================
+   CLOSE SHOW PATH
+=========================== */
+const closeShowPath = (count: number) => {
+  if (count == 1) {
+    ishowPath.value = false;
+    isMarkerShowPath.value = false;
+    isLoadPath.value = false;
+    isMapBusyWithRoute.value = false;
+  }
+
+  if (polylinePathsForShowPath.value) {
+    polylinePathsForShowPath.value.setPath([]);
+    polylinePathsForShowPath.value.getPath().clearPolyline;
+  }
+
+  if (markerMovingIcon) {
+    markerMovingIcon.setMap(null);
+    markerMovingIcon = null;
+  }
+
+  if (markerId1) {
+    markerId1.setMap(null);
+    markerId1 = null;
+  }
+
+  if (markerId2) {
+    markerId2.setMap(null);
+    markerId2 = null;
+  }
+
+  function removeMarker(marker: google.maps.Marker) {
+    if (marker) marker.setMap(null);
+  }
+
+  if (markersDotsArray.length > 1) {
+    markersDotsArray.forEach(removeMarker);
+  }
+
+  markersDotsArray.length = 0;
+  index_route_array.value = [];
+  routePoints.value = [];
+  routePoints.value.length = 0;
+  isSumTripObject.value = false;
+};
+     
+
+
+const navigateToPage = (pageName) => {
+  isMapBusyWithRoute.value = false;
+  closeShowPath(1);
+
+      console.log("Navigating to", pageName);
+
+  if (pageName == 1) {
+
+    router.push('/showtrip');
+
+  } else if (pageName == 2) {
+    router.push('/searchgoupmap');
+  } else if (pageName == 3) {
+    router.push('/settingmap');
+  } else if (pageName == 4) {
+    if (fabButton.value) fabButton.value.$el?.click();
+    moveCameraToHomeLocation();
+  } else if (pageName == 5) {
+    router.push('/searchclosestland');
+  } else if (pageName == 6) {
+    router.push('/searchvehiclemap');
+  } else if (pageName == 7) {
+    router.push('/searchland');
+  } else {
+    console.warn('Invalid page number:', pageName);
+  }
+};
+  
+
+async function MapDisplay() {
+  try {
+    await nextTick();
     
+ // 🔴 Remove old markers
+if (markersArray.value && markersArray.value.length > 0) {
+  markersArray.value.forEach((marker: google.maps.Marker) => {
+    marker.setMap(null);
+  });
+  markersArray.value = [];
+}
+    if (mapContainer.value) {
 
-  
-  
-  
-  
-  const openDatePicker = (type: string) => {
-        if (type === 'from') {
-          isFromPickerVisible.value = true;
-          isToPickerVisible.value = false;
-        } else {
-          isFromPickerVisible.value = false;
-          isToPickerVisible.value = true;
-        }
-      };
-  
-  
-      const closeShowPath=(count)=>{
-  
-        if(count===1)
-      {
-        ishowPath.value=false;
-        isMarkerShowPath.value=false;
-        isLoadPath.value=false;
-        isMapBusyWithRoute.value=false;
+      const login_data = await storage.get('login_data');
+
+      // Retrieve stored values
+      const storedZoom = await storage.get('mapZoom');
+      const mapLat = await storage.get('mapLat');
+      const mapLong = await storage.get('mapLong');
+      const storedMapType = await storage.get('mapType');
+
+      const initialLat =
+        mapLat !== null && mapLat !== undefined && !isNaN(parseFloat(mapLat))
+          ? parseFloat(mapLat)
+          : parseFloat(login_data?.h_lat);
+
+      const initialLong =
+        mapLong !== null && mapLong !== undefined && !isNaN(parseFloat(mapLong))
+          ? parseFloat(mapLong)
+          : parseFloat(login_data?.h_lon);
+
+      console.log("initialLat:", login_data.h_lat, "initialLong:", login_data.h_lon);
+
+      const initialZoom =
+        storedZoom !== null && storedZoom !== undefined && !isNaN(parseFloat(storedZoom))
+          ? parseInt(storedZoom)
+          : parseInt(login_data.zoom_lvl);
+
+      const initialCenter = { lat: initialLat, lng: initialLong };
+
+      const initialMapType =
+        storedMapType !== null && storedMapType !== undefined && !isNaN(parseFloat(storedMapType))
+          ? storedMapType
+          : 'roadmap';
+
+      await loadGoogleMaps();
+
+      newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
+        center: initialCenter,
+        zoom: initialZoom,
+        mapTypeId: initialMapType,
+        zoomControl: true,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false,
+      });
+
+      mapRef.value = newMap;
+
+      if (storedMapType) {
+        mapRef.value?.setMapTypeId(storedMapType);
       }
-  
-        if (polylinePathsForShowPath.value) {
-          polylinePathsForShowPath.value.setPath([]);
-          const path=polylinePathsForShowPath.value.getPath();
-          path.clearPolyline;
-  
-         
-  
+
+      const storedGroupData = await storage.get(Constants.storageValue.Key_GroupAPI);
+
+      if (storedGroupData && storedGroupData.length > 0) {
+
+        const storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus);
+
+        const checkedGroups = storedGroups.filter((group: { checked: any }) => group.checked);
+
+        const filteredGroupData = storedGroupData.filter((groupData: { group: any }) => {
+          const matchingStatus = checkedGroups.find(
+            (checkedGroup: { group: any }) => checkedGroup.group === groupData.group
+          );
+          return matchingStatus !== undefined;
+        });
+
+        selectedItems.value = filteredGroupData.flatMap((group: { veh_arr: any[] }) =>
+          group.veh_arr.map((veh: any) => ({
+            vehicleId: veh.veh_id,
+            vehicleName: veh.veh_no,
+            vehicleStatus: veh.veh_sts,
+            vehicleColor: veh.sts_colr,
+            lat: veh.lat,
+            lon: veh.lon,
+            sts_str: veh.sts_str,
+            loc_str: veh.loc_str,
+            status: veh.status,
+            rec_dt: veh.rec_dt,
+            drv_name: veh.drv_name,
+            speed: veh.speed,
+          }))
+        );
+      }
+
+      const vehicleStatusColorData = await storage.get('VehicleStatusColor');
+
+      const filteredVehicles = selectedItems.value.filter(item => {
+        const matchingStatus = vehicleStatusColorData.find(
+          (statusData: { id: any; isEnabled: boolean }) =>
+            statusData.id === item.status && statusData.isEnabled === true
+        );
+        return matchingStatus !== undefined;
+      });
+
+      // --- CONTROLS ---
+      const controlContainer = document.createElement('div');
+      controlContainer.style.position = 'absolute';
+      controlContainer.style.right = '20px';
+      controlContainer.style.bottom = '100px';
+      controlContainer.style.display = 'flex';
+      controlContainer.style.gap = '10px';
+      controlContainer.style.alignItems = 'center';
+      controlContainer.style.background = 'white';
+      controlContainer.style.borderRadius = '5px';
+      controlContainer.style.padding = '5px';
+
+      const mapControlDiv = document.createElement('div');
+      mapControlDiv.innerHTML = `
+        <button style="background: transparent; border: none;">
+          <img src="/pin.png" width="30" height="30">
+        </button>`;
+      mapControlDiv.style.display = 'none';
+
+      const navControlDiv = document.createElement('div');
+      navControlDiv.innerHTML = `
+        <button style="background: transparent; border: none;">
+          <img src="/navigation.png" width="30" height="30">
+        </button>`;
+      navControlDiv.style.display = 'none';
+
+      controlContainer.appendChild(navControlDiv);
+      controlContainer.appendChild(mapControlDiv);
+
+      newMap?.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
+
+      // --- MARKERS ---
+      filteredVehicles.forEach(async (vehicle) => {
+
+              isFirstTimeDataCall=false;
+
+
+        const Lat = parseFloat(vehicle.lat);
+        const Lng = parseFloat(vehicle.lon);
+        const initialCenter = { lat: Lat, lng: Lng };
+
+        const markerColor = vehicle.vehicleColor || '#FF0000';
+
+        const markerIcon = {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          fillColor: markerColor,
+          fillOpacity: 1,
+          strokeWeight: 0,
+          scale: 5,
+        };
+
+        const markerId = new google.maps.Marker({
+          position: initialCenter,
+          map: newMap,
+          icon: markerIcon,
+        });
+
+       
+
+        markersArray.value.push(markerId);
+
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+          .gm-style .gm-style-iw-c{ max-width:100%!important; }
+          .gm-ui-hover-effect{
+            width:30px!important;
+            height:30px!important;
+            right:5px!important;
+            top:5px!important;
           }
-  
-          if (markerMovingIcon) {
-            markerMovingIcon.setMap(null);
-            markerMovingIcon= null;
+        `;
+        document.head.appendChild(styleElement);
+
+        const infoWindomarker = new google.maps.InfoWindow();
+
+        const infoWindowContainer = document.createElement('div');
+
+        const app = createApp(InfoWindowMapMarker, {
+          vehicleData: vehicle,
+          onShowPath: (vehicleData: any) => {
+
+            fromDateTime.value = startOfDay(new Date(vehicleData.rec_dt));
+            toDateTime.value = new Date(vehicleData.rec_dt);
+
+            fromDateTimeFormatted.value = format(new Date(fromDateTime.value), 'dd/MM/yyyy HH:mm');
+            toDateTimeFormatted.value = format(new Date(toDateTime.value), 'dd/MM/yyyy HH:mm');
+
+            selectedVehNo.value = vehicleData.vehicleId;
+
+            ishowPath.value = true;
+            isMarkerShowPath.value = true;
+
+            infoWindomarker.close();
           }
-  
-                
-                if(markerId1)
-                {
-                  markerId1.setMap(null); // This removes the marker from the map
-                  markerId1 = null;
-  
-                }
-  
-                if(markerId2)
-                {
-                  markerId2.setMap(null); // This removes the marker from the map
-                  markerId2 = null;
-  
-                }
-  
-  
-                function removeMarker(marker: google.maps.Marker) {
-                      if (marker) {
-                          marker.setMap(null); // Removes the marker from the map
-                      }
-                  }
-  
-                  if(markersDotsArray.length>1){
-  
-                        markersDotsArray.forEach(marker => {
-                        // console.log(marker.getPosition());
-                          removeMarker(marker);
-          
-                      });
-                    }
-            markersDotsArray.length = 0; // Clear the array
-           // console.log("dot1",markersDotsArray.length);
-  
-  
-            index_route_array.value = [];
-            routePoints.value = [];
-            routePoints.value.length=0;
-            
-                isSumTripObject.value=false;
-              
-                
-     };
-      
-            const navigateToPage = (pageName: number) => {
-  
-  
-             
-              isMapBusyWithRoute.value=false;
-              closeShowPath(1);
-  
-  
-                // Navigate to the selected page
-                          console.log("Navigating to", pageName);
-                          if(pageName==1)
-                          {
-                            router.push('/showtrip');
-  
-                          }else if(pageName==2)
-                          {
-                            router.push('/searchgoupmap');
-  
-                          }else if(pageName==3)
-                          {
-                            router.push('/settingmap');
-  
-  
-                          }else if(pageName==4)
-                          {
-                            if (fabButton.value) {
-                                    fabButton.value.$el?.click(); // Access the native element and trigger a click
-                                  }
-                           
-                            moveCameraToHomeLocation(); // Move camera to home location for page 4
-  
-                          }else if(pageName==5)
-                          {
-                            router.push('/searchclosestland');
-  
-                          }else if(pageName==6)
-                          {
-                            router.push('/searchvehiclemap');
-  
-                          }if(pageName==7)
-                          {
-                            router.push('/searchland');
-  
-                          }
-  
-                };
-  
-  
-  
-  
-            async function MapDisplay(){
-                try {
+        });
 
-                  await nextTick();
-              if (mapContainer.value) {
-  
-                    const login_data= await storage.get('login_data');
-  
+        app.mount(infoWindowContainer);
+        infoWindomarker.setContent(infoWindowContainer);
 
-                    
-                        // Retrieve stored values
-                        const storedZoom = await storage.get('mapZoom');
-                        const mapLat = await storage.get('mapLat');
-                        const mapLong = await storage.get('mapLong');
-                        const storedMapType = await storage.get('mapType');
+        let currentInfoWindow: google.maps.InfoWindow | null = null;
+        let currentNavControlDiv: HTMLDivElement | null = null;
+        let currentMapControlDiv: HTMLDivElement | null = null;
 
-                     
-                      const initialLat =
-                        mapLat !== null && mapLat !== undefined && !isNaN(parseFloat(mapLat))
-                          ? parseFloat(mapLat)
-                          : parseFloat(login_data?.h_lat);
+        markerId.addListener('click', () => {
 
-                      const initialLong =
-                        mapLong !== null && mapLong !== undefined && !isNaN(parseFloat(mapLong))
-                          ? parseFloat(mapLong)
-                          : parseFloat(login_data?.h_lon);
+          fromDateTimeFormatted.value = '';
+          toDateTimeFormatted.value = '';
+          isMapBusyWithRoute.value = false;
 
-                        console.log("initialLat:", login_data.h_lat, "initialLong:", login_data.h_lon);
-  
-                    // Parse zoom and center values from storage or set defaults
-                    const initialZoom =  storedZoom !== null && storedZoom !== undefined && !isNaN(parseFloat(storedZoom)) ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
-                    const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
-                    const initialMapType = storedMapType !== null && storedMapType !== undefined && !isNaN(parseFloat(storedMapType))  ? storedMapType : 'roadmap';
-
-                      await loadGoogleMaps(); // ✅ Wait until Maps API is loaded
-
-                       newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
-                      center: initialCenter,
-                      zoom: initialZoom,
-                      mapTypeId: initialMapType,
-                      zoomControl: true,
-                      mapTypeControl: false, // Disable Map/Satellite control
-                    fullscreenControl: false, // Disable fullscreen control (ESC button)
-                    streetViewControl: false, // Disable the Pegman/Street View control
-              
-                    });
-  
-  
-  
-                    mapRef.value = newMap;
-
-  
-                  
-  
-                    // Update the map type if it's stored in localStorage
-                if (storedMapType) {
-                  mapRef.value?.setMapTypeId(storedMapType);
-                }
-  
-                    const storedGroupData = await storage.get(Constants.storageValue.Key_GroupAPI);
-  
-                    
-  
-                if (storedGroupData && storedGroupData.length > 0) {
-                  // console.log("filteredGroupData",storedGroupData);
-  
-              
-                          const storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus);
-  
-                      // Filter the groups where 'checked' is true
-                      const checkedGroups = storedGroups.filter((group: { checked: any; }) => group.checked);
-  
-  
-                      // Filter storedGroupData to match only the checked groups
-                      // const filteredGroupData = storedGroupData.filter((groupData: { group: any; }) => 
-                      //   checkedGroups.some((checkedGroup: { group: any; }) => checkedGroup.group === groupData.group)
-                        
-                      // );
-  
-                      const filteredGroupData = storedGroupData.filter((groupData: { group: any; }) => {
-                      // Find a matching entry in vehicleStatusColorData
-                      const matchingStatus = checkedGroups.find((checkedGroup: { group: any; }) => 
-                      checkedGroup.group === groupData.group 
-                      );
-                      
-                      // Return true if a match is found, false otherwise
-                      return matchingStatus !== undefined;
-                    });
-  
-                  
-  
-  
-                      // Collect vehicles from the filtered groups
-                      selectedItems.value = filteredGroupData.flatMap((group: { veh_arr: any[]; }) =>
-  
-                      group.veh_arr.map((veh: {
-                        rec_dt: any;
-                        drv_name: any;
-                        speed: any; veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; lat: any; lon: any; sts_str: any; loc_str: any; status: any; 
-  }) => ({
-                          vehicleId: veh.veh_id,
-                          vehicleName: veh.veh_no,
-                          vehicleStatus: veh.veh_sts, // status for filtering
-                          vehicleColor: veh.sts_colr,
-                          lat: veh.lat,
-                          lon: veh.lon,
-                          sts_str: veh.sts_str,
-                          loc_str: veh.loc_str,
-                          status: veh.status,
-                          rec_dt: veh.rec_dt,
-                          drv_name : veh.drv_name,
-                          speed : veh.speed
-                        }))
-                        
-                      );
-  
-  
-  
-                }
-  
-                const vehicleStatusColorData = await storage.get('VehicleStatusColor');
-  
-               // console.log("vehicleStatusColorData",vehicleStatusColorData);
-  
-               
-            
-                const filteredVehicles = selectedItems.value.filter(item => {
-                // Find a matching entry in vehicleStatusColorData
-                const matchingStatus = vehicleStatusColorData.find((statusData: { id: any; isEnabled: boolean; }) => 
-                  statusData.id === item.status && statusData.isEnabled === true
-                );
-                
-                // Return true if a match is found, false otherwise
-                return matchingStatus !== undefined;
-              });
-  
-          
-  
-  
-  
-  
-                              // Create custom controls for navigator and map icons
-                              const controlContainer = document.createElement('div');
-                            controlContainer.style.position = 'absolute';
-                            controlContainer.style.right = '20px';
-                            controlContainer.style.bottom = '100px'; // Adjust to position it below the zoom controls
-                            controlContainer.style.display = 'flex';
-                            controlContainer.style.gap = '10px'; // Add spacing between the icons
-                            controlContainer.style.alignItems = 'center';
-                            controlContainer.style.background = 'white'; // Optional: to match the background of the buttons
-                            controlContainer.style.borderRadius = '5px'; // Optional: rounded corners
-                            controlContainer.style.padding = '5px'; // Optional: add some padding
-  
-                            // Add the map icon
-                            const mapControlDiv = document.createElement('div');
-                            mapControlDiv.innerHTML = `
-                              <button style="background: transparent; border: none;">
-                                <img src="/pin.png" alt="Map" width="30" height="30">
-                              </button>`;
-                            mapControlDiv.style.display = 'none'; // Initially hidden
-  
-                            // Add the navigator icon
-                            const navControlDiv = document.createElement('div');
-                            navControlDiv.innerHTML = `
-                              <button style="background: transparent; border: none;">
-                                <img src="/navigation.png" alt="Navigator" width="30" height="30">
-                              </button>`;
-                            navControlDiv.style.display = 'none'; // Initially hidden
-  
-                            // Append the icons to the container
-                            controlContainer.appendChild(navControlDiv);
-                            controlContainer.appendChild(mapControlDiv);
-  
-                            // Append the container to the map controls
-                            newMap?.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
-  
-  
-              //  console.log("filteredVehicles",filteredVehicles);
-  
-  
-              filteredVehicles.forEach(async (vehicle) => {
-              
-  
-  
-                    const vehicleLat = parseFloat(vehicle.lat);
-                    const vehicleLng = parseFloat(vehicle.lon);
-                    const initialCenter = { lat: vehicleLat, lng: vehicleLng };
-  
-                    // Use the vehicle's color or default to red
-                    const markerColor = vehicle.vehicleColor || '#FF0000'; // Use the 'sts_colr' field for marker color
-  
-  
-                    // Create a custom marker icon
-                    const markerIcon = {
-                      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                      fillColor: markerColor,               // Use the vehicle status color
-                      fillOpacity: 1,
-                      strokeWeight: 0,
-                      scale: 5,                             // Reduce the size by adjusting the scale (e.g., 5)
-                    };
-  
-  
-                    const markerId = new google.maps.Marker ({
-                      position: initialCenter,
-                      map: newMap,
-                      icon: markerIcon,  // Set the custom icon
-  
-                    });
-  
-  
-                     markersArray.value.push(markerId);
-  
-                      // Create a new google.maps.InfoWindow instance with default settings
-  
-                
-                      const styleElement = document.createElement('style');
-                          styleElement.textContent = `
-                           
-                                .gm-style .gm-style-iw-c{
-                                   max-width: 100% !important;
-                                }
-  
-                  
-                                  .info-window[data-v-56b631a0] {
-                                  width: 95vw;
-                                  padding: 5px;
-                                  background-color: #ffffff;
-                                  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                                  border-radius: 8px;
-                              }
-                                  .gm-ui-hover-effect {
-                                     width: 30px !important; 
-                                    height: 30px !important;
-                                    right: 5px !important;
-                                    top: 5px !important;
-                                }
-  
-  
-                              
-                            }
-  
-  
-                          `;
-                          document.head.appendChild(styleElement);
-  
-                          const infoWindomarker = new google.maps.InfoWindow();
-                          
-                          infoWindomarker.addListener('domready', () => {
-                          setTimeout(() => {
-                            const iwContainer = document.querySelector('.gm-style-iw');
-                            if (iwContainer) {
-                              iwContainer.style.maxWidth = '100%';
-                              iwContainer.style.padding = '0';
-                              iwContainer.style.margin = '0';
-  
-                              iwContainer.style.boxSizing = 'border-box';
-                            }
-                          }, 100); // Adjust the delay as needed
-                        });
-  
-  
-                      const infoWindowContainer = document.createElement('div');
-                            infoWindowContainer.style.margin = '0';
-                            infoWindowContainer.style.padding = '0';
-  
-                                      // Mount your Vue component into the container
-                            const app = createApp(InfoWindowMapMarker, {
-                              vehicleData: vehicle,
-                              onShowPath: (vehicleData: { vehicleId: string; }) => {
-
-                                     console.log('currentDate:', currentDateTime.value+" rtc= "+vehicleData.rec_dt);
-
-                                  fromDateTime.value = startOfDay(new Date(vehicleData.rec_dt));
-                                  toDateTime.value = new Date(vehicleData.rec_dt);
-
-                               //  console.log('fromtodate:', fromDateTime.value+" "+toDateTime.value);
-
-                                 fromDateTimeFormatted.value = format(new Date(fromDateTime.value), 'dd/MM/yyyy HH:mm');
-                                   toDateTimeFormatted.value = format(new Date(toDateTime.value), 'dd/MM/yyyy HH:mm');
-                               
-                                   selectedVehNo.value = vehicleData.vehicleId;
-
-                                console.log('Show path for vehicle:', vehicleData);
-                                ishowPath.value = true;
-                                isMarkerShowPath.value=true;
-                                infoWindomarker.close(); // Close the InfoWindow on button click
-                              }
-                            });
-  
-                            app.mount(infoWindowContainer);
-  
-                            // Set the content and open the InfoWindow
-                            infoWindomarker.setContent(infoWindowContainer);
-  
-  
-                          
-                            
-                            let currentInfoWindow: google.maps.InfoWindow | null = null;
-                            let currentNavControlDiv: HTMLDivElement | null = null;
-                            let currentMapControlDiv: HTMLDivElement | null = null;
-  
-                  // Add click event to the marker to show info window
-                  markerId.addListener('click', () => {
-  
-                       // console.log("marker click");
-                       fromDateTimeFormatted.value='';
-                       toDateTimeFormatted.value='';
-                       isMapBusyWithRoute.value=false;
-  
-                       if(ishowPath.value)
-                       {
-                        ishowPath.value=false;
-                        isMarkerShowPath.value=false;
-                        closeShowPath(1);
-                       }
-  
-                                    // Show the custom controls when the marker is clicked
-                                    navControlDiv.style.display = 'block';
-                                    mapControlDiv.style.display = 'block';
-  
-  
-                                    currentNavControlDiv = navControlDiv;
-                                    currentMapControlDiv = mapControlDiv;
-  
-  
-                                    // Log latitude and longitude
-                                    const lat = markerId.getPosition().lat();
-                                    const lng = markerId.getPosition().lng();
-                                   // console.log(`Latitude: ${lat}, Longitude: ${lng}`);
-  
-                                    // Add click event listeners to controls to perform desired actions
-                                    navControlDiv.addEventListener('click', () => {
-                                      window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-                                    });
-  
-                                    mapControlDiv.addEventListener('click', () => {
-                                      window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-                                    });
-  
-                    
-                  
-                   
-  
-                    infoWindomarker.open({
-                          anchor: markerId,
-                          map: newMap,
-                        
-                        });  
-                        currentInfoWindow = infoWindomarker; // Update the reference
-  
-                        if (currentInfoWindow && currentInfoWindow !== infoWindomarker) {
-                      currentInfoWindow.close();
-                    }
-  
-                                                // Add a listener for when the info window is closed
-                            infoWindomarker.addListener('closeclick', () => {
-                              console.log("Info window closed");
-  
-                              // Hide or remove the custom controls
-                              if (currentNavControlDiv) {
-                                currentNavControlDiv.style.display = 'none';
-                                currentNavControlDiv = null;
-                              }
-  
-                              if (currentMapControlDiv) {
-                                currentMapControlDiv.style.display = 'none';
-                                currentMapControlDiv = null;
-                              }
-  
-                              currentInfoWindow = null; // Reset the current info window reference
-                            });
-                      
-                      });        
-                });
-  
-  
-                // If valid lat/lon are passed, move camera to that location
-                if (!isNaN(vehicleLat) && !isNaN(vehicleLon) && parseFloat(vehicleLat) !== 0  &&
-                 parseFloat(vehicleLon) !== 0) {
-                 await moveCameraToLocation(vehicleLat, vehicleLon,16);
-                }
-  
-                if (historyarray.value.length > 0) {
-                 // console.log('History Array:', historyarray.value);
-                  isMapBusyWithRoute.value=true;
-  
-                  
-
-               
-                          
-                  processAnimation(2);
-                } else {
-                  isMapBusyWithRoute.value=false;
-  
-                 // console.log('History Array is empty or not available.');
-                }
-  
-  
-                const lat = await storage.get('landmark_lat');
-          const lng = await storage.get('landmark_lng');
-  
-  
-          if (lat && lng) {
-            const parsedLat = parseFloat(lat);
-            const parsedLng = parseFloat(lng);
-  
-           // console.log("searched_land",parsedLat+" "+parsedLng);
-            await moveCameraToLocation(parsedLat, parsedLng,10);
-           await storage.remove('landmark_lat');
-            await storage.remove('landmark_lng');
-  
+          if (ishowPath.value) {
+            ishowPath.value = false;
+            isMarkerShowPath.value = false;
+            closeShowPath(1);
           }
-        
-          const Nearest_dirLat =await storage.get('Near_landmark_lat');
-            const Nearest_dirLon = await storage.get('Near_landmark_lng');
-            const NearesVeh=JSON.parse(await storage.get('NearestVeh'));
-            console.log("displayjyoby",NearesVeh);
-  
-            if (Nearest_dirLat !== null && Nearest_dirLat !== "" && Nearest_dirLon !== null && Nearest_dirLon !== "") {
-  
-            getDirections(Nearest_dirLat,Nearest_dirLon,NearesVeh);
+
+          navControlDiv.style.display = 'block';
+          mapControlDiv.style.display = 'block';
+
+          currentNavControlDiv = navControlDiv;
+          currentMapControlDiv = mapControlDiv;
+
+          const lat = markerId.getPosition().lat();
+          const lng = markerId.getPosition().lng();
+
+          navControlDiv.addEventListener('click', () => {
+            window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+          });
+
+          mapControlDiv.addEventListener('click', () => {
+            window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+          });
+
+          infoWindomarker.open({
+            anchor: markerId,
+            map: newMap,
+          });
+
+          currentInfoWindow = infoWindomarker;
+
+          if (currentInfoWindow && currentInfoWindow !== infoWindomarker) {
+            currentInfoWindow.close();
           }
-        
-  
-          
-          storage.remove('Near_landmark_lat');
-            storage.remove('Near_landmark_lng');
-            storage.remove('Near_landmark_address');
-            storage.remove('NearestVeh');
-        
-  
-                  } else {
-                    console.error('Map element not found.');
-                  }
-                } catch (error) {
-                  console.error('Error creating Google Map:', error);
-                }
-  
-             
-  
-  
-              };
-  
-             
-            const moveCameraToLocation = (lat, lon,zoomno:number) => {
-              // Move the camera to the latitude and longitude
-            
-              console.log("cameramove",lat+" "+lon);
-              if (newMap) {
-                  newMap.setCenter(new google.maps.LatLng(lat, lon));
-                  newMap.setZoom(zoomno);
-                } else {
-                  console.error('Map not initialized');
-                }
-              };
-          
-              const getDirections = async (destLat: number, destLon: number, vehicleObject: any) => {
 
-  // if (!mapRef.value || !vehicleObject) {
-  //   console.error("Map or vehicle object is not initialized");
-  //   return;
-  // }
+          infoWindomarker.addListener('closeclick', () => {
 
+            if (currentNavControlDiv) {
+              currentNavControlDiv.style.display = 'none';
+              currentNavControlDiv = null;
+            }
 
-    Near_vehicleObject.value = vehicleObject;
+            if (currentMapControlDiv) {
+              currentMapControlDiv.style.display = 'none';
+              currentMapControlDiv = null;
+            }
 
-    // Clear existing polyline if present
-    if (polylineRef.value) {
-      polylineRef.value.setMap(null);
-      polylineRef.value = null;
+            currentInfoWindow = null;
+          });
+
+        });
+
+      });
+
+      // If valid lat/lon are passed, move camera to that location
+    if (
+      !isNaN(vehicleLat) &&
+      !isNaN(vehicleLon) &&
+      parseFloat(vehicleLat) !== 0 &&
+      parseFloat(vehicleLon) !== 0
+    ) {
+      await moveCameraToLocation(vehicleLat, vehicleLon, 16);
     }
-    console.log("vehicleObject.lat map",vehicleObject.lat+" "+vehicleObject.lon);
 
-   
+    // Check if there is a history array to process animation
+    if (historyarray.value.length > 0) {
+      isMapBusyWithRoute.value = true;
 
-    // Define origin and destination
-    const origin = { lat: parseFloat(vehicleObject.lat), lng: parseFloat(vehicleObject.lon) };
-    const destination = { lat: destLat, lng: destLon };
+      canPlay.value = false;
+      const loading = await loadingController.create({
+        message: 'Please Wait',
+        spinner: 'circles',
+      });
 
-    console.log("showing map",origin.lat +" "+origin.lng+" de- "+destination.lat+" "+destination.lng);
+      await loading.present();
+      await processAnimation(2);
+      canPlay.value = true;
+
+      loading.dismiss();
+    } else {
+      isMapBusyWithRoute.value = false;
+      // console.log('History Array is empty or not available.');
+    }
+
+    // Handle landmark coordinates if present
+    const lat = await storage.get('landmark_lat');
+    const lng = await storage.get('landmark_lng');
+
+    if (lat && lng) {
+      const parsedLat = parseFloat(lat);
+      const parsedLng = parseFloat(lng);
+
+      // console.log("searched_land", parsedLat, parsedLng);
+      await moveCameraToLocation(parsedLat, parsedLng, 10);
+
+      await storage.remove('landmark_lat');
+      await storage.remove('landmark_lng');
+    }
+
+    // Handle nearest vehicle directions
+    const Nearest_dirLat = await storage.get('Near_landmark_lat');
+    const Nearest_dirLon = await storage.get('Near_landmark_lng');
+    const NearesVeh = JSON.parse(await storage.get('NearestVeh'));
+
+    console.log("displayjyoby", NearesVeh);
+
+    if (
+      Nearest_dirLat !== null &&
+      Nearest_dirLat !== "" &&
+      Nearest_dirLon !== null &&
+      Nearest_dirLon !== ""
+    ) {
+      getDirections(Nearest_dirLat, Nearest_dirLon, NearesVeh);
+    }
+
+    // Clean up storage values
+    storage.remove('Near_landmark_lat');
+    storage.remove('Near_landmark_lng');
+    storage.remove('Near_landmark_address');
+    storage.remove('NearestVeh');
+      
+
+    } else {
+      console.error('Map element not found.');
+    }
+
+  } catch (error) {
+    console.error('Error creating Google Map:', error);
+  }
+}
 
 
- const loading = await loadingController.create({
+
+
+// Move camera to a specific location
+function moveCameraToLocation(lat: number, lon: number, zoom: number): void {
+  if (!newMap) {
+    console.error('Map not initialized');
+    return;
+  }
+
+  console.log("Camera move to:", lat, lon, "Zoom:", zoom);
+  newMap.setCenter(new google.maps.LatLng(lat, lon));
+  newMap.setZoom(zoom);
+}
+
+// Move camera to home location (based on stored or login data)
+async function moveCameraToHomeLocation(): Promise<void> {
+  if (!mapRef.value) {
+    console.error('Map not initialized.');
+    return;
+  }
+
+  const login_data = await storage.get('login_data');
+  const [storedZoom, mapLat, mapLong] = await Promise.all([
+    storage.get('mapZoom'),
+    storage.get('mapLat'),
+    storage.get('mapLong'),
+  ]);
+
+  const initialLat = mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);
+  const initialLng = mapLong ? parseFloat(mapLong) : parseFloat(login_data.h_lon);
+  const initialZoom = storedZoom ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl);
+
+  mapRef.value.setCenter(new google.maps.LatLng(initialLat, initialLng));
+  mapRef.value.setZoom(initialZoom);
+
+  console.log(`Camera moved home: (${initialLat}, ${initialLng}) Zoom: ${initialZoom}`);
+}
+
+// Get driving directions and draw polyline on the map
+async function getDirections(destLat: number, destLon: number, vehicleObject: any): Promise<void> {
+  if (!mapRef.value || !vehicleObject) {
+    console.error("Map or vehicle object is not initialized");
+    return;
+  }
+
+  Near_vehicleObject.value = vehicleObject;
+
+  // Remove existing polyline
+  if (polylineRef.value) {
+    polylineRef.value.setMap(null);
+    polylineRef.value = null;
+  }
+
+  const origin = { lat: parseFloat(vehicleObject.lat), lng: parseFloat(vehicleObject.lon) };
+  const destination = { lat: destLat, lng: destLon };
+
+  console.log("Fetching directions:", origin, destination);
+
+  const loading = await loadingController.create({
     message: 'Loading directions...',
     spinner: 'circles',
   });
   await loading.present();
 
-  try{
+  try {
     const directionsService = new google.maps.DirectionsService();
-
-    // Request route
     const result = await directionsService.route({
-      origin,
-      destination,
+      origin: origin,
+      destination: destination,
       travelMode: google.maps.TravelMode.DRIVING,
-     });
-
-      console.log("DirecttionResult",result.routes);
+    });
 
     if (result.routes && result.routes.length > 0) {
       const path = result.routes[0].overview_path;
+
       polylineRef.value = new google.maps.Polyline({
-        path,
+        path: path,
         geodesic: true,
         strokeColor: '#FF0000',
         strokeOpacity: 1.0,
         strokeWeight: 5,
       });
 
-        isnearVehObject.value = true;
       polylineRef.value.setMap(mapRef.value);
+      isnearVehObject.value = true;
 
-        // Move camera to vehicle’s location
-        await moveCameraToLocation(vehicleObject.lat, vehicleObject.lon, 16);
-      } else {
-        console.error("Directions request failed due to:", status);
-      }
+      // Move camera to vehicle’s location
+      moveCameraToLocation(vehicleObject.lat, vehicleObject.lon, 16);
 
-  
-}catch (error) {
+    } else {
+      console.error("Directions request failed: no routes found");
+    }
+  } catch (error) {
     console.error('Error fetching directions:', error);
   } finally {
     await loading.dismiss();
   }
-              };
-    
-  
+}
 
-         
-            const moveCameraToHomeLocation = async () => {
-              const login_data= await storage.get('login_data');
-  
-  
-                          // Retrieve stored zoom and center from localStorage
-                          const storedZoom = await storage.get('mapZoom');
-                          const mapLat =await storage.get('mapLat');
-                          const mapLong = await storage.get('mapLong');
-                          const storedMapType =await storage.get('mapType'); // Retrieve map type
-  
-  
-                          const initialLat=mapLat ? parseFloat(mapLat) : parseFloat(login_data.h_lat);
-                          const initialLong=mapLong ? parseFloat(mapLong) : parseFloat(login_data.h_lon);
-  
-  
-                          // Parse zoom and center values from storage or set defaults
-                          const initialZoom = storedZoom ? parseInt(storedZoom) : parseInt(login_data.zoom_lvl); // Default zoom to 12  
-                          const initialCenter= { lat: initialLat, lng: initialLong }; // Default center coordinates
-                          const initialMapType = storedMapType ? storedMapType : 'roadmap';
-  
-              if (mapRef.value) {
-                
-  
-                mapRef.value.setCenter(new google.maps.LatLng(initialCenter));
-                mapRef.value.setZoom(initialZoom);
-        
-                
-             //   console.log(`Camera moved to: (${initialLat}, ${initialLong}) with zoom ${initialZoom}`);
-              } else {
-                console.error('Map not initialized.');
-              }
-              };
-  
-            const CallOnlyAPI = () => {
-  
-              isnearVehObject.value=false;
-              // Show loading controller
-              loadingController.create({
-                
-                backdropDismiss: true // Makes the loading controller cancelable
-              })
-              .then(loading => {
-                // Present the loading spinner
-                loading.present();
-  
-                const params = {
-                  grping: '2',
-                };
-  
-                // Make the API call
-                return fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Group, params)
-                  .then((response: { data: any; status: number }) => {
-                    const responsejson = response.data;
-  
-                    if (response.status === 200) {
-                      const arrData = responsejson.arr_data;
-  
-                      if (arrData && arrData.length > 0) {
-                        items.value = arrData.map(
-                          (
-                            data: { name: any; total_count: any; veh_arr: any; sts_arr: any },
-                            index: number
-                          ) => ({
-                            id: index + 1, // Unique ID
-                            group: data.name, // Group name
-                            total_count: data.total_count, // Total vehicles
-                            veh_arr: data.veh_arr,
-                            sts_arr: data.sts_arr,
-                          })
-                        );
-  
-                        const newItems = items.value;
-  
-                        // Retrieve existing data from storage
-                        return storage
-                          .get(Constants.storageValue.Key_GroupAPI)
-                          .then((storedGroupData: never[]) => {
-                            return storage
-                              .get(Constants.storageValue.key_VehicleDetails)
-                              .then((storedVehDetails: never[]) => {
-                                storedGroupData = storedGroupData || [];
-                                storedVehDetails = storedVehDetails || [];
-  
-                                // Check if data needs to be updated
-                                const isDataChanged =
-                                  JSON.stringify(storedGroupData) !== JSON.stringify(newItems);
-  
-                                  if (isDataChanged) {
-  
-  
-                                        return storage
-                                                    .set(Constants.storageValue.Key_GroupAPI, newItems)
-                                                    .then(async () => {
-  
-                                                      const storedGroups = await storage.get(Constants.storageValue.key_GroupWithStatus) || [];
-  
-                                                        const storedGroupsEvent = new Map(
-                                                          storedGroups.map((group: { group: any; groupId: any; }) => [`${group.group}-${group.groupId}`, group])
-                                                        );
-  
-                                                                                        // Create an updated array by iterating over arrData and merging with storedGroups if applicable.
-                                                  const groupStatusEventItems = arrData.map((data: { name: any; id: any; }) => {
-                                                    const key = `${data.name}-${data.id}`;  
-                                                    if (storedGroupsEvent.has(key)) {
-                                                      // If a match is found, use the stored group but ensure it has the required structure.
-                                                      return {
-                                                        ...storedGroupsEvent.get(key),
-                                                      };
-                                                    } else {
-                                                      // If no match, create a new group status item with default values.
-                                                      return {
-                                                        group: data.name,
-                                                        groupId: data.id,
-                                                        status: 1, // Initial status set to 1
-                                                        checked: true
-                                                      };
-                                                    }
-  
-                                                  });
-  
-                                                  const storedGroups_map = await storage.get(Constants.storageValue.key_Map_GroupWithStatus) || [];
-  
-                                                  const storedGroupsMap = new Map(
-                                                    storedGroups_map.map((group: { group: any; groupId: any; }) => [`${group.group}-${group.groupId}`, group])
-                                                  );
-  
-                                                  const groupStatusMapItems = arrData.map((data: { name: any; id: any; }) => {
-                                                    const key = `${data.name}-${data.id}`;                                  
-                                                    if (storedGroupsMap.has(key)) {
-                                                      // If a match is found, use the stored group but ensure it has the required structure.
-                                                      return {
-                                                        ...storedGroupsMap.get(key),
-                                                      };
-                                                    } else {
-                                                      // If no match, create a new group status item with default values.
-                                                      return {
-                                                        group: data.name,
-                                                        groupId: data.id,
-                                                        status: 1, // Initial status set to 1
-                                                        checked: true
-                                                      };
-                                                    }
-  
-                                                  });
-  
-  
-                                                  const storedGroups_fuel = await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus) || [];
-  
-                                                      const storedGroupsFuel = new Map(
-                                                        storedGroups_fuel.map((group: { group: any; groupId: any; }) => [`${group.group}-${group.groupId}`, group])
-                                                      );
-  
-                                                  const groupStatusFuelItems = arrData.map((data: { name: any; id: any; }) => {
-                                                    const key = `${data.name}-${data.id}`;                                  
-                                                    if (storedGroupsFuel.has(key)) {
-                                                      // If a match is found, use the stored group but ensure it has the required structure.
-                                                      return {
-                                                        ...storedGroupsFuel.get(key),
-                                                      };
-                                                    } else {
-                                                      // If no match, create a new group status item with default values.
-                                                      return {
-                                                        group: data.name,
-                                                        groupId: data.id,
-                                                        status: 1, // Initial status set to 1
-                                                        checked: true
-                                                      };
-                                                    }
-  
-                                                  });
-  
-                                            // Store the group and status data
-                                            return storage.set(Constants.storageValue.key_GroupWithStatus, groupStatusEventItems)
-                                              .then(() => storage.set(Constants.storageValue.key_Fuel_GroupWithStatus, groupStatusFuelItems))
-                                              .then(() => storage.set(Constants.storageValue.key_Map_GroupWithStatus, groupStatusMapItems)) // Add this line for Map
-                                              .then(async () => {
-  
-                                                // Create and store vehicle details data
-                                                const vehicleDetails = arrData.flatMap((data: { veh_arr: any[]; }) =>
-                                                  data.veh_arr.map((veh: { veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; }) => ({
-                                                    vehid: veh.veh_id,
-                                                    vehname: veh.veh_no,
-                                                    vehstatus: veh.veh_sts,
-                                                    vehColor: veh.sts_colr,
-                                                    status: 1,
-                                                  }))
-                                                );
-  
-  
-                                                // Compare existing vehicle details data with the new one
-                                                const isVehDetailsChanged = JSON.stringify(storedVehDetails) !== JSON.stringify(vehicleDetails);
-  
-                                                if (isVehDetailsChanged) {
-  
-                                                const event_veh = await storage.get(Constants.storageValue.key_VehicleDetails) || [];
-  
-                                                          const storedEventVeh = new Map(
-                                                            event_veh.map((vehicle: { vehid: any; vehname: any; }) => [`${vehicle.vehid}-${vehicle.vehname}`, vehicle])
-                                                          );
-  
-                                                      // Create new or updated vehicle details
-                                                      const vehicleDetailsEvent = arrData.flatMap((data: { veh_arr: any[]; }) => 
-                                                        data.veh_arr.map((veh: { veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; }) => {
-                                                          const key = `${veh.veh_id}-${veh.veh_no}`;
-                                                          if (storedEventVeh.has(key)) {
-                                                            // If a match is found, use the stored vehicle but ensure it has the required structure.
-                                                            return {
-                                                              ...storedEventVeh.get(key)
-                                                            };
-                                                          } else {
-                                                            // If no match, create a new vehicle detail with default values.
-                                                            return {
-                                                              vehid: veh.veh_id,
-                                                              vehname: veh.veh_no,
-                                                              vehstatus: veh.veh_sts,
-                                                              vehColor: veh.sts_colr,
-                                                              status: 1 // Initial status set to 1
-                                                            };
-                                                          }
-                                                        })
-                                                      );
-  
-  
-  
-                                                          const fuel_veh = await storage.get(Constants.storageValue.key_Fuel_VehicleDetails) || [];
-  
-                                                          const storedVehFuel = new Map(
-                                                            fuel_veh.map((vehicle: { vehid: any; vehname: any; }) => [`${vehicle.vehid}-${vehicle.vehname}`, vehicle])
-                                                          );
-  
-                                                                                              // Create new or updated vehicle details
-                                                      const vehicleDetailsFuel = arrData.flatMap((data: { veh_arr: any[]; }) => 
-                                                        data.veh_arr.map((veh: { veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; }) => {
-                                                          const key = `${veh.veh_id}-${veh.veh_no}`;
-                                                          if (storedVehFuel.has(key)) {
-                                                            // If a match is found, use the stored vehicle but ensure it has the required structure.
-                                                            return {
-                                                              ...storedVehFuel.get(key)
-                                                            };
-                                                          } else {
-                                                            // If no match, create a new vehicle detail with default values.
-                                                            return {
-                                                              vehid: veh.veh_id,
-                                                              vehname: veh.veh_no,
-                                                              vehstatus: veh.veh_sts,
-                                                              vehColor: veh.sts_colr,
-                                                              status: 1 // Initial status set to 1
-                                                            };
-                                                          }
-                                                        })
-                                                      );
-  
-  
-                                                  return storage.set(Constants.storageValue.key_VehicleDetails, vehicleDetailsEvent)
-                                                    .then(() => storage.set(Constants.storageValue.key_Fuel_VehicleDetails, vehicleDetailsFuel));
-                                                }
-  
-                                                return Promise.resolve(); // No change in vehicle details
-                                              });
-                                          });
-                                        }
-  
-                                return Promise.resolve(); // No change in group data
-                              });
-                          });
-                      }
-                    } else if (response.status === 401) {
-                      console.error('Unauthorized:', responsejson.message);
-                    } else {
-                      console.error('Empty response data');
-                    }
-                  })
-                  .catch((error: any) => {
-                    console.error('Error:', error);
-                  })
-                  .finally(() => {
-                    // Dismiss the loading spinner after the API call finishes
-                    loading.dismiss();
-                  });
-              })
-              .catch(error => {
-                console.error('Error creating loading:', error);
-              });
-              };
-  
-  
-              const processAnimation=async (fromwhere)=>{
-  
-                if(fromwhere===1)
-              {
-                isMarkerShowPath.value=true;
-              }
-  
-                ishowPath.value=true;
-                isLoadPath.value=true;
-  
-  
-              isSumTripObject.value=true;
-              isSummaryChecked.value=true;
-              isTripInfoChecked.value=true;
-  
-  
-                  // Extract origin (0th index)
-                  const origin = {
-                    lat: historyarray.value[0].lat,
-                    lng: historyarray.value[0].lon,
+
+async function CallOnlyAPI(): Promise<void> {
+  console.log("Called from map");
+  isnearVehObject.value = false;
+
+  let loading: HTMLIonLoadingElement | null = null;
+
+  try {
+    // Show loading spinner
+    loading = await loadingController.create({ backdropDismiss: true });
+    if(isFirstTimeDataCall)
+    await loading.present();
+
+    const params = {}; // API params
+    const response = await fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.req_all_veh, params);
+    const responsejson = response.data;
+
+    if (response.status == 200 && responsejson.arr_data?.length > 0) {
+      const arrData = responsejson.arr_data;
+
+      // Map API response to internal items structure
+      items.value = arrData.map((data: any, index: number) => ({
+        id: index + 1,
+        group: data.name,
+        total_count: data.total_count,
+        veh_arr: data.veh_arr,
+        sts_arr: data.sts_arr,
+      }));
+
+      const newItems = items.value;
+
+      // Get stored group and vehicle data
+      let storedGroupData = (await storage.get(Constants.storageValue.Key_GroupAPI)) || [];
+      let storedVehDetails = (await storage.get(Constants.storageValue.key_VehicleDetails)) || [];
+
+      const isDataChanged = JSON.stringify(storedGroupData) !== JSON.stringify(newItems);
+
+      if (isDataChanged) {
+        // Update group data
+        await storage.set(Constants.storageValue.Key_GroupAPI, newItems);
+
+        // Handle event/map/fuel group statuses
+        const storedGroups = (await storage.get(Constants.storageValue.key_GroupWithStatus)) || [];
+        const storedGroups_map = (await storage.get(Constants.storageValue.key_Map_GroupWithStatus)) || [];
+        const storedGroups_fuel = (await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus)) || [];
+
+        function mergeGroupStatus(arrData: any[], storedGroups: any[]) {
+          const map = new Map(storedGroups.map(g => [`${g.group}-${g.groupId}`, g]));
+          return arrData.map(data => {
+            const key = `${data.name}-${data.id}`;
+            return map.has(key)
+              ? { ...map.get(key) }
+              : { group: data.name, groupId: data.id, status: 1, checked: true };
+          });
+        }
+
+        const groupStatusEventItems = mergeGroupStatus(arrData, storedGroups);
+        const groupStatusMapItems = mergeGroupStatus(arrData, storedGroups_map);
+        const groupStatusFuelItems = mergeGroupStatus(arrData, storedGroups_fuel);
+
+        await storage.set(Constants.storageValue.key_GroupWithStatus, groupStatusEventItems);
+        await storage.set(Constants.storageValue.key_Fuel_GroupWithStatus, groupStatusFuelItems);
+        await storage.set(Constants.storageValue.key_Map_GroupWithStatus, groupStatusMapItems);
+
+        // Handle vehicle details
+        const storedEventVeh = new Map((await storage.get(Constants.storageValue.key_VehicleDetails) || []).map((v: any) => [`${v.vehid}-${v.vehname}`, v]));
+        const storedVehFuel = new Map((await storage.get(Constants.storageValue.key_Fuel_VehicleDetails) || []).map((v: any) => [`${v.vehid}-${v.vehname}`, v]));
+
+        function mergeVehicleDetails(arrData: any[], storedMap: Map<string, any>) {
+          return arrData.flatMap((data: any) =>
+            data.veh_arr.map((veh: any) => {
+              const key = `${veh.veh_id}-${veh.veh_no}`;
+              return storedMap.has(key)
+                ? { ...storedMap.get(key) }
+                : {
+                    vehid: veh.veh_id,
+                    vehname: veh.veh_no,
+                    vehstatus: veh.veh_sts,
+                    vehColor: veh.sts_colr,
+                    status: 1,
                   };
-  
+            })
+          );
+        }
+        const vehicleDetailsEvent = mergeVehicleDetails(arrData, storedEventVeh);
+        const vehicleDetailsFuel = mergeVehicleDetails(arrData, storedVehFuel);
 
-                  
-                  
-                  // Extract destination (last index)
-                  const destination = {
-                    lat: historyarray.value[historyarray.value.length - 1].lat,
-                    lng: historyarray.value[historyarray.value.length - 1].lon,
-                  };
-  
-  
-  
-                 
-  
-  
-                  // markerId1 = new google.maps.Marker ({
-                  // position: origin,
-                  // map: newMap,
-                  // icon: {
-                  //         url: "/ic_end.png", // Path to the icon
-                  //         scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                  //       }              
-                      
-                  //   });
-  
-  
-                  // markerId2 = new google.maps.Marker ({
-                  // position: destination,
-                  // map: newMap,
-                  //       icon: {
-                  //           url: "/ic_st.png", // Path to the icon
-                  //           scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                  //         }
-                  // });
-  
-  
-                  // markersArray.value.push(markerId1);
-                  // markersArray.value.push(markerId2);
-  
-  
-                  // newMap?.setCenter(new google.maps.LatLng(origin));
-                  // newMap?.setZoom(14);
-  
-  
-                  markerMovingIcon = new google.maps.Marker({
-                      map: newMap,
-                      icon: {
-                        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                        scale: 3.5,
-                        strokeColor: "#FF0000",
-                      },
-                    });
-  
-                    polylinePathsForShowPath.value = new google.maps.Polyline({
-                      path: [],
-                      geodesic: true,
-                      strokeColor: "#FF0000",
-                      strokeOpacity: 0.7,
-                      strokeWeight: 2.5,
-                      map: newMap,
-                    });
-  
-  
-  
-                  directionsService.value = new google.maps.DirectionsService();
-  
-                  //added
-                  const waypoints = historyarray.value.map((item) => ({
-                        location: { lat: item.lat, lng: item.lon },
-                        stopover: true, // Set to true if these should be treated as stopovers
-                      }));
-  
-                       processWaypoints(waypoints);
-  
-                      // console.log("markersDotsArray",markersDotsArray.length);
+        await storage.set(Constants.storageValue.key_VehicleDetails, vehicleDetailsEvent);
+        await storage.set(Constants.storageValue.key_Fuel_VehicleDetails, vehicleDetailsFuel);
+      }
+      isFirstTimeDataCall=false;
+      await MapDisplay();
 
+    } else if (response.status == 401) {
+      console.error('Unauthorized:', responsejson.message);
+    } else {
+      console.error('Empty response data');
+    }
+  } catch (error) {
+    console.error('Error in CallOnlyAPI:', error);
+  } finally {
+    if (loading) await loading.dismiss();
+  }
+}
 
-                  for (let i = 0; i < historyarray.value.length; i++) 
-                  {
-  
-                     // const s1 ={lat:historyarray.value[i].lat,lng:historyarray.value[i].lon}
-  
-                          const s1 = await snapToRoad(
-                            historyarray.value[i].lat,
-                            historyarray.value[i].lon
-                          );
+// Function to process animation on map
+async function processAnimation(fromwhere: number) {
+  if (fromwhere ==1) {
+    isMarkerShowPath.value = true;
+  }
 
-                          if(i==0)
-                          {
+  ishowPath.value = true;
+  isLoadPath.value = true;
+  isSumTripObject.value = true;
+  isSummaryChecked.value = true;
+  isTripInfoChecked.value = true;
 
+  // Extract origin and destination
+  const origin = { lat: historyarray.value[0].lat, lng: historyarray.value[0].lon };
+  const destination = { lat: historyarray.value[historyarray.value.length - 1].lat, lng: historyarray.value[historyarray.value.length - 1].lon };
 
-                            
-                              markerId1 = new google.maps.Marker ({
-                              position: s1,
-                              map: newMap,
-                              icon: {
-                                      url: "/ic_end.png", // Path to the icon
-                                      scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                                    }              
-                                  
-                                });
-                                 markersArray.value.push(markerId1);
+  // Create moving marker
+  markerMovingIcon = new google.maps.Marker({
+    map: newMap,
+    icon: {
+      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 3.5,
+      strokeColor: "#FF0000",
+    },
+  });
 
-                        newMap?.setCenter(new google.maps.LatLng(s1));
-                                        newMap?.setZoom(16);
-                        }
+  // Create polyline for the path
+  polylinePathsForShowPath.value = new google.maps.Polyline({
+    path: [],
+    geodesic: true,
+    strokeColor: "#FF0000",
+    strokeOpacity: 0.7,
+    strokeWeight: 2.5,
+    map: newMap,
+  });
 
-                          if(i==historyarray.value.length-1)
-                          {
-                              markerId2 = new google.maps.Marker ({
-                              position: s1,
-                              map: newMap,
-                                    icon: {
-                                        url: "/ic_st.png", // Path to the icon
-                                        scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                                      }
-                              });
-              
-          
-                          markersArray.value.push(markerId2);
-                          }
-  
+  directionsService.value = new google.maps.DirectionsService();
 
-                          
-  
-                      let dot_marker;
+  // Process waypoints
+  const waypoints = historyarray.value.map((item) => ({
+    location: { lat: item.lat, lng: item.lon },
+    stopover: true,
+  }));
+  processWaypoints(waypoints);
 
-                      if(historyarray.value[i].event_type===Constants.eventType.Event_Type_Stopped ||
-                      historyarray.value[i].event_type===Constants.eventType.Event_Type_Idel)
-                      {
-  
-                        dot_marker = new google.maps.Marker({
-                          position: s1,
-                          map: newMap,
-  
-                          icon: {
-                              path: google.maps.SymbolPath.CIRCLE,
-                              scale: 4,
-                              strokeColor: '#ff0000',
-                              fillColor: '#ff0000',
-                              fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-                              strokeWeight: 1, // Adjust the border thickness
-                              rotation: 0 // Will be dynamically updated
-                            }
-                        });
+  for (let i = 0; i < historyarray.value.length; i++) {
+    const s1 = await snapToRoad(historyarray.value[i].lat, historyarray.value[i].lon);
 
-                      }else  if(historyarray.value[i].event_type===Constants.eventType.Event_Type_NoData ||
-                      historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_OFF_NoGPS ||
-                      historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_ON_NoGPS)
-                                  {
-                              
-                                    dot_marker = new google.maps.Marker({
-                                      position: s1,
-                                      map: newMap,
-                              
-                                      icon: {
-                                          path: google.maps.SymbolPath.CIRCLE,
-                                          scale: 4,
-                                          strokeColor: '#999999',
-                                          fillColor: '#999999', // Set the fill color
-                                          fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-                                          strokeWeight: 1, // Adjust the border thickness
-                                          rotation: 0 // Will be dynamically updated
-                                        }
-                                    });
-                                  }else{
-                      // Place marker at current point with dot icon
-                                            dot_marker = new google.maps.Marker({
-                                              position: s1,
-                                              map: newMap,
-                                      
-                                              icon: {
-                                                  path: google.maps.SymbolPath.CIRCLE,
-                                                  scale: 4,
-                                                  strokeColor: '#999999',
-                                                  fillColor: '#999999',
-                                                  fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-                                                  strokeWeight: 1, // Adjust the border thickness
-                                                  rotation: 0 // Will be dynamically updated
-                                                }
-                                            });                             
+    // Start marker
+    if (i == 0) {
+      markerId1 = new google.maps.Marker({
+        position: s1,
+        map: newMap,
+        icon: { url: "/ic_end.png", scaledSize: new google.maps.Size(25, 25) },
+      });
+      markersArray.value.push(markerId1);
+      newMap?.setCenter(new google.maps.LatLng(s1));
+      newMap?.setZoom(16);
+    }
 
-                                   }
-        
-  
-        const infoWindow = new google.maps.InfoWindow();
-  
-        
-                // Create a new div to mount your Vue component
-                const infoWindowContainer = document.createElement('div');
-  
-            infoWindowContainer.style.margin = '0';            // Remove margins
-            infoWindowContainer.style.padding = '0';           // Remove padding
-  
-  
-                // Use Vue's createApp to mount the InfoBox component inside the div
-                const app = createApp(InfoWindowDorMarker, 
-                { 
-                  vehicleData: historyarray.value[i],
-                
-                });
-              
-                app.mount(infoWindowContainer);
-  
-  
-              
-                // Set the infoWindow's content to the container with the Vue component
-                infoWindow.setContent(infoWindowContainer);
-  
-  
-   
-                // Add click event to the marker to show info window
-                dot_marker.addListener('click', () => {
-  
-                  infoWindow.open(newMap, dot_marker);
-  
-                  // Automatically close InfoWindow after 3 seconds (3000ms)
-                  setTimeout(() => {
-                    infoWindow.close();
-                  }, 3000); // Adjust the closing time as needed
-                  
-               });
-  
-  
-                  //  markersDotsArray.value.push(dot_marker);
-                 
-                  markersDotsArray.push(dot_marker);
-  
-  
-                    }
-  
-                   
-                   
-                   
-  
-  
-              };
-  
+    // End marker
+    if (i == historyarray.value.length - 1) {
+      markerId2 = new google.maps.Marker({
+        position: s1,
+        map: newMap,
+        icon: { url: "/ic_st.png", scaledSize: new google.maps.Size(25, 25) },
+      });
+      markersArray.value.push(markerId2);
+    }
 
-              //this function used for call data from server for vehicle history check
-              const CallTripPath=async()=>{
-                loadingController.create({
-                
-                backdropDismiss: false // Makes the loading controller cancelable
-              })
-              .then(loading => {
-                // Present the loading spinner
-                loading.present();
-  
-  
-  
-                const fromdateString = fromDateTimeFormatted.value;
-              const todateString = toDateTimeFormatted.value;
-  
-             // console.log(fromdateString+" "+todateString);
-              const [day1, month1, year1, hour1, minute1] = fromdateString.match(/\d+/g); // Extract date and time parts
-              const [day2, month2, year2, hour2, minute2] = todateString.match(/\d+/g); // Extract date and time parts
-  
-  
-              // Create a Date object with parsed values (months are zero-indexed in JavaScript Dates)
-              const fromdateObject = new Date(year1, month1 - 1, day1, hour1, minute1);
-              const todateObject = new Date(year2, month2 - 1, day2, hour2, minute2);
-  
-              const FromepochTime = Math.floor(fromdateObject.getTime() / 1000); // Convert to seconds
-              const ToepochTime = Math.floor(todateObject.getTime() / 1000); // Convert to seconds
-  
-  
-             // console.log(FromepochTime+" "+ToepochTime);
-  
-                const params = {
-                  veh_id: selectedVehNo.value,
-                  fdate: FromepochTime,
-                  edate: ToepochTime,
-  
-                  
-                };
-  
-                // Make the API call
-                return fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_trip_path, params)
-                  .then(async (response: { data: any; status: number }) => {
-                    const responsejson = response.data;
-  
-                    if (response.status === 200) {
-  
-                      isMapBusyWithRoute.value=true;
-                    
-                      if(responsejson.arr_data && responsejson.arr_data.length>1)
-                       {
-                       
-                // Odometer values
-                const odometerLast = parseInt(responsejson.arr_data[responsejson.arr_data.length - 1].odometer);
-                const odometerFirst = parseInt(responsejson.arr_data[0].odometer);
-                const start_loc = responsejson.arr_data[0].location;
-                const end_loc = responsejson.arr_data[responsejson.arr_data.length - 1].location;
-  
-                const distance = ((odometerLast - odometerFirst) / 1000).toFixed(1);
-  
-                // Dates and times
-                const lastDate = `${responsejson.arr_data[responsejson.arr_data.length - 1].rtcdate} ${responsejson.arr_data[responsejson.arr_data.length - 1].rtctime}`;
-                const firstDate = `${responsejson.arr_data[0].rtcdate} ${responsejson.arr_data[0].rtctime}`;
-  
-                const format = "yyyy-MM-dd HH:mm:ss"; // Date format
-  
-  
-               
-  
-                // Calculate time difference
-                const calculateDuration = (start: string, end: string) => {
-  
-                             // console.log("dattime",start+" "+end);
-              // Convert string dates to actual Date objects
-              const startDate = new Date(start.split('-').reverse().join('-'));
-                const endDate = new Date(end.split('-').reverse().join('-'));
-  
-                // Get the difference in milliseconds
-                const diffMs = endDate - startDate;
-  
-                            
-                  // Calculate days, hours, minutes, and seconds
-                  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-  
-                  // Format the result
-                  let result = '';
-  
-                  if (days > 0) result += `${days} day${days > 1 ? 's' : ''}, `;
-                  if (hours > 0) result += `${hours} hour${hours > 1 ? 's' : ''}, `;
-  
-                  if (minutes > 0) {
-                    result += `${minutes} minute${minutes > 1 ? 's' : ''}`;
-                  } else if (seconds > 0) {
-                    result += `${seconds} second${seconds > 1 ? 's' : ''}`;
-                  }
-  
-                  return result;
-  
-                };
-  
-                // Calculate duration
-                const duration = calculateDuration(firstDate, lastDate);
-  
-  
-                const ConvertSecondToHHMMSSString=(nSecondTime: string | number)=>{
-                   // Calculate hours, minutes, and seconds
-                const h = Math.floor(nSecondTime / 3600);
-                const m = Math.floor((nSecondTime % 3600) / 60);
-                const s = nSecondTime % 60;
-  
-                // Format each part
-                const sh = h > 0 ? `${h} h` : '';
-                const sm = m > 0 ? `${h > 0 && s === 0 && m < 10 ? '0' : ''}${m} m` : '';
-                const ss = s === 0 && (h > 0 || m > 0)
-                    ? ''
-                    : `${(s < 10 && (h > 0 || m > 0)) ? '0' : ''}${s} s`;
-  
-                // Combine the parts with appropriate spacing
-                return `${sh}${h > 0 ? ' ' : ''}${sm}${m > 0 ? ' ' : ''}${ss}`.trim();
-                };
-  
-                  // Function to return event status message based on event type
-                  const getEventStatus = (event_type: string,status: string,speed: string | number,stoppage: string) => {
-  
-                   // console.log("vehicleJyo",event_type);
-  
-                    if (event_type === Constants.eventType.Event_Type_Moving) {
-                      return `${status} at ${speed} Km/h`;
-                    } else {
-                      return `${status} for ${ConvertSecondToHHMMSSString(stoppage)}`;
-                    }
-                  };
-  
-         
-                  historyarray.value=[];
-  
-                    historyarray.value = responsejson.arr_data
-                        .filter((item: { lat: string; lon: string }) => item.lat && item.lon) // Filter out invalid lat/lon
-                        .map((item: { rec_id: any; lat: string; lon: string; location: any; speed: string; veh_no: any; rtcdate: any; rtctime: any; driver_name: any; event_type: string; label: string; stoppage_dur: string }) => ({
-                          recId: item.rec_id,
-                          lat: parseFloat(item.lat),
-                          lon: parseFloat(item.lon),
-                          location: item.location,
-                          speed: parseInt(item.speed, 10),
-                          vehNo: item.veh_no,
-                          rtcDate: item.rtcdate,
-                          rtcTime: item.rtctime,
-                          driverName: item.driver_name,
-                          distance: distance,
-                          duration: duration,
-                          start_loc: start_loc,
-                          end_loc: end_loc,
-                          driver_name: item.driver_name,
-                          event_type: item.event_type,
-                          label: item.label,
-                          stoppage: item.stoppage_dur,
-                          event_status: getEventStatus(item.event_type, item.label, parseInt(item.speed, 10), item.stoppage_dur),
-                        }));
-                      
+    // Dot marker based on event type
+    let dot_marker: google.maps.Marker;
+    const evt = historyarray.value[i].event_type;
+    if (evt === Constants.eventType.Event_Type_Stopped || evt === Constants.eventType.Event_Type_Idel) {
+      dot_marker = createDotMarker(s1, "#ff0000");
+    } else if (
+      evt === Constants.eventType.Event_Type_NoData ||
+      evt === Constants.eventType.Event_Type_IG_OFF_NoGPS ||
+      evt === Constants.eventType.Event_Type_IG_ON_NoGPS
+    ) {
+      dot_marker = createDotMarker(s1, "#999999");
+    } else {
+      dot_marker = createDotMarker(s1, "#999999");
+    }
 
-                        const waypoints = historyarray.value.map((item) => ({
-                        location: { lat: item.lat, lng: item.lon },
-                        stopover: true, // Set to true if these should be treated as stopovers
-                      }));
+    // Mount InfoWindow Vue component
+    const infoWindow = new google.maps.InfoWindow();
+    const infoWindowContainer = document.createElement("div");
+    infoWindowContainer.style.margin = "0";
+    infoWindowContainer.style.padding = "0";
 
-                    //  console.log("Historyarray",historyarray.value.length+" "+waypoints.length);
+    const app = createApp(InfoWindowDorMarker, { vehicleData: historyarray.value[i] });
+    app.mount(infoWindowContainer);
 
-                        loadingController.create({
-                          backdropDismiss: false // Makes the loading controller cancelable
-                        })
-                        .then(async loading => {
-                          loading.present();
+    infoWindow.setContent(infoWindowContainer);
+    dot_marker.addListener("click", () => {
+      infoWindow.open(newMap, dot_marker);
+      setTimeout(() => infoWindow.close(), 3000);
+    });
 
+    markersDotsArray.push(dot_marker);
+  }
+}
 
-                            loading.dismiss();
-                      
-                    })
-                    
+// Helper function to create dot markers
+function createDotMarker(position: any, color: string) {
+  return new google.maps.Marker({
+    position,
+    map: newMap,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 4,
+      strokeColor: color,
+      fillColor: color,
+      fillOpacity: 0.8,
+      strokeWeight: 1,
+      rotation: 0,
+    },
+  });
+}
 
-                           closeShowPath(2);
-                       
-                            processAnimation(1);
-  
-                          }else if(responsejson.arr_data.length===1)
-                          {
-                            showToastMessage("Start and end location getting same.");
-                          }
-  
-                      
-                 } else if (response.status === 401) {
-                      console.error('Unauthorized:', responsejson.message);
-                    } else {
-                      console.error('Empty response data');
-                    }
-                  })
-                  .catch((error: any) => {
-                    console.error('Error:', error);
-                  })
-                  .finally(() => {
-                    // Dismiss the loading spinner after the API call finishes
-                    loading.dismiss();
-                  });
-              })
-              .catch(error => {
-                console.error('Error creating loading:', error);
-              });
-          };
-  
-                         
-            const intervalCallback1Min = async () => {
-                // console.log("Interval callback triggered For Map!");
-                const currentRoute = router.currentRoute.value;
-  
-                const isLoggedIn = await storage.get('IsLoginAlready');
-                  if (isLoggedIn) {
-  
-                    const status = await Network.getStatus();
-                    if (currentRoute.name === 'map'){
-                        if (status.connected) {
-                          if(!isMapBusyWithRoute.value){
-                            CallOnlyAPI();
-                          }
-                        } else {
-                          showToast();
-                        }
-                  }
-                }else{
-                  stopInterval1Min();
-                }
-              };
-  
-     
-      export { intervalCallback1Min,intervalRunning1Min };
-  
+// Function to call trip path API
+async function CallTripPath() {
+  let loading: HTMLIonLoadingElement | null = null;
+  try {
+    loading = await loadingController.create({ backdropDismiss: false });
+    await loading.present();
 
+    const fromdateString = fromDateTimeFormatted.value;
+    const todateString = toDateTimeFormatted.value;
 
-const snapToRoad = (lat, lng) => {
+    const [day1, month1, year1, hour1, minute1] = fromdateString.match(/\d+/g)!;
+    const [day2, month2, year2, hour2, minute2] = todateString.match(/\d+/g)!;
+
+    const fromdateObject = new Date(+year1, +month1 - 1, +day1, +hour1, +minute1);
+    const todateObject = new Date(+year2, +month2 - 1, +day2, +hour2, +minute2);
+
+    const params = {
+      veh_id: selectedVehNo.value,
+      fdate: Math.floor(fromdateObject.getTime() / 1000),
+      edate: Math.floor(todateObject.getTime() / 1000),
+    };
+
+    const response = await fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_trip_path, params);
+    const responsejson = response.data;
+
+    if (response.status == 200) {
+      isMapBusyWithRoute.value = true;
+
+      if (responsejson.arr_data && responsejson.arr_data.length > 1) {
+        processTripData(responsejson.arr_data);
+
+        closeShowPath(2);
+        canPlay.value = false;
+
+        const loadingPlay = await loadingController.create({
+          message: "Please wait for play",
+          spinner: "circles",
+        });
+        await loadingPlay.present();
+
+        await processAnimation(1);
+        canPlay.value = true;
+
+        loadingPlay.dismiss();
+      } else if (responsejson.arr_data.length == 1) {
+        showToastMessage("Start and end location getting same.");
+      }
+    } else if (response.status == 401) {
+      console.error("Unauthorized:", responsejson.message);
+    } else {
+      console.error("Empty response data");
+    }
+  } catch (error) {
+    console.error("Error in CallTripPath:", error);
+  } finally {
+    if (loading) await loading.dismiss();
+  }
+}
+
+// Function to process trip data and populate historyarray
+function processTripData(arr_data: any[]) {
+  const odometerFirst = parseInt(arr_data[0].odometer);
+  const odometerLast = parseInt(arr_data[arr_data.length - 1].odometer);
+  const distance = ((odometerLast - odometerFirst) / 1000).toFixed(1);
+  const start_loc = arr_data[0].location;
+  const end_loc = arr_data[arr_data.length - 1].location;
+
+  const firstDate = `${arr_data[0].rtcdate} ${arr_data[0].rtctime}`;
+  const lastDate = `${arr_data[arr_data.length - 1].rtcdate} ${arr_data[arr_data.length - 1].rtctime}`;
+
+  const duration = calculateDuration(firstDate, lastDate);
+
+  const ConvertSecondToHHMMSSString = (nSecondTime: string | number) => {
+    const h = Math.floor(+nSecondTime / 3600);
+    const m = Math.floor((+nSecondTime % 3600) / 60);
+    const s = +nSecondTime % 60;
+    const sh = h > 0 ? `${h} h` : "";
+    const sm = m > 0 ? `${h > 0 && s === 0 && m < 10 ? "0" : ""}${m} m` : "";
+    const ss = s === 0 && (h > 0 || m > 0) ? "" : `${s < 10 && (h > 0 || m > 0) ? "0" : ""}${s} s`;
+    return `${sh}${h > 0 ? " " : ""}${sm}${m > 0 ? " " : ""}${ss}`.trim();
+  };
+
+  const getEventStatus = (event_type: string, status: string, speed: string | number, stoppage: string) => {
+    if (event_type === Constants.eventType.Event_Type_Moving) {
+      return `${status} at ${speed} Km/h`;
+    } else {
+      return `${status} for ${ConvertSecondToHHMMSSString(stoppage)}`;
+    }
+  };
+
+  historyarray.value = arr_data
+    .filter((item) => item.lat && item.lon)
+    .map((item) => ({
+      recId: item.rec_id,
+      lat: parseFloat(item.lat),
+      lon: parseFloat(item.lon),
+      location: item.location,
+      speed: parseInt(item.speed, 10),
+      vehNo: item.veh_no,
+      rtcDate: item.rtcdate,
+      rtcTime: item.rtctime,
+      driverName: item.driver_name,
+      distance,
+      duration,
+      start_loc,
+      end_loc,
+      event_type: item.event_type,
+      label: item.label,
+      stoppage: item.stoppage_dur,
+      event_status: getEventStatus(item.event_type, item.label, parseInt(item.speed, 10), item.stoppage_dur),
+    }));
+}
+
+// Helper function to calculate duration between two datetime strings
+function calculateDuration(start: string, end: string) {
+  const startDate = new Date(start.split("-").reverse().join("-"));
+  const endDate = new Date(end.split("-").reverse().join("-"));
+  const diffMs = endDate.getTime() - startDate.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+  let result = "";
+  if (days > 0) result += `${days} day${days > 1 ? "s" : ""}, `;
+  if (hours > 0) result += `${hours} hour${hours > 1 ? "s" : ""}, `;
+  if (minutes > 0) result += `${minutes} minute${minutes > 1 ? "s" : ""}`;
+  else if (seconds > 0) result += `${seconds} second${seconds > 1 ? "s" : ""}`;
+  return result;
+}        
+ 
+
+ // Snap a GPS point to the nearest road using Google Directions API
+async function snapToRoad(lat: number, lng: number): Promise<{ lat: number; lng: number }> {
   return new Promise((resolve) => {
     const latLng = new google.maps.LatLng(lat, lng);
 
@@ -2534,30 +2186,54 @@ const snapToRoad = (lat, lng) => {
       {
         origin: latLng,
         destination: latLng,
-        travelMode: google.maps.TravelMode.DRIVING
+        travelMode: google.maps.TravelMode.DRIVING,
       },
       (response, status) => {
-        if (
-          status === google.maps.DirectionsStatus.OK &&
-          response.routes.length > 0
-        ) {
-          const snapped =
-            response.routes[0].legs[0].start_location;
-
-          resolve({
-            lat: snapped.lat(),
-            lng: snapped.lng()
-          });
+        if (status === google.maps.DirectionsStatus.OK && response.routes.length > 0) {
+          const snapped = response.routes[0].legs[0].start_location;
+          resolve({ lat: snapped.lat(), lng: snapped.lng() });
         } else {
-          // fallback to original GPS point
+          // fallback to original GPS coordinates if snapping fails
           resolve({ lat, lng });
         }
       }
     );
   });
-};
+}
 
-  </script>
+// Interval callback triggered every 1 minute
+async function intervalCallback1Min() {
+  try {
+    // Get current route
+    const currentRoute = router.currentRoute.value;
+
+    // Check login status
+    const isLoggedIn = await storage.get('IsLoginAlready');
+    if (!isLoggedIn) {
+      stopInterval1Min();
+      return;
+    }
+
+    // Check network status
+    const status = await Network.getStatus();
+    if (currentRoute.name === 'map') {
+      if (status.connected) {
+        // Only call API if map is not busy
+        if (!isMapBusyWithRoute.value) {
+          await CallOnlyAPI();
+        }
+      } else {
+        showToast();
+      }
+    }
+  } catch (error) {
+    console.error('Error in intervalCallback1Min:', error);
+  }
+}
+
+export { intervalCallback1Min,intervalRunning1Min };
+  
+</script>
   
  
   

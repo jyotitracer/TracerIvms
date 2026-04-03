@@ -54,7 +54,9 @@
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
   
-        return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  const finadate=`${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  console.log("display_recDate",finadate+"\n"+date);
+        return finadate;
       });
   
       return {

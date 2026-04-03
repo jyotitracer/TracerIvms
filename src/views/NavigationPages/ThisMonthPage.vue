@@ -162,6 +162,7 @@ export default {
    setup() {
 
     const { isConnected } = useNetwork();
+    let isFirstTimeDataCall = true;
 
     
 
@@ -245,8 +246,12 @@ export default {
       fuelCons1.value = arrData[0].t_f;
       fuelCons2.value = arrData[0].a_f_pd;
 
-      createChart(labels, activeData, stoppedData, offlineData);
+     await createChart(labels, activeData, stoppedData, offlineData);
+                   isFirstTimeDataCall=false;
+
     }
+
+
   }
 
  const CallAPIForTodayData = async () => {
@@ -266,7 +271,9 @@ export default {
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+     if(isFirstTimeDataCall){
+         loading.present();
+    }
 
 
 
@@ -316,8 +323,14 @@ export default {
           console.error("Error:", error);
         })
         .finally(() => {
+
+           if(isFirstTimeDataCall){
+              loading.dismiss();   
+             }
+             
           // Dismiss the loading controller after the API call completes
-          return loading.dismiss();
+          return ; 
+         
         });
     })
     .catch(error => {
@@ -659,7 +672,7 @@ export default {
   align-items: center;
   padding: 16px;
   background-color: #f1f1f1;
-  color: red;
+  color:#D01526;
 }
 .fleet-info {
   padding: 16px;

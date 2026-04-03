@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -73,7 +73,8 @@ export default defineComponent({
   },
 
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;  
+     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     const selectedItems = ref([]);
     const searchQuery = ref('');
@@ -88,7 +89,9 @@ export default defineComponent({
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+     if(isFirstTimeDataCall){
+         loading.present();
+    }
 
   // Fetch data using the fetchData function
   return fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Event_List, params)
@@ -143,7 +146,11 @@ export default defineComponent({
         })
         .finally(() => {
           // Dismiss the loading controller after the API call completes
-          return loading.dismiss();
+           if(isFirstTimeDataCall){
+loading.dismiss();  
+  }
+            return;
+
         });
     })
     .catch(error => {
@@ -174,19 +181,20 @@ export default defineComponent({
     onMounted(async () => {
       initNetworkListener();
 
-      const status = await Network.getStatus();
-      if (status.connected) {
+      // const status = await Network.getStatus();
+      // if (status.connected) {
         const storedItems = await storage.get('eventItems');
         console.log(storedItems);
 
         // Check if the count matches
         if (storedItems) {
           selectedItems.value = storedItems;
+          isFirstTimeDataCall=false;
         }
         CallAPIForData();
-      } else {
-        showToast();
-      }
+      // } else {
+      //   showToast();
+      // }
     });
 
     return {
@@ -231,7 +239,7 @@ ion-item {
   margin-left: 6px;
 }
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

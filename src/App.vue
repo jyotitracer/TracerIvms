@@ -127,13 +127,159 @@ export default defineComponent({
         const loginResponse = await storage.get('login_data');
         if(loginResponse)
         isFuelEnabled.value = loginResponse?.isFuel;
-      
+           CallOnlyAPI();
+
       } catch (error) {
         console.error('Error fetching login data:', error);
       }
       requestPermission();
       listenForNotifications();
+
     });
+
+
+   const CallOnlyAPI = async () => {
+  try {
+    console.log("Background API sync started");
+
+    const params = {};
+
+    const response: any = await fetchData(
+      Constants.CONT.Mobile_Contro,
+      Constants.CMD.req_all_veh,
+      params
+    );
+
+    if (response.status !== 200) return;
+
+    const arrData = response.data?.arr_data;
+    if (!arrData || arrData.length === 0) return;
+
+    // ✅ Prepare group data
+    const newItems = arrData.map((data: any, index: number) => ({
+      id: index + 1,
+      group: data.name,
+      total_count: data.total_count,
+      veh_arr: data.veh_arr,
+      sts_arr: data.sts_arr,
+    }));
+
+    // ✅ Get stored data
+    const storedGroupData =
+      (await storage.get(Constants.storageValue.Key_GroupAPI)) || [];
+
+    const storedVehDetails =
+      (await storage.get(Constants.storageValue.key_VehicleDetails)) || [];
+
+    // ✅ Compare
+    const isGroupChanged =
+      JSON.stringify(storedGroupData) !== JSON.stringify(newItems);
+
+    if (!isGroupChanged) return; // 🔥 Nothing changed → exit silently
+
+    // ✅ Save group data
+    await storage.set(Constants.storageValue.Key_GroupAPI, newItems);
+
+    // ========================
+    // GROUP STATUS (EVENT/MAP/FUEL)
+    // ========================
+
+    const buildGroupStatus = async (keyName: string) => {
+      const stored = (await storage.get(keyName)) || [];
+
+      const map = new Map(
+        stored.map((g: any) => [`${g.group}-${g.groupId}`, g])
+      );
+
+      return arrData.map((data: any) => {
+        const key = `${data.name}-${data.id}`;
+        return map.has(key)
+          ? { ...map.get(key) }
+          : {
+              group: data.name,
+              groupId: data.id,
+              status: 1,
+              checked: true,
+            };
+      });
+    };
+
+    const groupEvent = await buildGroupStatus(
+      Constants.storageValue.key_GroupWithStatus
+    );
+    const groupMap = await buildGroupStatus(
+      Constants.storageValue.key_Map_GroupWithStatus
+    );
+    const groupFuel = await buildGroupStatus(
+      Constants.storageValue.key_Fuel_GroupWithStatus
+    );
+
+    await Promise.all([
+      storage.set(Constants.storageValue.key_GroupWithStatus, groupEvent),
+      storage.set(Constants.storageValue.key_Map_GroupWithStatus, groupMap),
+      storage.set(Constants.storageValue.key_Fuel_GroupWithStatus, groupFuel),
+    ]);
+
+    // ========================
+    // VEHICLE DETAILS
+    // ========================
+
+    const vehicleDetails = arrData.flatMap((data: any) =>
+      data.veh_arr.map((veh: any) => ({
+        vehid: veh.veh_id,
+        vehname: veh.veh_no,
+        vehstatus: veh.veh_sts,
+        vehColor: veh.sts_colr,
+        status: 1,
+      }))
+    );
+
+    const isVehChanged =
+      JSON.stringify(storedVehDetails) !== JSON.stringify(vehicleDetails);
+
+    if (!isVehChanged) return;
+
+    const buildVehicleDetails = async (keyName: string) => {
+      const stored = (await storage.get(keyName)) || [];
+
+      const map = new Map(
+        stored.map((v: any) => [`${v.vehid}-${v.vehname}`, v])
+      );
+
+      return arrData.flatMap((data: any) =>
+        data.veh_arr.map((veh: any) => {
+          const key = `${veh.veh_id}-${veh.veh_no}`;
+          return map.has(key)
+            ? { ...map.get(key) }
+            : {
+                vehid: veh.veh_id,
+                vehname: veh.veh_no,
+                vehstatus: veh.veh_sts,
+                vehColor: veh.sts_colr,
+                status: 1,
+              };
+        })
+      );
+    };
+
+    const vehEvent = await buildVehicleDetails(
+      Constants.storageValue.key_VehicleDetails
+    );
+    const vehFuel = await buildVehicleDetails(
+      Constants.storageValue.key_Fuel_VehicleDetails
+    );
+
+    await Promise.all([
+      storage.set(Constants.storageValue.key_VehicleDetails, vehEvent),
+      storage.set(Constants.storageValue.key_Fuel_VehicleDetails, vehFuel),
+    ]);
+
+    console.log("Background sync completed");
+  } catch (error) {
+    console.error("Background API error:", error);
+  }
+};
+  
 
      // ✅ Use computed for auto refresh
  const filteredPages = computed(() => {
@@ -212,7 +358,8 @@ export default defineComponent({
       
 
         closeMenu();
-        await router.replace(path);
+         await router.replace(path);
+
       }
     };
 
@@ -241,14 +388,16 @@ const logoutMethod = async () => {
       toastMessage.value = response.data.message;
       closeMenu();
 
+       username.value = '';
+      selectedPage.value = {};
+
       // Clear storage and localStorage
       await storage.clear();
       await storage.clearAllPreferences();
 
       localStorage.clear();
 
-      username.value = '';
-      selectedPage.value = {};
+     
 
       await router.push('/');
     } else if (response.status === 204) {

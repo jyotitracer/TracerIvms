@@ -153,7 +153,9 @@ export default defineComponent({
     }
 
   },
-  setup(props) {
+   setup(props) {
+    let isFirstTimeDataCall = true;
+
   // Constants and reactive variables
   const route = useRoute();
       const router = useRouter();
@@ -241,7 +243,9 @@ export default defineComponent({
   })
   .then((load) => {
     loading = load;
-    return loading.present();
+    return ; if(isFirstTimeDataCall){
+         loading.present();
+    }
   })
   .then(() => {
     const params = {
@@ -285,7 +289,8 @@ export default defineComponent({
   })
   .finally(() => {
     if (loading) {
-      loading.dismiss();
+       if(isFirstTimeDataCall){
+loading.dismiss();    }
     }
   });
 };

@@ -1,6 +1,6 @@
 <template>
   <ion-page id="main-content">
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -87,7 +87,7 @@ import {
 } from '@ionic/vue';
 import useNetwork from '@/services/networkService'; // Import the network service
 
-import { defineComponent, computed, ref, onMounted } from 'vue';
+import { defineComponent, computed, ref, onMounted, watch } from 'vue';
 import CustomItem from '@/components/MonthGroupCustomItem.vue';
 import router from '@/router/index'; 
 import { useRoute } from 'vue-router';
@@ -128,6 +128,7 @@ export default defineComponent({
 
   },
  setup() {
+    let isFirstTimeDataCall = true;
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
@@ -232,6 +233,8 @@ export default defineComponent({
           grphArr: data.grph_arr
         }));
       }
+
+
     }
 
     // API call function
@@ -250,7 +253,9 @@ export default defineComponent({
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+     if(isFirstTimeDataCall){
+         loading.present();
+    }
 
 
 
@@ -304,8 +309,13 @@ export default defineComponent({
           console.error("Error:", error);
         })
         .finally(() => {
+
+           if(isFirstTimeDataCall){
+            loading.dismiss();  
+              }
+
           // Dismiss the loading controller after the API call completes
-          return loading.dismiss();
+          return ;
         });
     })
     .catch(error => {
@@ -313,12 +323,16 @@ export default defineComponent({
     });
 };
 
+watch(searchQuery, () => {
+  isFirstTimeDataCall = false;
+});
 
     // Filtered items based on search query
     const filteredItems = computed(() =>
       items.value.filter(item =>
         item.group.toLowerCase().includes(searchQuery.value.toLowerCase())
       )
+      
     );
 
     // On mount logic
@@ -428,7 +442,7 @@ export default defineComponent({
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  color: red; /* Text color */
+  color:#D01526; /* Text color */
   background-color: #dbd7d7; /* Background for the text */
 }
 
@@ -475,7 +489,7 @@ export default defineComponent({
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

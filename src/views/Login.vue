@@ -1,7 +1,7 @@
 <template>
   <ion-page>
-
-    <ion-content class="login-content">
+<!-- edge-to-edge -->
+       <ion-content class="login-content no-safe-area" :scroll="true" :keyboard-offset="true">
 
           <div v-if="!isConnected" class="network-status-bar">
           No Network Connection
@@ -93,6 +93,7 @@ export default {
   setup() {
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    
 
     const usernamefield = ref('');
     const password = ref('');
@@ -146,7 +147,9 @@ export default {
       if (status.connected) {
         loadingController.create({ message: 'Loading...' })
           .then((loading) => {
-            loading.present(); // Show loading
+         loading.present();
+    
+    
 
             const params = {
               username: usernamefield.value,
@@ -198,7 +201,7 @@ export default {
                 console.error('Error fetching data:', error);
               })
               .finally(() => {
-                loading.dismiss(); // Hide loading
+            loading.dismiss();    // Hide loading
               });
 
           })
@@ -251,14 +254,16 @@ export default {
               console.error('Error fetching data:', error);
             })
             .finally(() => {
-             // loading.dismiss(); // Hide loading
+             
+  // Hide loading
             });
 
       };
     const requestVehicleStatusColor = () => {
       loadingController.create({ message: 'Loading...' })
         .then((loading) => {
-          loading.present(); // Show loading spinner
+         loading.present();
+     // Show loading spinner
 
           fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Color, {})
             .then((response) => {
@@ -300,7 +305,8 @@ export default {
               console.error('Error fetching vehicle status color:', error);
             })
             .finally(() => {
-              loading.dismiss();
+          loading.dismiss();   
+ 
             });
         })
         .catch((error) => {
@@ -383,7 +389,7 @@ export default {
   }
 
   .network-status-bar {
-  background-color: red;
+  background-color: #D01526;;
   color: white;
   text-align: center;
   padding: 5px;

@@ -8,7 +8,7 @@
             <div class="text">{{ page.msg }}</div>
             <div class="separator"></div>
             <div class="action-buttons">
-                <ion-icon style="height: 30px; width: 30px; color: red;" name="share-outline" @click="shareItem(page.msg)"></ion-icon>
+                <ion-icon style="height: 30px; width: 30px; color:#D01526;" name="share-outline" @click="shareItem(page.msg)"></ion-icon>
                 <ion-checkbox v-model="page.selected" class="large-checkbox"></ion-checkbox>
               </div>
           </div>
@@ -71,6 +71,8 @@ export default defineComponent({
     IonIcon,
   },
   setup() {
+    let isFirstTimeDataCall = true;  
+    
     const selectedItems = ref([]);
 
     const loadItemsFromStorage = async () => {
@@ -78,6 +80,7 @@ export default defineComponent({
         const storedItems = await storage.get('selectedItems');
         if (storedItems) {
           selectedItems.value = storedItems;
+          isFirstTimeDataCall=false;
         }
       } catch (error) {
         console.error('Error loading items from storage:', error);
@@ -91,7 +94,9 @@ export default defineComponent({
       });
 
       try {
-        await loading.present();
+        if(isFirstTimeDataCall){ 
+          await loading.present();
+    }
 
         const lastRecId = storage.get('last_rec_id') || '0';
         const params = { lst_rec_id: lastRecId };
@@ -122,7 +127,9 @@ export default defineComponent({
         console.error('Error fetching data:', error);
        // showToastMessage('Error fetching data. Please check your connection.');
       } finally {
-        loading.dismiss();
+         if(isFirstTimeDataCall){
+loading.dismiss();   
+ }
       }
     };
 
@@ -265,7 +272,6 @@ export default defineComponent({
     justify-content: center;    /* ✅ CENTER BOTH BUTTONS */
   align-items: center;
   align-text:center;
-  background: #000000;
 
 }
 
@@ -274,7 +280,7 @@ export default defineComponent({
   --size: 22px; /* Adjust this value to increase or decrease the checkbox size */
 }
 .red-button {
-  --color: red; /* Text color */
+  --color:#D01526; /* Text color */
   --background: transparent; /* Background color (optional) */
 }
 

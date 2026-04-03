@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -156,6 +156,7 @@ export default defineComponent({
     IonList,IonItemDivider
   },
   setup() {
+    let isFirstTimeDataCall = true;
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
@@ -312,10 +313,10 @@ ion-content {
   padding: 0 10px 0 10px;
 }
 ion-button {
-  --border-color: red;
+  --border-color:#D01526;
   --border-width: 1px;
   --border-style: solid;
-  --color: red;
+  --color:#D01526;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -326,7 +327,8 @@ ion-button {
 }
 
 ion-button.selected {
-  --background: red;
+   --background:#D01526;
+
   --color: white;
   font-size: 10px;
 }
@@ -353,7 +355,7 @@ ion-button.selected {
 
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

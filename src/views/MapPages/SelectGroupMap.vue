@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -36,17 +36,27 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import useNetwork from '@/services/networkService'; // Import the network service
-
+<<script lang="ts">
+import useNetwork from '@/services/networkService';
 import { defineComponent, onMounted, ref, watch, computed } from 'vue';
 import {
-  IonButtons, IonBackButton, IonContent, IonHeader, IonPage, IonTitle,
-  IonToolbar, IonItem, IonList, IonToggle, IonSearchbar
+  IonButtons,
+  IonBackButton,
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonItem,
+  IonList,
+  IonToggle,
+  IonSearchbar,
+  loadingController
 } from '@ionic/vue';
 import storage from "@/services/storagefile";
 import Constants from "@/common/constants";
 import router from '@/router/index';
+import { fetchData } from "@/services/ApiService";
 
 export default defineComponent({
   components: {
@@ -60,72 +70,114 @@ export default defineComponent({
     IonItem,
     IonList,
     IonToggle,
-    IonSearchbar
+    IonSearchbar,
+    loadingController
   },
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;
+    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
 
     const selectedItems = ref([]);
     const searchQuery = ref('');
     const allToggled = ref(false);
 
-    const collectGroup = async () => {
-      const storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus);
+    /** 🔹 Fetch Map Groups from API & Merge with Stored Values */
+    const fetchMapGroups = async () => {
+      const storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus) || [];
+      if (storedGroups) isFirstTimeDataCall = false;
 
-      if (storedGroups && storedGroups.length > 0) {
+      // Show loading only if first time
+      const loading = await loadingController.create({
+        message: 'Loading...',
+        spinner: 'crescent',
+        backdropDismiss: false
+      });
+      if (isFirstTimeDataCall) await loading.present();
+
+      try {
+        const params = { grping: 'map' }; // Adjust API param if needed
+        const response = await fetchData(Constants.CONT.Mobile_Contro, Constants.CMD.Req_Group_v1, params);
+        const arrData = response.data?.arr_data;
+
+        if (response.status === 200 && arrData?.length) {
+          const stored = await storage.get(Constants.storageValue.key_Map_GroupWithStatus) || [];
+          const storedMap = new Map(stored.map(g => [g.groupId, g]));
+
+          selectedItems.value = arrData.map(data => {
+            const storedItem = storedMap.get(data.id);
+            return {
+              groupId: data.id,
+              group: data.name,
+              checked: storedItem?.checked ?? (data.status === 1),
+              status: storedItem?.status ?? data.status ?? 1,
+              disabled: storedItem?.disabled ?? false
+            };
+          });
+
+          // Ensure at least one is checked
+          if (!selectedItems.value.some(item => item.checked)) {
+            selectedItems.value.forEach(item => item.checked = true);
+          }
+
+          await storage.set(Constants.storageValue.key_Map_GroupWithStatus, selectedItems.value);
+        }
+      } catch (error) {
+        console.error("API Error fetching map groups:", error);
+      } finally {
+        if (isFirstTimeDataCall) loading.dismiss();
+      }
+    };
+
+    /** 🔹 Collect map groups from storage or API */
+    const collectMapGroups = async () => {
+      let storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus);
+
+      if (!storedGroups || storedGroups.length === 0) {
+        await fetchMapGroups();
+        storedGroups = await storage.get(Constants.storageValue.key_Map_GroupWithStatus);
+      }
+
+      if (storedGroups?.length) {
         selectedItems.value = storedGroups.map(data => ({
           groupId: data.groupId,
           group: data.group,
-          status: data.status, // Initial status set to 1
-            checked: data.checked,
-
-
+          checked: data.status === 1,
+          status: data.status,
+          disabled: data.disabled ?? false
         }));
       } else {
         selectedItems.value = [];
       }
+
+      allToggled.value = selectedItems.value.every(item => item.checked);
     };
 
-    onMounted(() => {
-      initNetworkListener();
-
-      collectGroup();
-    });
-
-    watch(selectedItems, (newItems) => {
-      if (newItems.length === 0) {
-        allToggled.value = false;
-        return;
-      }
-      allToggled.value = newItems.every(item => item.checked);
-    }, { deep: true });
-
+    /** 🔹 Toggle All Groups */
     const toggleAllItems = async (event) => {
       const isChecked = event.detail.checked;
       allToggled.value = isChecked;
 
       selectedItems.value.forEach(item => {
-        item.checked = isChecked;
-        item.status = isChecked ? 1 : 0; // Update status based on checked state
+        if (!item.disabled) {
+          item.checked = isChecked;
+          item.status = isChecked ? 1 : 0;
+        }
       });
 
-      // Save the updated groups to storage
       await storage.set(Constants.storageValue.key_Map_GroupWithStatus, selectedItems.value);
     };
 
+    /** 🔹 Toggle Single Group */
     const updateGroupStatus = async (page, event) => {
       const isChecked = event.detail.checked;
       page.checked = isChecked;
-      page.status = isChecked ? 1 : 0; // Update status based on checked state
+      page.status = isChecked ? 1 : 0;
 
-      // Save the updated group to storage
+      allToggled.value = selectedItems.value.every(item => item.checked);
       await storage.set(Constants.storageValue.key_Map_GroupWithStatus, selectedItems.value);
-
-      // Update the allToggled state based on current items
-      const allChecked = selectedItems.value.every(item => item.checked);
-      allToggled.value = allChecked;
     };
 
+    /** 🔹 Filtered Items for Search */
     const filteredItems = computed(() => {
       if (searchQuery.value) {
         return selectedItems.value.filter(item =>
@@ -139,16 +191,22 @@ export default defineComponent({
       router.back();
     };
 
-    return {
-      isConnected, showReconnectedMessage, initNetworkListener,
+    onMounted(async () => {
+      initNetworkListener();
+      await collectMapGroups();
+    });
 
+    return {
       selectedItems,
       searchQuery,
       allToggled,
       toggleAllItems,
       updateGroupStatus,
       filteredItems,
-      goBack
+      goBack,
+      isConnected,
+      showReconnectedMessage,
+      initNetworkListener
     };
   }
 });
@@ -169,7 +227,7 @@ ion-item {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

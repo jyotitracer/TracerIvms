@@ -37,6 +37,12 @@ class Constants {
   public static CMD = {
     LOGIN: "login",
     Req_Group: "req_group",
+   Req_Group_v1: "req_group_v1",
+   req_group_vehicle:"req_group_vehicle",
+
+      req_all_veh:"req_all_veh",
+
+
     Req_Dash_All: "req_dash_per",
     Req_Color: "req_sts_clr",
     Req_Vehi_info: "req_veh_info",
@@ -72,6 +78,16 @@ class Constants {
     key_date_from: 'fromdate',
     key_date_to: 'todate',
     Key_Fav_data: 'favItem',
+
+        Key_GroupAPI_v1: "groupApi_v1",
+          key_VehicleDetails_v1: "vehicledtlstatus_v1",
+       key_GroupWithStatus_v1:"groupnamestatus_v1",
+
+    key_Fuel_GroupWithStatus_v1: "fuelgroupnamestatus_v1",
+    key_Fuel_VehicleDetails_v1: "fuelvehicledtlstatus_v1",
+
+    key_Map_GroupWithStatus_v1: "mapgroupnamestatus_v1",
+    Key_Fav_data_group_v1: 'favItemGroup_v1',
 
     Key_GroupAPI: "groupApi",
     key_GroupWithStatus: "groupnamestatus",

@@ -116,7 +116,8 @@ const fetchSlidesData = async () => {
 
   loadingController.create({ message: 'Loading...' })
         .then((loading) => {
-          loading.present(); // Show loading spinner
+         loading.present();
+     // Show loading spinner
 
           const params = {
             page_id: pageid,
@@ -138,7 +139,8 @@ const fetchSlidesData = async () => {
               console.error('Error fetching vehicle status color:', error);
             })
             .finally(() => {
-              loading.dismiss();
+loading.dismiss();  
+  
             });
         })
         .catch((error) => {
@@ -275,7 +277,7 @@ const next = () => {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color: #D01526;;
   color: white;
   text-align: center;
   padding: 5px;

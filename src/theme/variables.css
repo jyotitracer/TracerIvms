@@ -4,29 +4,32 @@ http://ionicframework.com/docs/theming/ */
 /** Ionic CSS Variables **/
 :root {
 
+--ion-font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
 
   --ion-background-color:#ffffff; 
   --ion-text-color: #000000;       
 
 
   /** primary **/
-  --ion-color-primary: hsl(0, 100%, 50%);
+  --ion-color-primary: #D01526;
   --ion-color-primary-rgb: 56, 128, 255;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: red;
-  --ion-color-primary-tint: red;
+  --ion-color-primary-shade: #D01526;
+  --ion-color-primary-tint: #D01526;
 
   /** secondary **/
-  --ion-color-secondary: red;
+  --ion-color-secondary: #D01526;
   --ion-color-secondary-rgb: 61, 194, 255;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: red;
-  --ion-color-secondary-tint: red;
+  --ion-color-secondary-shade: #D01526;
+  --ion-color-secondary-tint: #D01526;
 
   /** tertiary **/
-  --ion-color-tertiary: red;
+  --ion-color-tertiary: #D01526;
   --ion-color-tertiary-rgb: 82, 96, 255;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
@@ -84,6 +87,10 @@ http://ionicframework.com/docs/theming/ */
 }
 
 :root[theme="dark"] {
+  --ion-font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+
   /* Dark mode styles */
   --ion-background-color: #ffffff;
   --ion-text-color: #000000;
@@ -93,6 +100,9 @@ http://ionicframework.com/docs/theming/ */
 
 
   :root {
+
+--ion-font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
 
     --ion-background-color:#ffffff; /* Background color ion-color-purplishGrey */
@@ -106,14 +116,14 @@ http://ionicframework.com/docs/theming/ */
    */
 
   body {
-    --ion-color-primary: red;
+    --ion-color-primary: #D01526;
     --ion-color-primary-rgb: 66,140,255;
     --ion-color-primary-contrast: #ffffff;
     --ion-color-primary-contrast-rgb: 255,255,255;
-    --ion-color-primary-shade: red;
-    --ion-color-primary-tint: red;
+    --ion-color-primary-shade: #D01526;
+    --ion-color-primary-tint: #D01526;
 
-    --ion-color-secondary: red;
+    --ion-color-secondary: #D01526;
     --ion-color-secondary-rgb: 80,200,255;
     --ion-color-secondary-contrast: #ffffff;
     --ion-color-secondary-contrast-rgb: 255,255,255;

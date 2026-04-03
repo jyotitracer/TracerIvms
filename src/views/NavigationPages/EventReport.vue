@@ -66,7 +66,7 @@
                         </div>
                         <div class="text-row">
                           <span class="text-item1">{{ vehicle.eventstring }}</span>
-                          <span class="text-item" style="color: red;">{{vehicle.lastStatusUpdate}}</span>
+                          <span class="text-item" style="color:#D01526;">{{vehicle.lastStatusUpdate}}</span>
                         </div>
                         <ion-row class="text-row">
                           <ion-col class="text-item2"> {{vehicle.datestring }} </ion-col>
@@ -144,6 +144,8 @@ export default {
   },
 
   setup() {
+    let isFirstTimeDataCall = true;
+
     // Alert data
     const showAlert = ref(false);
     const alertMessage = ref('');
@@ -193,7 +195,9 @@ const selectedVehicleId = ref('all');
 
   }).then((createdLoading) => {
     loading = createdLoading;
-    return loading.present();
+    return ; if(isFirstTimeDataCall){
+         loading.present();
+    }
   }).then(() => {
     const params = {
       evnt_arr: selectedEventIds.value === 'all' 
@@ -271,7 +275,8 @@ const selectedVehicleId = ref('all');
   }).catch((error) => {
     console.error('Error:', error);
   }).finally(() => {
-    loading.dismiss();
+     if(isFirstTimeDataCall){
+loading.dismiss();    }
   });
 };
 
@@ -392,6 +397,7 @@ let selectedEvents;
 
    
     
+   isFirstTimeDataCall=false;
     };
 
     // Navigation logic
@@ -546,7 +552,7 @@ border: 1px solid red;
 }
 .date-display{
 font-size: 14px;
-color: red;
+color:#D01526;
 font-weight: bold;
 }
 
@@ -636,7 +642,7 @@ cursor: pointer;
 .circle {
 width: 40px;
 height: 40px;
-background-color: red; /* Green background color */
+background-color:#D01526; /* Green background color */
 border-radius: 50%;
 display: flex;
 justify-content: center;

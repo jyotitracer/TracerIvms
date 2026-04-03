@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="/group"></ion-back-button>
@@ -21,20 +21,24 @@
         v-model="searchQuery"
       ></ion-searchbar>
 
-      <ion-list>
-        <template v-for="(vehicle, index) in filteredItems" :key="vehicle.sr_no">
-          <VehicleItem 
-            :vehicle="vehicle" 
-            :isFavorite="isFavorite(vehicle)" 
-            @click="navigateToPage(vehicle,vehicle.veh_id, vehicle.veh_no,groupname)"
-            v-long-press="() => openActionSheet(vehicle)"
-          />
-          <ion-item-divider 
-            v-if="index < filteredItems.length" 
-            class="custom-divider">
-          </ion-item-divider>
-        </template>
-      </ion-list>
+     <ion-list>
+  <div v-for="(vehicle, index) in filteredItems" :key="vehicle.veh_id">
+
+    <VehicleItem
+      :vehicle="vehicle"
+      :isFavorite="isFavorite(vehicle)"
+      @click="navigateToPage(vehicle,vehicle.veh_id, vehicle.veh_no,groupname)"
+      v-long-press="() => openActionSheet(vehicle)"
+    />
+
+    <ion-item-divider
+      v-if="index < filteredItems.length - 1"
+      class="custom-divider">
+    </ion-item-divider>
+
+  </div>
+</ion-list>
+
 
       <ion-action-sheet
         v-if="showActionSheet"
@@ -46,7 +50,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, defineComponent, computed, onMounted,onUnmounted } from 'vue';
 import {
   IonPage,
@@ -59,7 +63,8 @@ import {
   IonButtons,
   IonItemDivider,
   IonSearchbar,
-  IonActionSheet,
+  IonActionSheet,  loadingController,
+
   alertController
 } from '@ionic/vue';
 import VehicleItem from '@/components/VehicleCustomeItem.vue';
@@ -70,7 +75,8 @@ import { Share } from '@capacitor/share';
 import useNetwork from '@/services/networkService'; // Import the network service
 import { showToast,showToastMessage } from '@/services/toast'; // Custom toast utility
 import { App } from '@capacitor/app';
-import { onIonViewWillEnter, onIonViewDidEnter, onIonViewWillLeave, onIonViewDidLeave } from '@ionic/vue';
+import {  onIonViewWillLeave } from '@ionic/vue';
+import { fetchData } from '@/services/ApiService';
 import { useBackButton } from '@ionic/vue';
 
 
@@ -93,6 +99,8 @@ export default defineComponent({
   },
 
   setup() {
+    let isFirstTimeDataCall = true;
+let hasMounted = false;
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
@@ -100,9 +108,12 @@ export default defineComponent({
     const router = useRouter();
 
     const groupname=ref('');
+        const groupid=ref('');
+        const groupVehCount=ref(0);
+
     const items = ref([]);
-    const intervalId=ref('');
-    const searchQuery = ref('');
+const intervalId = ref<number | null>(null);  
+  const searchQuery = ref('');
     const showActionSheet = ref(false);
     const actionSheetButtons = ref([]);
     const favorites = ref([]);
@@ -146,7 +157,7 @@ export default defineComponent({
 
 
       // Reload favorites after adding
-      loadFavorites();
+      loadFavorites(2);
 
       //console.log('Added to Favorites', newItem);
       const alert = await alertController.create({
@@ -161,35 +172,110 @@ export default defineComponent({
 };
 
     // Function to retrieve the favorites array
-    const loadFavorites = async () => {
+    const loadFavorites = async (number) => {
       favorites.value = await storage.get(Constants.storageValue.Key_Fav_data) || [];
-      console.log('Favorites loaded:', favorites.value); // Debugging
+      console.log('Favorites loaded:', "number="+number+" "+favorites.value); // Debugging
 
     };
 
      // Fetch updated data from storage
-     const fetchData = async () => {
-      const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
-      if (storedValues) {
-        const matchingGroups = storedValues.filter(
-          (grouparray) => grouparray.group === groupname.value
-        );
-
-        if (matchingGroups.length > 0) {
-          
-          items.value=[];
-          const itemupdated=[...matchingGroups[0].veh_arr];
-          items.value = itemupdated; // Update items
-
-          console.log("displayAPI",itemupdated.length);
-
-        }
-      }
-    };
-
-
+    
+async function DisplayStoredData() {
   
+          const storedValues = await storage.get(Constants.storageValue.key_VehicleDetails_v1);
+          console.log("storagefile",storedValues);
+          if (storedValues && storedValues.id===groupid.value) {
+            console.log("displaydata");
+            items.value = storedValues.veh_arr;
+                    isFirstTimeDataCall=false;
 
+          }
+        
+}
+
+
+
+  const CallAPIForVehicleDetails = () =>
+   {
+  const params = {
+    gp_id: groupid.value,
+  };
+
+  // Show loading controller
+  loadingController.create({
+    message: 'Loading ...',
+    backdropDismiss: true, // Makes the loading controller cancelable
+  })
+  .then(async (loading) => {
+    // Present the loading spinner only if first time
+    if (isFirstTimeDataCall) {
+      await loading.present();
+    }
+
+    try {
+      // Make the API call
+      const response = await fetchData(Constants.CONT.Mobile_Contro, 
+      Constants.CMD.req_group_vehicle, params);
+      const responsejson = response.data;
+
+      if (response.status === 200) {
+        items.value = [];
+        
+        if(groupid.value=="all")
+        {
+
+        const allVehicles = responsejson.arr_data.flatMap(obj => obj.veh_arr);
+
+          const saveData = {
+            id: "all",
+            name: "All Group",
+            total_count: allVehicles.length,
+            veh_arr: allVehicles
+          };
+
+          items.value = allVehicles;
+
+
+          await storage.set(
+            Constants.storageValue.key_VehicleDetails_v1,
+            saveData
+          );
+
+        }else {
+
+        const arrData = responsejson.arr_data[0];
+          const dataValue = arrData.veh_arr.map(v => ({ ...v }));
+          items.value = dataValue;
+         console.log("DisplayResponse",dataValue);
+
+        // ⭐ Save vehicle data to storage
+
+          await storage.set(
+            Constants.storageValue.key_VehicleDetails_v1,
+            arrData
+          );
+        }
+
+      } else if (response.status === 401) {
+        console.error('Unauthorized:', responsejson.message);
+      } else {
+        console.error('Empty response data');
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      // Dismiss loading if it was shown
+      if ( loading) {
+        loading.dismiss();
+      }
+    }
+  })
+  .catch((err) => {
+    console.error('Error creating loading controller:', err);
+  });
+};
+  
  const filteredItems = computed(() =>
       items.value.filter((item) =>
         item.veh_no.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -197,42 +283,55 @@ export default defineComponent({
     );
 
     onMounted(async () => {
+  if (hasMounted) return;  // Prevent double call in dev
+  hasMounted = true;
 
-      groupname.value=route.params.group;
+
+const groupData = route.query.group ? JSON.parse(route.query.group as string) : null;
+if (groupData) 
+{
+  groupname.value = groupData.group;
+groupid.value=groupData.group_id;
+groupVehCount.value=groupData.total_count;
+}
+
+
       initNetworkListener();
-      await loadFavorites(); // Load favorites when the component is mounted
-      await fetchData(); // Fetch data on mount
+      
+      await loadFavorites(1); // Load favorites when the component is mounted
+      // First load
+   
+
+if (isFirstTimeDataCall) {
+  await DisplayStoredData();  // load UI from storage first
+
+  await CallAPIForVehicleDetails();  // run once
+
+  const intervalTime = (groupid.value === 'all' ||
+   Number(groupVehCount.value) > 80) ? 60000 : 30000;
+   
+  intervalId.value = setInterval(CallAPIForVehicleDetails, intervalTime);
+}
 
 
-     intervalId.value = setInterval(() => {
-        fetchData();
-      }, 30000); // 30000 ms = 30 seconds
-
-
-
-  //       // Method 1 — Ionic’s built-in listener
-  // useBackButton(9999, (processNextHandler) => {
-  //   console.log('🚫 Hardware back button pressed — default action prevented');
-  //   // Do nothing (completely block back)
-  // });
-
-  // // OR Method 2 — Capacitor’s App listener (more control)
-  // backButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
-  //   console.log('🚫 Hardware back button pressed — blocking default');
-  //   // Simply return without navigating back
-  //   // e.g., you could show a toast instead
-  // });
 
 
     });
-    onUnmounted(()=>{
-      if (backButtonListener) {
-        backButtonListener.remove();
-      }
-    });
+onUnmounted(() => {
+  // Start interval
+  
 
+  if (intervalId.value) {
+    clearInterval(intervalId.value);
+  }
 
-            onIonViewWillLeave(async () => {
+  if (backButtonListener) {
+    backButtonListener.remove();
+  }
+
+});
+
+onIonViewWillLeave(async () => {
   
                     if (showActionSheet.value) {
                           // Close ActionSheet if open
@@ -341,7 +440,7 @@ export default defineComponent({
       navigateToPage,
       isFavorite,
       goBack,
-      groupname,
+      groupname,groupid,groupVehCount,
       items,
       searchQuery,
       filteredItems,
@@ -380,7 +479,7 @@ ion-content {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

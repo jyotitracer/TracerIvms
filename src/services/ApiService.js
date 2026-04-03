@@ -188,8 +188,8 @@ const getCountryGoogleKey = async () => {
       const responseJson = response.data;
 
     
-       getGoogleMapKey.value ='AIzaSyBin959fS6JGk_3MGp2OdMfpS-SdTNPWDY';
-       // getGoogleMapKey.value = await responseJson.GoogleMapKey;
+      // getGoogleMapKey.value ='AIzaSyBin959fS6JGk_3MGp2OdMfpS-SdTNPWDY';
+       getGoogleMapKey.value = await responseJson.GoogleMapKey;
 
       
       await storage.set('GoogleMapKey', getGoogleMapKey.value + "");

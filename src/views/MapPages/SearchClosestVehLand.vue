@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-      <ion-header translucent>
+      <ion-header>
         <ion-toolbar>
           <ion-buttons slot="start">
             <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -80,7 +80,7 @@ import storage from '@/services/storagefile';
       IonSearchbar,IonLabel,IonList,IonItem
     },
     setup() {
-      const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
+    let isFirstTimeDataCall = true;     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork();
       const searchQuery = ref('');
       const searchResults = ref([]);
   
@@ -173,7 +173,7 @@ import storage from '@/services/storagefile';
   
   <style scoped>
   .network-status-bar {
-    background-color: red;
+    background-color:#D01526;
     color: white;
     text-align: center;
     padding: 5px;

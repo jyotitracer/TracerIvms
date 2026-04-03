@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -19,10 +19,10 @@
 <ion-content fullscreen class="safe-bottom">
       <ion-list>
         <ion-item>
-          <ion-label>App Version: 1.0.0</ion-label>
+          <ion-label>App Version: 1.2.5</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label>Build Date : dd/mm/yyyy</ion-label>
+          <ion-label>Build Date : 21/03/2026</ion-label>
         </ion-item>
         <ion-item>
           <ion-label class="clickable-label"  @click="openLink('http://tracer.co.in/Mobappprivacy.aspx')">Check Privacy Policy</ion-label>
@@ -59,7 +59,7 @@ export default defineComponent({
     IonBackButton
   },
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;   const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     onMounted(()=>{
       initNetworkListener();
@@ -97,7 +97,7 @@ ion-icon {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

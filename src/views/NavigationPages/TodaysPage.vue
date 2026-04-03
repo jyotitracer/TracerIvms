@@ -162,6 +162,7 @@ import { useBackButton } from '@ionic/vue';
 import { showToastMessage } from '@/services/toast'; 
 
 const savedTodaysData = ref("");
+    let isFirstTimeDataCall = true;
 
 Chart.register(...registerables);
 
@@ -285,11 +286,15 @@ const listenToNetworkChanges = () => {
                          violation2.value = arrData[0].a_vc_pav;
                          fuelCons1.value = arrData[0].t_f;
                          fuelCons2.value = arrData[0].a_f_pav;
+                         isFirstTimeDataCall=false;
+
 
                          // Update chart data
                          updateChartData();
 
                        }
+
+
            }
            
            async function CallAPIForTodayData() {
@@ -310,7 +315,10 @@ const listenToNetworkChanges = () => {
                                            backdropDismiss: true // Makes the loading controller cancelable
 
                                          }).then(loading => {
-                                           loading.present();
+                                            if(isFirstTimeDataCall)
+                                            {
+                                            loading.present();
+                                                }
 
 
                      // Call the API using the fetchData promise
@@ -361,8 +369,13 @@ const listenToNetworkChanges = () => {
          console.error("Error:", error);
        })
        .finally(() => {
+        if(isFirstTimeDataCall){
+loading.dismiss();   
+                         isFirstTimeDataCall=false;
+
+ }
          // Dismiss the loading controller after the API call completes
-         return loading.dismiss();
+         return ; 
        });
    })
    .catch(error => {
@@ -844,7 +857,7 @@ const listenToNetworkChanges = () => {
 }
 
 .network-status-bar {
- background-color: red;
+ background-color:#D01526;
  color: white;
  text-align: center;
  padding: 5px;

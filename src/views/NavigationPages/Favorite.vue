@@ -76,7 +76,8 @@ export default defineComponent({
     alertController
   },
   setup() {
-    const vehicles = ref([]);
+    let isFirstTimeDataCall = true; 
+      const vehicles = ref([]);
     const showActionSheet = ref(false);
     const actionSheetButtons = ref([]);
     const vehicleToRemove = ref(null);
@@ -103,38 +104,16 @@ export default defineComponent({
     const loadFavoritesAndSetVehicles = async () => {
       try {
         const storedFavorites = await storage.get(Constants.storageValue.Key_Fav_data);
-        const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
-
-        const favoriteIds = storedFavorites.map(fav => fav.veh_ID);
-      //  const Groupnames = storedFavorites.map(fav => fav.groupname);
+        const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI_v1);
 
 
-          // 3️⃣ Find the group data matching the current group name
-          const matchingGroups = storedValues.filter(
-            (grouparray) => grouparray.group === 'All Group'
-          );
-      
-           console.log("Favorite IDs:", favoriteIds);
-           console.log("matchingGroups IDs:", matchingGroups);
-
-           
-            let allGroupVehicles;
-
-          if(matchingGroups[0])
-          {
-                     allGroupVehicles = matchingGroups[0].veh_arr || [];
-          }else{
-               allGroupVehicles = storedValues[0].veh_arr || [];
-          }
-          // 4️⃣ Extract the group's vehicles
+        const favorite = storedFavorites.map(fav => fav);
 
 
-          // 5️⃣ Filter only vehicles whose veh_id exists in favorites
-        const filteredVehicles = allGroupVehicles.filter(vehicle =>
-          favoriteIds.includes(vehicle.veh_ID)
-        );
+          console.log("Favorite IDs:", favorite);
 
-          vehicles.value = [...filteredVehicles];
+         
+          vehicles.value = [...favorite];
           
 
       } catch (error) {

@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -75,7 +75,7 @@ export default defineComponent({
   },
 
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;   const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     const selectedItems = ref([]);
     const searchQuery = ref('');
@@ -170,7 +170,7 @@ ion-item {
   border-radius: 2px;
 }
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

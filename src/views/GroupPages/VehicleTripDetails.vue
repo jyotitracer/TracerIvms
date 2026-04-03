@@ -199,7 +199,9 @@ export default defineComponent({
     }
 
   },
-  setup(props) {
+   setup(props) {
+    let isFirstTimeDataCall = true;
+
 
     const router = useRouter();
 
@@ -257,7 +259,9 @@ export default defineComponent({
             })
             .then(loading => {
               // Present the loading spinner
-              loading.present();
+               if(isFirstTimeDataCall){
+         loading.present();
+    }
 
 
 
@@ -412,7 +416,8 @@ export default defineComponent({
                 })
                 .finally(() => {
                   // Dismiss the loading spinner after the API call finishes
-                  loading.dismiss();
+                   if(isFirstTimeDataCall){
+loading.dismiss();    }
                 });
             })
             .catch(error => {
@@ -481,7 +486,9 @@ export default defineComponent({
       })
       .then((load) => {
         loading = load;
-        return loading.present();
+        return ; if(isFirstTimeDataCall){
+         loading.present();
+    }
       })
       .then(() => {
         if (selectedLabel.value === "Today") req_period_type = '1';
@@ -550,7 +557,8 @@ export default defineComponent({
       })
       .finally(() => {
         if (loading) {
-          loading.dismiss();
+           if(isFirstTimeDataCall){
+loading.dismiss();    }
         }
       });
     };
@@ -649,10 +657,10 @@ export default defineComponent({
 }
 
 ion-button {
-  --border-color: red;
+  --border-color:#D01526;
   --border-width: 1px;
   --border-style: solid;
-  --color: red;
+  --color:#D01526;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -663,7 +671,8 @@ ion-button {
 }
 
 ion-button.selected {
-  --background: red;
+   --background:#D01526;
+
   --color: white;
   font-size: 10px;
 }

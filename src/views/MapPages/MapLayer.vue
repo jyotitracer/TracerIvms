@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-      <ion-header translucent>
+      <ion-header>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -53,6 +53,8 @@
         IonBackButton
       },
        setup(){
+            let isFirstTimeDataCall = true;
+
         const selectedMapType = ref('roadmap');
 
 

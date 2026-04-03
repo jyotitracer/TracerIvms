@@ -35,8 +35,8 @@ ion-footer ion-toolbar {
   }
 
   ion-toggle {
-    --handle-background-checked: red; /* The color of the toggle handle */
-    --background-checked: red; /* The color of the background when the toggle is selected */
+    --handle-background-checked: #D01526; /* The color of the toggle handle */
+    --background-checked: #D01526; /* The color of the background when the toggle is selected */
   }
 
   ion-list{
@@ -78,7 +78,7 @@ ion-content.no-safe-bottom {
 
 
 ion-content.safe-bottom::part(scroll) {
-    margin-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
+    margin-bottom: env(safe-area-inset-bottom)  !important;
 }
 
 /* Put this in global.css */
@@ -86,7 +86,9 @@ ion-content.no-safe-bottom::part(scroll) {
   margin-bottom: 0 !important;
 }
 
-
+* {
+  font-family: var(--ion-font-family) !important;
+}
  
 
   

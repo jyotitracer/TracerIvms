@@ -48,7 +48,7 @@ export default {
     chevronForwardOutline
   },
   setup() {
-    const navigateTo = (pageName) => {
+    let isFirstTimeDataCall = true;   const navigateTo = (pageName) => {
     // Navigate to the selected page
     console.log("Navigating to", pageName);
     if(pageName==='1')

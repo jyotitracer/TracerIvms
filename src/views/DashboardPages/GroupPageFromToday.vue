@@ -1,6 +1,6 @@
 <template>
   <ion-page id="main-content">
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -82,6 +82,7 @@ export default defineComponent({
   name: 'Home',
   
   setup() {
+    let isFirstTimeDataCall = true;
 
     const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
     const router = useIonRouter();
@@ -175,7 +176,12 @@ export default defineComponent({
           fuel1: data.t_f, // Total fuel
           fuel2: data.a_f_pav // Fuel per day
         }));
+
+                 isFirstTimeDataCall=false;
+
       }
+
+
     }
 
     const CallAPIForGroupTodayData = async () => {
@@ -192,7 +198,9 @@ export default defineComponent({
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+     if(isFirstTimeDataCall){
+         loading.present();
+    }
 
 
 
@@ -239,8 +247,10 @@ export default defineComponent({
           console.error("Error:", error);
         })
         .finally(() => {
+          if(isFirstTimeDataCall){
+loading.dismiss();    }
           // Dismiss the loading controller after the API call completes
-          return loading.dismiss();
+          return ; 
         });
     })
     .catch(error => {
@@ -339,7 +349,7 @@ export default defineComponent({
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  color: red; /* Text color */
+  color:#D01526; /* Text color */
   background-color: #dbd7d7; /* Background for the text */
 }
 
@@ -366,7 +376,7 @@ export default defineComponent({
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

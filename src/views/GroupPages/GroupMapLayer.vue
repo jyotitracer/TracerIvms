@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-      <ion-header translucent>
+      <ion-header>
         <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="goBack"></ion-back-button>
@@ -63,6 +63,7 @@
         IonBackButton
       },
        setup(){
+    let isFirstTimeDataCall = true;
 
         const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
@@ -126,7 +127,7 @@ input[type="radio"] {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;

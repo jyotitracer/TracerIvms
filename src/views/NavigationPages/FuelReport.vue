@@ -184,7 +184,7 @@ export default {
     loadingController
   },
   setup() {
-    const selectedOption = ref('point1');
+    let isFirstTimeDataCall = true;   const selectedOption = ref('point1');
     const showEfficiencyReport = ref(false);
     const showFillDropReport = ref(false);
     const showAlert = ref(false); // Controls the visibility of the alert
@@ -238,7 +238,9 @@ export default {
 
   }).then((createdLoading) => {
     loading = createdLoading;
-    return loading.present();
+    return ; if(isFirstTimeDataCall){
+         loading.present();
+    }
   }).then(async () => {
     return await storage.get(Constants.storageValue.key_Fuel_GroupWithStatus);
   }).then((storedGroups) => {
@@ -354,7 +356,8 @@ export default {
     console.error("Error:", error);
   }).finally(() => {
     if (loading) {
-      loading.dismiss();
+       if(isFirstTimeDataCall){
+loading.dismiss();    }
     }
   });
 };
@@ -452,6 +455,8 @@ export default {
     console.log("fuelData",items.value);
 
   }
+     isFirstTimeDataCall=false;
+
 };
 
     const navigationPage = (pageName) => {

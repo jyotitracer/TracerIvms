@@ -1,10 +1,8 @@
 <!-- This Page is menu Map  Page. -->
 <template>
-  <ion-content>
+<ion-content class="safe-bottom" >
     <!-- Attach the ref to the map container -->
-  
-      <!-- <div :class="ishowPath ? 'map-fab-container-small' : 'map-fab-container-full'"> -->
-  
+    
         <div :style="{ height: mapFabContainerHeight }" class="map-fab-container-full">
         <div ref="mapContainer" class="map-container">
           <div id="map"></div> 
@@ -129,8 +127,13 @@
       <!-- New Play/Pause Section -->
       <div class="play-pause-section" v-if="isLoadPath" :style="{ height: playPauseSection }">
         <div class="first-div">
-        <ion-button @click="togglePlayPause" class="play-pause-icon">
+        <ion-button
+         @click="togglePlayPause"
+          class="play-pause-icon"
+          :disabled="!canPlay">
+
              <ion-icon :icon="isPlaying ? pauseIcon : playIcon" style="color: white;"></ion-icon>
+
           </ion-button> 
         </div>   
         <div class="second-div">
@@ -142,15 +145,15 @@
         
 
             <ion-range
-  :key="routePoints.length"
-  class="progress-bar"
-  :min="0"
-  step="1"
-  :max="Math.max(routePoints.length - 1, 0)"
-  v-model="animationProgress"
-  :disabled="!isPlaying"
-  @ionChange="updateAnimationProgress"
-/>
+                  :key="routePoints.length"
+                  class="progress-bar"
+                  :min="0"
+                  step="1"
+                  :max="Math.max(routePoints.length - 1, 0)"
+                  v-model="animationProgress"
+                  :disabled="!isPlaying"
+                  @ionChange="updateAnimationProgress"
+                />
           </div>
   
           <div class="label-and-range">
@@ -208,10 +211,10 @@
     </div>
   
     </ion-content>
+
 </template>
   
-   <style scoped>
-  
+  <style scoped>
   
   ion-range{
     --knob-size: 16px;
@@ -257,20 +260,20 @@
   
   ion-content {
     --padding-top: 0;
-    --padding-bottom: 0;
-    overflow: hidden;
+
   }
-  
-  
   
   
   
   .map-container {
-    height: 100%; /* Default height */
-  }
+  height: calc(100%); /* adjust 120px for controls */
+}
+
+  
   
   .full-screen-map {
-    height: 100%; /* Full screen height when isShowPath is false */
+      height: 100%; 
+ /* Full screen height when isShowPath is false */
   }
   
   .filter-section {
@@ -278,7 +281,8 @@
     position: relative;
     z-index: 5;
     margin-top: 5px;
-  
+      background-color: #4d4d4d;
+
   }
   
   
@@ -332,7 +336,7 @@
   
   ion-icon {
     font-size: 24px;
-    color: red;
+    color:#D01526;
   }
   
   
@@ -370,11 +374,6 @@
   
   
   
-  
-  .filter-section
-  {
-    background-color: #4d4d4d;
-  }
   
   .from-to-section {
     bottom: 0;
@@ -450,7 +449,8 @@
     height: 40px;  /* Height of the circle */
     display: flex;
     align-items: center;
-    --background: red;
+     --background:#D01526;
+
       --color: white;
       padding: 0px;
       --padding-top: 0px; 
@@ -484,7 +484,8 @@
     font-size: 12px;
     align-items:end;
     color: white;
-    --background: red;
+     --background:#D01526;
+
     text-transform: none;
     width: auto;
     margin: 0px 0px 0px 0px;
@@ -572,7 +573,7 @@
     import { loadGoogleMaps } from '@/services/googleMapsLoader';
     import * as tz from "date-fns-tz";
 
-  
+
           const selectedVehNo=ref('');
           const currentIndex = ref(0);  // Track the current index
         
@@ -631,6 +632,8 @@
         const playIcon = playCircle;
         const pauseIcon = pauseCircle;     
         const isPlaying= ref(false);
+        const canPlay= ref(false);
+
         const progressValue = ref(0); // Value for progress bar
         const speedValue = ref(5); // Example speed in km/h
         
@@ -693,7 +696,6 @@
                   
                   setup() {
       
-      
                       const route = useRoute();
                       vehicleLat = route.params.vehLat;
                       vehicleLon = route.params.vehLon;
@@ -745,20 +747,19 @@
                             currentDateTime.value = formatDateToString(new Date(),userTimeZone.value);
 
 
-                          useBackButton(9999, async () => {
-                            const title='';
-                          const pageid='';
-                          const path='';
-                          selectedPage.value = { title, pageid,path }; // Update the shared state
-      
-                          router.replace('/today');
-                        });
+                         
                       await CallOnlyAPI();
                         await MapDisplay();
                       await MapIntervalRefresh();
                                   
-                          console.log("uerhter");
-              
+                     useBackButton(9999, async () => {
+                                  const title='';
+                                const pageid='';
+                                const path='';
+                                selectedPage.value = { title, pageid,path }; // Update the shared state
+            
+                                router.replace('/today');
+                              });              
                       });
                 
                           // Stop timer when component is unmounted
@@ -789,7 +790,7 @@
                           moveCameraToLocation, MapDisplay,getDirections, Near_vehicleObject, summaryTripObject,isnearVehObject,isSumTripObject,
                             clearPolyline,showData,isPlaying,vehicleNo,distance,fromDateTime,toDateTime,loadData,togglePlayPause,playIcon,
                         pauseIcon,isFromPickerVisible,isToPickerVisible,isDateTimeValid,fromDateTimeFormatted,toDateTimeFormatted,
-                      openDatePicker,validateDateTime,closeModal,selectedDateTime,
+                      openDatePicker,validateDateTime,closeModal,selectedDateTime,canPlay,
                       openModal,progressValue,speedValue,isSummaryChecked,isTripInfoChecked,isDateTimePickerVisible,
                       currentDateTime,updateDateTime,saveDateTime,interval,historyarray,currentIndex,fabButton,
                       markerMovingIcon,isMapBusyWithRoute,formatDateToString, extractRoutePoints,animateRoute,getCurrentWaypointIndex,
@@ -810,21 +811,27 @@
       };
   
 
-      const processWaypoints = async (waypoints) => {
-       
+    const processWaypoints = async (waypoints) => {
+  routePoints.value = [];   // 🔴 REQUIRED
 
-           for (let i = 0; i < waypoints.length -1; i++) {
-            const origin = waypoints[i].location;
-            const destination = waypoints[i + 1].location;
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const origin = new google.maps.LatLng(
+      waypoints[i].location.lat,
+      waypoints[i].location.lng
+    );
 
-            try {
-              await fetchRoute(origin, destination,i);
-            } catch (error) {
-              console.error(`Error fetching route for segment ${i} -> ${i + 1}:`, error);
-            }
-          }
-      };
-  
+    const destination = new google.maps.LatLng(
+      waypoints[i + 1].location.lat,
+      waypoints[i + 1].location.lng
+    );
+
+    await fetchRoute(origin, destination, i);
+  }
+
+  animationIndex.value = 0;
+  animationProgress.value = 0;
+};
+
       const fetchRoute = (origin, destination,wayPointIndex) => {
 
           
@@ -850,7 +857,7 @@
         });
        };
       
-      const extractRoutePoints = (response,wayPointIndex) => {
+ const extractRoutePoints = (response,wayPointIndex) => {
         const route = response.routes[0];
         const legs = route.legs;
 
@@ -867,6 +874,7 @@
 
 
        };
+
       
 
   
@@ -994,24 +1002,57 @@
   
      //update moving location based on used change progress
 
-      const updateAnimationProgress = (event: { detail: { value: number; }; }) => {
+    watch(animationProgress, (newIndex) => {
+  applyAnimationProgress(newIndex)
+})
 
-         animationIndex.value = event.detail.value;
-      animationProgress.value = animationIndex.value;
 
-      if (animationIndex.value < routePoints.value.length) {
-        markerMovingIcon.setPosition(routePoints.value[animationIndex.value]);
-        newMap.panTo(routePoints.value[animationIndex.value]);
+      // const updateAnimationProgress = (event: { detail: { value: number; }; }) => {
 
-        const path = polylinePathsForShowPath.value.getPath();
-        path.clear();
-        for (let i = 0; i <= animationIndex.value; i++) {
-          path.push(routePoints.value[i]);
-        }
-      }
+      //     console.log("animationProgress",event.detail.value);
+      //    animationIndex.value = event.detail.value;
+      // animationProgress.value = animationIndex.value;
+
+      // if (animationIndex.value < routePoints.value.length) {
+      //   markerMovingIcon.setPosition(routePoints.value[animationIndex.value]);
+      //   newMap.panTo(routePoints.value[animationIndex.value]);
+
+      //   const path = polylinePathsForShowPath.value.getPath();
+      //   path.clear();
+      //   for (let i = 0; i <= animationIndex.value; i++) {
+      //     path.push(routePoints.value[i]);
+      //   }
+      // }
 
        
-      };
+      // };
+
+      const applyAnimationProgress = (index: number) => {
+ // console.log("applyAnimationProgress", index)
+
+  if (index >= routePoints.value.length) return
+
+  markerMovingIcon.setPosition(routePoints.value[index])
+  newMap.panTo(routePoints.value[index])
+
+  const path = polylinePathsForShowPath.value.getPath()
+  path.clear()
+
+  for (let i = 0; i <= index; i++) {
+    path.push(routePoints.value[i])
+  }
+}
+const updateAnimationProgress = (event: { detail: { value: number } }) => {
+  const index = event.detail.value
+
+  console.log("animationProgress", index)
+
+  animationIndex.value = index
+  animationProgress.value = index
+
+  applyAnimationProgress(index)
+}
+
 
 
  // ✅ Convert it to ISO **without changing local time**
@@ -1310,8 +1351,7 @@ const saveDateTime = () => {
                       group.veh_arr.map((veh: {
                         rec_dt: any;
                         drv_name: any;
-                        speed: any; veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; lat: any; lon: any; sts_str: any; loc_str: any; status: any; 
-  }) => ({
+                        speed: any; veh_id: any; veh_no: any; veh_sts: any; sts_colr: any; lat: any; lon: any; sts_str: any; loc_str: any; status: any; }) => ({
                           vehicleId: veh.veh_id,
                           vehicleName: veh.veh_no,
                           vehicleStatus: veh.veh_sts, // status for filtering
@@ -1601,8 +1641,19 @@ const saveDateTime = () => {
                   
 
                
-                          
-                  processAnimation(2);
+                   canPlay.value=false;
+                            const loading = await loadingController.create({
+                            message: 'Please Wait',
+                            spinner: 'circles',
+                          });
+
+                            await loading.present();
+
+                            await processAnimation(2);
+                             canPlay.value=true;
+  
+                       loading.dismiss();
+
                 } else {
                   isMapBusyWithRoute.value=false;
   
@@ -1698,7 +1749,9 @@ const saveDateTime = () => {
     message: 'Loading directions...',
     spinner: 'circles',
   });
-  await loading.present();
+
+    await loading.present();
+    
 
   try{
     const directionsService = new google.maps.DirectionsService();
@@ -1735,7 +1788,8 @@ const saveDateTime = () => {
 }catch (error) {
     console.error('Error fetching directions:', error);
   } finally {
-    await loading.dismiss();
+      await loading.dismiss();   
+     
   }
               };
     
@@ -1777,6 +1831,7 @@ const saveDateTime = () => {
   
             const CallOnlyAPI = () => {
   
+              console.log("called from map");
               isnearVehObject.value=false;
               // Show loading controller
               loadingController.create({
@@ -1785,8 +1840,9 @@ const saveDateTime = () => {
               })
               .then(loading => {
                 // Present the loading spinner
-                loading.present();
-  
+                          loading.present();
+                      
+                
                 const params = {
                   grping: '2',
                 };
@@ -2019,7 +2075,8 @@ const saveDateTime = () => {
                   })
                   .finally(() => {
                     // Dismiss the loading spinner after the API call finishes
-                    loading.dismiss();
+                      loading.dismiss();  
+                      
                   });
               })
               .catch(error => {
@@ -2028,7 +2085,7 @@ const saveDateTime = () => {
               };
   
   
-              const processAnimation=(fromwhere)=>{
+              const processAnimation=async (fromwhere)=>{
   
                 if(fromwhere===1)
               {
@@ -2050,6 +2107,9 @@ const saveDateTime = () => {
                     lng: historyarray.value[0].lon,
                   };
   
+
+                  
+                  
                   // Extract destination (last index)
                   const destination = {
                     lat: historyarray.value[historyarray.value.length - 1].lat,
@@ -2061,33 +2121,33 @@ const saveDateTime = () => {
                  
   
   
-                  markerId1 = new google.maps.Marker ({
-                  position: origin,
-                  map: newMap,
-                  icon: {
-                          url: "/ic_end.png", // Path to the icon
-                          scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                        }              
+                  // markerId1 = new google.maps.Marker ({
+                  // position: origin,
+                  // map: newMap,
+                  // icon: {
+                  //         url: "/ic_end.png", // Path to the icon
+                  //         scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                  //       }              
                       
-                    });
+                  //   });
   
   
-                  markerId2 = new google.maps.Marker ({
-                  position: destination,
-                  map: newMap,
-                        icon: {
-                            url: "/ic_st.png", // Path to the icon
-                            scaledSize: new google.maps.Size(25, 25) // Adjust width and height
-                          }
-                  });
+                  // markerId2 = new google.maps.Marker ({
+                  // position: destination,
+                  // map: newMap,
+                  //       icon: {
+                  //           url: "/ic_st.png", // Path to the icon
+                  //           scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                  //         }
+                  // });
   
   
-                  markersArray.value.push(markerId1);
-                  markersArray.value.push(markerId2);
+                  // markersArray.value.push(markerId1);
+                  // markersArray.value.push(markerId2);
   
   
-                  newMap?.setCenter(new google.maps.LatLng(origin));
-                  newMap?.setZoom(14);
+                  // newMap?.setCenter(new google.maps.LatLng(origin));
+                  // newMap?.setZoom(14);
   
   
                   markerMovingIcon = new google.maps.Marker({
@@ -2123,117 +2183,160 @@ const saveDateTime = () => {
                       // console.log("markersDotsArray",markersDotsArray.length);
 
 
-        //           for (let i = 0; i < historyarray.value.length; i++) 
-        //           {
+                  for (let i = 0; i < historyarray.value.length; i++) 
+                  {
   
-        //               const s1 ={lat:historyarray.value[i].lat,lng:historyarray.value[i].lon}
+                     // const s1 ={lat:historyarray.value[i].lat,lng:historyarray.value[i].lon}
   
-  
-        //               let dot_marker;
+                          const s1 = await snapToRoad(
+                            historyarray.value[i].lat,
+                            historyarray.value[i].lon
+                          );
 
-        //               if(historyarray.value[i].event_type===Constants.eventType.Event_Type_Stopped ||
-        //               historyarray.value[i].event_type===Constants.eventType.Event_Type_Idel)
-        //               {
-  
-        //                 dot_marker = new google.maps.Marker({
-        //                   position: s1,
-        //                   map: newMap,
-  
-        //                   icon: {
-        //                       path: google.maps.SymbolPath.CIRCLE,
-        //                       scale: 4,
-        //                       strokeColor: '#ff0000',
-        //                       fillColor: '#ff0000',
-        //                       fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-        //                       strokeWeight: 1, // Adjust the border thickness
-        //                       rotation: 0 // Will be dynamically updated
-        //                     }
-        //                 });
+                          if(i==0)
+                          {
 
-        //               }else  if(historyarray.value[i].event_type===Constants.eventType.Event_Type_NoData ||
-        //               historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_OFF_NoGPS ||
-        //               historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_ON_NoGPS)
-        //                           {
+
+                            
+                              markerId1 = new google.maps.Marker ({
+                              position: s1,
+                              map: newMap,
+                              icon: {
+                                      url: "/ic_end.png", // Path to the icon
+                                      scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                                    }              
+                                  
+                                });
+                                 markersArray.value.push(markerId1);
+
+                        newMap?.setCenter(new google.maps.LatLng(s1));
+                                        newMap?.setZoom(16);
+                        }
+
+                          if(i==historyarray.value.length-1)
+                          {
+                              markerId2 = new google.maps.Marker ({
+                              position: s1,
+                              map: newMap,
+                                    icon: {
+                                        url: "/ic_st.png", // Path to the icon
+                                        scaledSize: new google.maps.Size(25, 25) // Adjust width and height
+                                      }
+                              });
+              
+          
+                          markersArray.value.push(markerId2);
+                          }
+  
+
+                          
+  
+                      let dot_marker;
+
+                      if(historyarray.value[i].event_type===Constants.eventType.Event_Type_Stopped ||
+                      historyarray.value[i].event_type===Constants.eventType.Event_Type_Idel)
+                      {
+  
+                        dot_marker = new google.maps.Marker({
+                          position: s1,
+                          map: newMap,
+  
+                          icon: {
+                              path: google.maps.SymbolPath.CIRCLE,
+                              scale: 4,
+                              strokeColor: '#ff0000',
+                              fillColor: '#ff0000',
+                              fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
+                              strokeWeight: 1, // Adjust the border thickness
+                              rotation: 0 // Will be dynamically updated
+                            }
+                        });
+
+                      }else  if(historyarray.value[i].event_type===Constants.eventType.Event_Type_NoData ||
+                      historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_OFF_NoGPS ||
+                      historyarray.value[i].event_type===Constants.eventType.Event_Type_IG_ON_NoGPS)
+                                  {
                               
-        //                             dot_marker = new google.maps.Marker({
-        //                               position: s1,
-        //                               map: newMap,
+                                    dot_marker = new google.maps.Marker({
+                                      position: s1,
+                                      map: newMap,
                               
-        //                               icon: {
-        //                                   path: google.maps.SymbolPath.CIRCLE,
-        //                                   scale: 4,
-        //                                   strokeColor: '#999999',
-        //                                   fillColor: '#999999', // Set the fill color
-        //                                   fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-        //                                   strokeWeight: 1, // Adjust the border thickness
-        //                                   rotation: 0 // Will be dynamically updated
-        //                                 }
-        //                             });
-        //                           }else{
-        //               // Place marker at current point with dot icon
-        //                                     dot_marker = new google.maps.Marker({
-        //                                       position: s1,
-        //                                       map: newMap,
+                                      icon: {
+                                          path: google.maps.SymbolPath.CIRCLE,
+                                          scale: 4,
+                                          strokeColor: '#999999',
+                                          fillColor: '#999999', // Set the fill color
+                                          fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
+                                          strokeWeight: 1, // Adjust the border thickness
+                                          rotation: 0 // Will be dynamically updated
+                                        }
+                                    });
+                                  }
+                                  else{
+                      // Place marker at current point with dot icon
+                                            dot_marker = new google.maps.Marker({
+                                              position: s1,
+                                              map: newMap,
                                       
-        //                                       icon: {
-        //                                           path: google.maps.SymbolPath.CIRCLE,
-        //                                           scale: 4,
-        //                                           strokeColor: '#999999',
-        //                                           fillColor: '#999999',
-        //                                           fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
-        //                                           strokeWeight: 1, // Adjust the border thickness
-        //                                           rotation: 0 // Will be dynamically updated
-        //                                         }
-        //                                     });                             
+                                              icon: {
+                                                  path: google.maps.SymbolPath.CIRCLE,
+                                                  scale: 4,
+                                                  strokeColor: '#999999',
+                                                  fillColor: '#999999',
+                                                  fillOpacity: 0.8, // Adjust the fill opacity (0.0 to 1.0)
+                                                  strokeWeight: 1, // Adjust the border thickness
+                                                  rotation: 0 // Will be dynamically updated
+                                                }
+                                            });                             
 
-        //                            }
+                                   }
         
   
-        // const infoWindow = new google.maps.InfoWindow();
+        const infoWindow = new google.maps.InfoWindow();
   
         
-        //         // Create a new div to mount your Vue component
-        //         const infoWindowContainer = document.createElement('div');
+                // Create a new div to mount your Vue component
+                const infoWindowContainer = document.createElement('div');
   
-        //     infoWindowContainer.style.margin = '0';            // Remove margins
-        //     infoWindowContainer.style.padding = '0';           // Remove padding
+            infoWindowContainer.style.margin = '0';            // Remove margins
+            infoWindowContainer.style.padding = '0';           // Remove padding
   
   
-        //         // Use Vue's createApp to mount the InfoBox component inside the div
-        //         const app = createApp(InfoWindowDorMarker, 
-        //         { 
-        //           vehicleData: historyarray.value[i],
+                // Use Vue's createApp to mount the InfoBox component inside the div
+                const app = createApp(InfoWindowDorMarker, 
+                { 
+                  vehicleData: historyarray.value[i],
                 
-        //         });
+                });
               
-        //         app.mount(infoWindowContainer);
+                app.mount(infoWindowContainer);
   
   
               
-        //         // Set the infoWindow's content to the container with the Vue component
-        //         infoWindow.setContent(infoWindowContainer);
+                // Set the infoWindow's content to the container with the Vue component
+                infoWindow.setContent(infoWindowContainer);
   
   
    
-        //         // Add click event to the marker to show info window
-        //         dot_marker.addListener('click', () => {
+                // Add click event to the marker to show info window
+                dot_marker.addListener('click', () => {
   
-        //           infoWindow.open(newMap, dot_marker);
+                  infoWindow.open(newMap, dot_marker);
   
-        //           // Automatically close InfoWindow after 3 seconds (3000ms)
-        //           setTimeout(() => {
-        //             infoWindow.close();
-        //           }, 3000); // Adjust the closing time as needed
+                  // Automatically close InfoWindow after 3 seconds (3000ms)
+                  setTimeout(() => {
+                    infoWindow.close();
+                  }, 3000); // Adjust the closing time as needed
                   
-        //        });
+               });
   
   
-        //           //  markersDotsArray.value.push(dot_marker);
+                  //  markersDotsArray.value.push(dot_marker);
                  
-        //           markersDotsArray.push(dot_marker);
+                  markersDotsArray.push(dot_marker);
   
   
-        //             }
+                    }
   
                    
                    
@@ -2251,7 +2354,8 @@ const saveDateTime = () => {
               })
               .then(loading => {
                 // Present the loading spinner
-                loading.present();
+                      loading.present();
+                  
   
   
   
@@ -2415,18 +2519,29 @@ const saveDateTime = () => {
                           backdropDismiss: false // Makes the loading controller cancelable
                         })
                         .then(async loading => {
-                          loading.present();
-
-
-                            loading.dismiss();
+                                      loading.present();
+                                  
+                              loading.dismiss();    
                       
                     })
                     
 
                            closeShowPath(2);
                        
-                            processAnimation(1);
+                           canPlay.value=false;
+                            const loading = await loadingController.create({
+                            message: 'Please wait for play',
+                            spinner: 'circles',
+                          });
+
+                            await loading.present();
+
+                            await processAnimation(1);
+                             canPlay.value=true;
   
+                       loading.dismiss();
+
+
                           }else if(responsejson.arr_data.length===1)
                           {
                             showToastMessage("Start and end location getting same.");
@@ -2444,7 +2559,8 @@ const saveDateTime = () => {
                   })
                   .finally(() => {
                     // Dismiss the loading spinner after the API call finishes
-                    loading.dismiss();
+                        loading.dismiss();   
+                        
                   });
               })
               .catch(error => {
@@ -2478,7 +2594,39 @@ const saveDateTime = () => {
      
       export { intervalCallback1Min,intervalRunning1Min };
   
-  
+
+
+const snapToRoad = (lat, lng) => {
+  return new Promise((resolve) => {
+    const latLng = new google.maps.LatLng(lat, lng);
+
+    directionsService.value.route(
+      {
+        origin: latLng,
+        destination: latLng,
+        travelMode: google.maps.TravelMode.DRIVING
+      },
+      (response, status) => {
+        if (
+          status === google.maps.DirectionsStatus.OK &&
+          response.routes.length > 0
+        ) {
+          const snapped =
+            response.routes[0].legs[0].start_location;
+
+          resolve({
+            lat: snapped.lat(),
+            lng: snapped.lng()
+          });
+        } else {
+          // fallback to original GPS point
+          resolve({ lat, lng });
+        }
+      }
+    );
+  });
+};
+
   </script>
   
  

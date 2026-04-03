@@ -115,6 +115,9 @@ export default defineComponent({
   setup(props) {
     const lastStatusUpdate = ref(''); // Reactive ref for storing the update
 
+
+
+
     // Function to get the formatted "Last Status Update"
     const formatDateToString = (date, timezone) => {
       return new Date(
@@ -200,14 +203,15 @@ export default defineComponent({
     };
 
     // Watch for changes in `vehicle.rec_dt` and update `lastStatusUpdate`
-    watch(
-      () => props.vehicle.rec_dt,
-      async (newValue) => {
-        lastStatusUpdate.value = await getLastStatusUpdate(newValue);
-      },
-      { immediate: true } // Ensure it runs on component mount
-    );
-
+ watch(
+  () => props.vehicle,
+  async (newVehicle) => {
+    if (newVehicle && newVehicle.rec_dt) {
+      lastStatusUpdate.value = await getLastStatusUpdate(newVehicle.rec_dt);
+    }
+  },
+  { immediate: true, deep: true }
+);
     return {
       lastStatusUpdate,
     };

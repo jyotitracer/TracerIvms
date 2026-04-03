@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
 
@@ -10,14 +10,17 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher_new"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.NoActionBar">
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:name="in.co.tracer.tracerobdv2.MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
+
+            android:windowSoftInputMode="adjustResize"
+
             android:exported="true">
 
             <intent-filter>
@@ -55,6 +58,7 @@
 
 
     <!-- Permissions -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>

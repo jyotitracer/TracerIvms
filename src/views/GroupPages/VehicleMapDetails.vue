@@ -39,6 +39,7 @@ import InfowindowgroupMap from '@/components/InfoWindowGroupMarker.vue';
 import { showToastMessage } from '@/services/toast'; 
 import { loadGoogleMaps } from '@/services/googleMapsLoader';
 import { oldPath } from '@/services/routeTracker';
+import { fetchData } from '@/services/ApiService';
 
 import {
   IonButtons,
@@ -110,7 +111,11 @@ export default defineComponent({
     }
 
   },
-  setup(props) {
+   setup(props) {
+    let isFirstTimeDataCall = true;
+
+    
+    //  const IsFuelEnable = ref(1);
 
     const route = useRoute();
     const router = useRouter();
@@ -122,6 +127,10 @@ export default defineComponent({
     const intervalId=ref('30000');
     let vehicle_id: any;
     const fabButton = ref(null);
+
+const markerRef = ref<google.maps.Marker | null>(null);
+const controlContainerRef = ref<HTMLDivElement | null>(null);
+
 
 
       // storage.set('Dir_lat', '');
@@ -173,9 +182,12 @@ const getDirections = async (destLat: number, destLon: number) => {
     message: 'Loading directions...',
     spinner: 'circles',
   });
-  await loading.present();
+ 
 
   try {
+     if(isFirstTimeDataCall){ 
+    await  loading.present();
+    }
     const directionsService = new google.maps.DirectionsService();
     const result = await directionsService.route({
        origin,
@@ -204,7 +216,8 @@ const getDirections = async (destLat: number, destLon: number) => {
   } catch (error) {
     console.error('Error fetching directions:', error);
   } finally {
-    await loading.dismiss();
+    if(isFirstTimeDataCall){ await  
+loading.dismiss();    }
   }
 };
 
@@ -234,7 +247,8 @@ const RunData = async (vehicleObject: any) => {
    await loadGoogleMaps();
   
  
-                
+
+
                 const initialLat = parseFloat(vehicleObject.lat);
                 const initialLong = parseFloat(vehicleObject.lon);
                 const initialZoom = 16;
@@ -242,21 +256,53 @@ const RunData = async (vehicleObject: any) => {
                 const storedMapType =  await storage.get('groupmapType') || 'roadmap';
  
 
+ // ✅ CREATE MAP ONLY FIRST TIME
+  if (!mapRef.value) {
+
+    newMap = new google.maps.Map(mapContainer.value, {
+      center: initialCenter,
+      zoom: 16,
+      mapTypeId: 'roadmap',
+      zoomControl: true,
+      mapTypeControl: false,
+      fullscreenControl: false,
+      streetViewControl: false,
+    });
+
+    mapRef.value = newMap;
+
+  } else {
+    // ✅ Only move camera on updates
+    mapRef.value.setCenter(initialCenter);
+  }
+
+const markerColor = vehicleObject.sts_colr || '#FF0000';
+
+const markerIcon = {
+  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+  fillColor: markerColor,
+  fillOpacity: 1,
+  strokeWeight: 0,
+  scale: 5,
+};
+
+// ✅ Remove old marker
+if (markerRef.value) {
+  markerRef.value.setMap(null);
+  markerRef.value = null;
+}
+
+// ✅ Create new marker
+markerRef.value = new google.maps.Marker({
+  position: initialCenter,
+  map: mapRef.value,
+  icon: markerIcon,
+});
 
 
-  newMap = new google.maps.Map(mapContainer.value, {
-                    center: initialCenter,
-                    zoom: 16,
-                    mapTypeId: storedMapType,
-                    zoomControl: true,
-                    mapTypeControl: false,
-                    fullscreenControl: false,
-                    streetViewControl: false,
-                  });
 
-                  mapRef.value = newMap;
+            if (!controlContainerRef.value) {
 
-            
                             // Create custom controls for navigator and map icons
                             const controlContainer = document.createElement('div');
                           controlContainer.style.position = 'absolute';
@@ -269,7 +315,11 @@ const RunData = async (vehicleObject: any) => {
                           controlContainer.style.borderRadius = '5px'; // Optional: rounded corners
                           controlContainer.style.padding = '5px'; // Optional: add some padding
 
-                          // Add the map icon
+                         
+                        controlContainerRef.value = controlContainer;
+            }
+
+                 // Add the map icon
                           const mapControlDiv = document.createElement('div');
                           mapControlDiv.innerHTML = `
                             <button style="background: transparent; border: none;">
@@ -277,7 +327,8 @@ const RunData = async (vehicleObject: any) => {
                             </button>`;
                           mapControlDiv.style.display = 'none'; // Initially hidden
 
-                          // Add the navigator icon
+                         
+                         // Add the navigator icon
                           const navControlDiv = document.createElement('div');
                           navControlDiv.innerHTML = `
                             <button style="background: transparent; border: none;">
@@ -286,35 +337,12 @@ const RunData = async (vehicleObject: any) => {
                           navControlDiv.style.display = 'none'; // Initially hidden
 
                           // Append the icons to the container
-                          controlContainer.appendChild(navControlDiv);
-                          controlContainer.appendChild(mapControlDiv);
+                          controlContainerRef.value.appendChild(navControlDiv);
+                          controlContainerRef.value.appendChild(mapControlDiv);
 
                           // Append the container to the map controls
-                          newMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
+                          newMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainerRef.value);
 
-
-
-
-                const markerColor = vehicleObject.sts_colr || '#FF0000'; // Default to red if no color is provided
-
-                // Create a custom marker icon
-                const markerIcon = {
-                  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,  // Use circle as the marker shape
-                  fillColor: markerColor,               // Use the vehicle status color
-                  fillOpacity: 1,
-                  strokeWeight: 0,
-                  scale: 5,                             // Reduce the size by adjusting the scale (e.g., 5)
-                };
-
-
-                const marker = new google.maps.Marker ({
-                  position: initialCenter,
-                  map: newMap,
-                  icon: markerIcon,  // Set the custom icon
-
-                });
-
-                        
 
                             const infoWindow = new google.maps.InfoWindow();
 
@@ -330,15 +358,15 @@ const RunData = async (vehicleObject: any) => {
 
 
                 // Add click event to the marker to show info window
-                marker.addListener('click', () => {
+                markerRef.value.addListener('click', () => {
                          
                       // Show the custom controls when the marker is clicked
                                   navControlDiv.style.display = 'block';
                                   mapControlDiv.style.display = 'block';
 
                                   // Log latitude and longitude
-                                  const lat = marker.getPosition().lat();
-                                  const lng = marker.getPosition().lng();
+                                  const lat = markerRef.value.getPosition().lat();
+                                  const lng = markerRef.value.getPosition().lng();
                                   console.log(`Latitude: ${lat}, Longitude: ${lng}`);
 
                                   // Add click event listeners to controls to perform desired actions
@@ -351,7 +379,7 @@ const RunData = async (vehicleObject: any) => {
                                   });
 
                       infoWindow.open({
-                            anchor: marker,
+                            anchor: markerRef.value,
                             map: newMap,
                           
                           });
@@ -422,22 +450,13 @@ const RunData = async (vehicleObject: any) => {
       const VehicleValue =JSON.parse(vehicleData);
             vehicle_id=VehicleValue.veh_id;
 
-        const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
+        const storedValues = await storage.get(Constants.storageValue.key_VehicleDetails_v1);
 
               console.log("displayveharra",storedValues);
 
-              // 3️⃣ Find the group data matching the current group name
-          const matchingGroups = storedValues.filter(
-            (grouparray) => grouparray.group === 'All Group'
-          );
-          let allGroupVehicles;
+              const allGroupVehicles = storedValues.veh_arr || [];
 
-          if(matchingGroups[0])
-          {
-                     allGroupVehicles = matchingGroups[0].veh_arr || [];
-          }else{
-               allGroupVehicles = storedValues[0].veh_arr || [];
-          }
+            
       
           // 4️⃣ Extract the group's vehicles
 
@@ -454,17 +473,25 @@ const RunData = async (vehicleObject: any) => {
       await RunData(vehicleObject.value);
     }
 
-       intervalId.value = setInterval( async () => {
-               const storedValues = await storage.get(Constants.storageValue.Key_GroupAPI);
 
-                                  
-                                      const matchingGroups = storedValues.filter(groupPage => groupPage.group === props.groupname);
-                                      if (matchingGroups.length > 0) {
 
-                                        console.log('Parsed storedValues:', matchingGroups);
+intervalId.value = setInterval(async () => 
+{
+  
 
-                                          const matchingVehdata = matchingGroups[0].veh_arr.filter(vehobject => vehobject.veh_id === vehicle_id);
-                                          
+        
+                const storedValuesnew = await storage.get(Constants.storageValue.key_VehicleDetails_v1);
+
+                                              console.log("selectenew",storedValuesnew);
+
+
+
+                                        if(storedValuesnew){
+
+                                          const matchingVehdata = storedValuesnew.veh_arr.filter(vehobject => vehobject.veh_id === vehicle_id);
+                                 
+                                     console.log("storedValuesnew",matchingVehdata);
+
                                            await storage.set('selectedVeh', JSON.stringify(matchingVehdata[0]));
 
 
@@ -473,9 +500,11 @@ const RunData = async (vehicleObject: any) => {
                                           if (vehicleObject.value) {
                                               RunData(vehicleObject.value);
                                           }
-                                      }
+                                        }
+                                      
+  
                                    
-              },60000); // 30000 ms = 60 seconds
+ },30000); // 30000 ms = 60 seconds
 
 
     
@@ -600,7 +629,7 @@ const RunData = async (vehicleObject: any) => {
 
 .fab-icon {
   font-size: 24px;
-  color: red;
+  color:#D01526;
 }
 
 /* Reduce the size of the close button for the InfoWindow */

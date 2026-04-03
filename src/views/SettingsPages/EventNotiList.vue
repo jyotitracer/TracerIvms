@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header translucent>
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button @click="goBack"></ion-back-button>
@@ -89,7 +89,7 @@ export default defineComponent({
   },
 
   setup() {
-    const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
+    let isFirstTimeDataCall = true;   const { isConnected, showReconnectedMessage, initNetworkListener } = useNetwork(); // Use network service
 
     const selectedItems = ref([]);
     const searchQuery = ref('');
@@ -102,7 +102,9 @@ export default defineComponent({
     backdropDismiss: true // Makes the loading controller cancelable
 
   }).then(loading => {
-    loading.present();
+     if(isFirstTimeDataCall){
+         loading.present();
+    }
 
     const params = { action: "0" };
 
@@ -145,7 +147,8 @@ export default defineComponent({
         console.error("Error:", error);  // Handle any errors during API call or storage operations
       })
       .finally(() => {
-        loading.dismiss();  // Dismiss the loading spinner once the operation completes
+         if(isFirstTimeDataCall){
+loading.dismiss();    }  // Dismiss the loading spinner once the operation completes
       });
 
   }).catch((error) => {
@@ -238,7 +241,7 @@ ion-item {
 }
 
 .network-status-bar {
-  background-color: red;
+  background-color:#D01526;
   color: white;
   text-align: center;
   padding: 5px;
