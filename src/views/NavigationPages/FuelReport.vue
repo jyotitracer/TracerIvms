@@ -4,9 +4,9 @@
     
 <ion-content fullscreen class="safe-bottom">
       <ion-grid>
-        <ion-row>
+        <ion-row >
           <ion-col>
-            <ion-item>
+            <ion-item style="--background: var(--ion-background-color)">
               <ion-select v-model="selectedOption" interface="popover" class="selection_dropdown">
               <ion-select-option value="point1">Efficiency Report</ion-select-option>
               <ion-select-option value="point2">Fill Drop Report</ion-select-option>
@@ -161,7 +161,7 @@ import storage from "@/services/storagefile";
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
 import { Network } from '@capacitor/network';
-import { showToast } from '@/services/toast';
+import { showToast,showToastMessage } from '@/services/toast';
 import {  selectedPage } from '@/services/userstate'; // Import the global state
 
 addIcons({ close });
@@ -481,6 +481,7 @@ loading.dismiss();    }
 
           alertMessage.value = 'Please select at least one group';
           showAlert.value = true;
+          showToastMessage(alertMessage.value);
           console.log(alertMessage.value);
           return;
         }else
@@ -489,6 +490,8 @@ loading.dismiss();    }
         
           alertMessage.value = 'Please select a vehicle';
           showAlert.value = true;
+                    showToastMessage(alertMessage.value);
+
           console.log(alertMessage.value);
 
           return;
@@ -498,6 +501,7 @@ loading.dismiss();    }
           alertMessage.value = 'Please select a period';
           showAlert.value = true;
           console.log(alertMessage.value);
+          showToastMessage(alertMessage.value);
 
           return;
         }else if (!['point1', 'point2'].includes(selectedOption.value)) {
@@ -591,7 +595,7 @@ watch(selectedOption, async (newValue) => {
 /* Your custom styles */
 .selection_dropdown {
   font-size: 11px;
-  color: #078DFC;
+  color: var(--ion-color-primary);
   width: 100%;
 }
 
@@ -599,7 +603,7 @@ watch(selectedOption, async (newValue) => {
 font-size: 11px;
 text-align: left;
 text-transform: none;
-color: #078DFC;
+  color: var(--ion-color-primary);
 }
 
 .button_submit {
@@ -608,7 +612,7 @@ color: #078DFC;
   padding: 0px;
   width: 70px;
   color: white;
-  --background: #078DFC; /* Change the background color to blue */
+  --background: var(--ion-color-primary); /* Change the background color to blue */
   --border-radius: 0px; /* Set custom border radius */
   --height: 30px; /* Set custom height */
   height: 30px; /* Ensure height is applied as fallback */
@@ -626,13 +630,16 @@ color: #078DFC;
   margin-bottom: 20px;
 }
 
+
+
 .group-header {
-background-color: #e0e0e0;
+background-color: var(--ion-color-primary);
 padding: 10px;
 font-weight: bold;
-color: #272626;
+color: white;
 font-size: 14px;
 }
+
 
 .item-details {
   padding: 0px 5px;
@@ -721,7 +728,6 @@ font-size: 14px;
 }
 
 
-
 .icon-arrow {
   height: 30px;
   width: 30px;
@@ -730,4 +736,6 @@ font-size: 14px;
   justify-content: center;
   justify-items: center;
 }
+
+
 </style>

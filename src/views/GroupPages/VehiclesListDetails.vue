@@ -6,6 +6,13 @@
           <ion-back-button default-href="/group"></ion-back-button>
         </ion-buttons>
         <ion-title>{{ groupname }}</ion-title>
+
+         <!-- 🔥 RIGHT FILTER BUTTON -->
+    <ion-buttons slot="end">
+      <ion-button @click="isFilterOpen = true">
+        <ion-icon :icon="filterOutline" style="color: white; height: 24px; width: 24px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <div v-if="!isConnected" class="network-status-bar">
@@ -16,28 +23,71 @@
     </div>   
 
 <ion-content fullscreen class="safe-bottom">
+ <ion-modal
+  :is-open="isFilterOpen"
+  @didDismiss="isFilterOpen = false"
+  :breakpoints="[0, 0.6]"
+  :initialBreakpoint="0.6"
+>
+  <ion-content class="ion-padding">
+
+    <!-- Header -->
+    <div class="filter-header">
+      <h4>Select Status</h4>
+      <ion-icon :icon="closeOutline" @click="isFilterOpen = false" style="font-size: 24px;"></ion-icon>
+    </div>
+
+    <!-- List -->
+    <div class="filter-list">
+      <div 
+        v-for="item in filterOptions" 
+        :key="item"
+        class="filter-item"
+        @click="selectFilter(item)"
+      >
+        <span>{{ item }}</span>
+
+        <ion-icon 
+          v-if="selectedFilter === item"
+          :icon="checkmarkDone"
+          class="check-icon"
+        ></ion-icon>
+      </div>
+    </div>
+
+  </ion-content>
+</ion-modal>
+
       <ion-searchbar 
         placeholder="Search Vehicle"
         v-model="searchQuery"
       ></ion-searchbar>
 
-     <ion-list>
-  <div v-for="(vehicle, index) in filteredItems" :key="vehicle.veh_id">
+      <div v-if="filteredItems.length === 0" class="empty-container">
+  <ion-icon name="car-outline" class="empty-icon"></ion-icon>
+  <p class="empty-text">Vehicles not available</p>
+</div>
+
+    <ion-list v-else>
+
+  <div
+    v-for="(vehicle, index) in filteredItems"
+    :key="vehicle.veh_id"
+    class="custom-item"
+  >
 
     <VehicleItem
       :vehicle="vehicle"
+      :groupname="groupname"
       :isFavorite="isFavorite(vehicle)"
-      @click="navigateToPage(vehicle,vehicle.veh_id, vehicle.veh_no,groupname)"
       v-long-press="() => openActionSheet(vehicle)"
     />
 
-    <ion-item-divider
-      v-if="index < filteredItems.length - 1"
-      class="custom-divider">
-    </ion-item-divider>
-
   </div>
+
 </ion-list>
+
+<!-- 🔥 EMPTY MESSAGE -->
 
 
       <ion-action-sheet
@@ -51,7 +101,7 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, computed, onMounted,onUnmounted } from 'vue';
+import { ref, defineComponent, computed, onMounted,onUnmounted, watch } from 'vue';
 import {
   IonPage,
   IonHeader,
@@ -63,7 +113,7 @@ import {
   IonButtons,
   IonItemDivider,
   IonSearchbar,
-  IonActionSheet,  loadingController,
+  IonActionSheet,  loadingController,IonButton,IonIcon,
 
   alertController
 } from '@ionic/vue';
@@ -78,7 +128,7 @@ import { App } from '@capacitor/app';
 import {  onIonViewWillLeave } from '@ionic/vue';
 import { fetchData } from '@/services/ApiService';
 import { useBackButton } from '@ionic/vue';
-
+import { filterOutline, closeOutline, checkmarkOutline, checkmarkDone, checkmarkCircleSharp } from 'ionicons/icons';
 
 export default defineComponent({
   name: 'DetailVehicle',
@@ -95,10 +145,12 @@ export default defineComponent({
     IonItemDivider,
     IonSearchbar,
     IonActionSheet,
-    alertController
+    alertController,IonButton,IonIcon,
   },
 
+  
   setup() {
+   
     let isFirstTimeDataCall = true;
 let hasMounted = false;
 
@@ -112,6 +164,42 @@ let hasMounted = false;
         const groupVehCount=ref(0);
 
     const items = ref([]);
+
+     const isFilterOpen = ref(false)
+
+// const filterOptions = computed(() => {
+//   const statuses = items.value
+//     .map(v => v.sts_str)
+//     .filter(Boolean); // remove null/undefined
+
+//   const uniqueStatuses = [...new Set(statuses)];
+
+//   return ['All', ...uniqueStatuses];
+// });
+
+const filterOptions = computed(() => {
+  return [
+    'All',
+    'Moving',
+    'IDLE',
+    'Stopped',
+    'Offline',
+
+  ];
+});
+
+const selectedFilter = ref('All') // 🔥 default
+
+const selectFilter = (item: string) => {
+  selectedFilter.value = item
+  isFilterOpen.value = false
+}
+watch(filterOptions, (newVal) => {
+  if (newVal.length > 1) {
+    selectedFilter.value = newVal[0]; // first real status
+  }
+});
+
 const intervalId = ref<number | null>(null);  
   const searchQuery = ref('');
     const showActionSheet = ref(false);
@@ -276,11 +364,49 @@ async function DisplayStoredData() {
   });
 };
   
- const filteredItems = computed(() =>
-      items.value.filter((item) =>
-        item.veh_no.toLowerCase().includes(searchQuery.value.toLowerCase())
-      )
-    );
+// const filteredItems = computed(() => {
+//   return items.value.filter((item) => {
+
+
+//     console.log("item.sts_str",item.sts_str);
+//     // 🔍 Search
+//     const matchesSearch = item.veh_no
+//       .toLowerCase()
+//       .includes(searchQuery.value.toLowerCase());
+
+//     // 🎯 Dynamic status filter
+//     const matchesStatus =
+//       selectedFilter.value === 'All' ||
+//       item.sts_str === selectedFilter.value;
+
+//     return matchesSearch && matchesStatus;
+//   });
+// });
+
+
+const filteredItems = computed(() => {
+
+  return items.value.filter((item) => {
+
+    //console.log("item.sts_str", item.sts_str);
+
+    // 🔍 Search
+    const matchesSearch = item.veh_no
+      .toLowerCase()
+      .includes(searchQuery.value.toLowerCase());
+
+    // 🎯 Status Filter (includes instead of exact match)
+    const matchesStatus =
+      selectedFilter.value === 'All' ||
+      item.sts_str?.toLowerCase().includes(
+        selectedFilter.value.toLowerCase()
+      );
+
+    return matchesSearch && matchesStatus;
+  });
+
+});
+
 
     onMounted(async () => {
   if (hasMounted) return;  // Prevent double call in dev
@@ -449,7 +575,12 @@ onIonViewWillLeave(async () => {
       openActionSheet,
       favorites,
       addToFavorites,
-      loadFavorites,
+        loadFavorites,
+    // 🔥 ADD THESE
+    isFilterOpen,
+    filterOptions,
+    selectedFilter,
+    selectFilter,filterOutline,closeOutline, checkmarkOutline,checkmarkDone,checkmarkCircleSharp,
       isConnected, showReconnectedMessage, initNetworkListener,intervalId,
 
     };
@@ -458,6 +589,38 @@ onIonViewWillLeave(async () => {
 </script>
 
 <style scoped>
+
+.empty-container {
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #8a8a8a;
+}
+
+.empty-icon {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
+
+.empty-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+ion-content {
+  --background: #f3faff;
+}
+
+.custom-item {
+  border-radius: 16px;
+  background: white;
+  margin: 10px 20px;
+  padding: 5px;
+  border: none;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
 .custom-divider {
   margin: 0;
   padding: 0;
@@ -472,14 +635,12 @@ ion-item {
 
 ion-list {
   padding: 0;
+  background: transparent;
 }
 
-ion-content {
-  --ion-background-color: #fff;
-}
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;
@@ -490,5 +651,36 @@ ion-content {
 .network-status-bar.connected {
   background-color: green;
 }
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
 
+.filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #e6f6ff;
+  font-weight: 500;
+}
+
+.filter-item:active {
+  background: #e6f4ea;
+}
+
+.check-icon {
+  color: var(--ion-color-primary);
+  font-weight: bolder;
+  font-size: 24px;
+}
 </style>

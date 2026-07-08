@@ -642,58 +642,70 @@ loading.dismiss();    }
 
 <style scoped>
 .custom-divider {
-  margin: 0; /* Remove margin */
-  padding: 0; /* Remove padding */
-  height: 0px; /* Control the height of the divider */
-  min-height: 5px;
+  display: block;
+  height: 1px;
+  background-color: #e2e8f0; /* Very soft subtle divider */
+  margin: 8px 0;
+  min-height: 1px;
 }
 
 .button-group {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 10px;
-
+  margin-top: 10px;
+  overflow-x: auto;
+  margin-bottom: 10px;
 }
 
+
+
+/* 🔹 Default (Deselected) */
 ion-button {
-  --border-color:#D01526;
-  --border-width: 1px;
-  --border-style: solid;
-  --color:#D01526;
-  --background: transparent;
-  --border-radius: 0;
-  margin-right: -2px;
-  font-size: 10px;
-  flex: 1;
-  box-sizing: border-box;
-  
+  --background: #e6f6ff;        /* surface-container-low */
+  --border-radius: 9999px;
+  --box-shadow: none;
+  font-size: 12px;
+  font-weight: bold;
 }
 
+/* 🔥 Hover effect (like Tailwind) */
+ion-button:hover {
+  --background: #d1ecfa;        /* surface-container-high */
+}
+
+/* 🔥 Active (Selected) */
 ion-button.selected {
-   --background:#D01526;
-
-  --color: white;
-  font-size: 10px;
+  --background: #006b47;        /* primary */
+  --color: #ffffff;             /* on-primary */
 }
+
+
+
 
 .item {
   margin-bottom: 10px;
+  border-radius: 16px;
+  background: white;
+  margin: 10px 20px;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  overflow: hidden;
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
-  padding: 5px 10px;
-  border: 1px solid #ccc;
+  background-color: #e6f6ff;
+  padding: 10px;
+  border: none;
+  font-weight: bold;
 }
 
 .item-details {
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  background-color: #ffffff;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
   align-items: center;
 }
 
@@ -712,6 +724,8 @@ ion-button.selected {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .detail-container {
@@ -736,10 +750,13 @@ ion-button.selected {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Divide into 3 equal columns */
   gap: 10px; /* Optional: Add gap between columns */
-  align-items: center; /* Center items vertically */
+  align-items: stretch; /* Ensure all columns are equal height */
   justify-items: center; /* Center items horizontally */
-  background-color: #f0f0f0; /* Optional: Background color for grid items */
-  border: 1px solid #4a4a4a; /* Optional: Border for grid items */
+  background-color: white; /* Optional: Background color for grid items */
+  border: none; /* Optional: Border for grid items */
+  border-radius: 16px;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  margin: 10px 20px;
 }
 
 

@@ -97,7 +97,7 @@
 
   <style scoped>
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

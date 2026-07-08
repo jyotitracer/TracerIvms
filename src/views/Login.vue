@@ -22,14 +22,12 @@
           </ion-img>
         </div>
 
-        <!-- Login Title -->
-        <strong>
-          <ion-title 
-            style="margin-bottom: 20px; font-size: 23px; color: #000;">
+                <strong style="display: block; text-align: center;">
+          <span style="font-size: 23px; color: var(--ion-color-primary);">
             Login
-          </ion-title>
+          </span>
         </strong>
-     
+
         <!-- Username Input -->
         <ion-input 
           label="Username" 
@@ -37,7 +35,7 @@
           v-model="usernamefield" 
           type="text" 
           required 
-          style="color: #000; background-color: #fff;">
+          style="color: #000;">
         </ion-input>
 
         <!-- Password Input -->
@@ -47,7 +45,7 @@
           v-model="password" 
           type="password" 
           required 
-          style="margin-bottom: 30px; color: #000; background-color: #fff;">
+          style="margin-bottom: 30px; color: #000; ">
         </ion-input>
 
         <!-- Login Button -->
@@ -339,9 +337,9 @@ export default {
 
 <style scoped>
 
-.login-content {
+/* .login-content {
   --background: #fff;
-}
+} */
 
 .login-wrapper {
   display: flex;
@@ -357,13 +355,13 @@ export default {
 }
 
   ion-button {
-    --background: #ca0505;
-    --background-hover: #ca0505;
-    --background-activated: #ca0505;
-    --background-focused: #ca0505;
+    --background: var(--ion-color-primary);
+    --background-hover: var(--ion-color-primary);
+    --background-activated:  var(--ion-color-primary);
+    --background-focused:  var(--ion-color-primary);
     --color: #c4c4c4;
-    --border-radius: 20px;
-    --border-color: #ca0505;
+    --border-radius: 16px;
+    --border-color:  var(--ion-color-primary);
     --border-style: solid;
     --border-width: 1px;
       width: 120px;
@@ -389,7 +387,7 @@ export default {
   }
 
   .network-status-bar {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   text-align: center;
   padding: 5px;

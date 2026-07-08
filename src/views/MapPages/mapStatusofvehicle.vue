@@ -19,7 +19,8 @@
         <ion-item v-for="(statuscolor, index) in statusList" :key="index">
           <ion-label>{{ statuscolor.status }}</ion-label>
           <!-- Toggle button for each status -->
-          <ion-toggle  mode="md" slot="end"
+          <ion-toggle  
+          class="big-toggle" mode="md" slot="end"
                       :checked="statuscolor.isEnabled"
                       @ionChange="toggleStatus(index, $event)"
                       color="danger">
@@ -125,7 +126,7 @@ ion-icon {
 }
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

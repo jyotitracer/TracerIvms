@@ -1,7 +1,120 @@
 <template>
   <ion-page>
+
+   <ion-content class="dashboard-content">
+
+  <!-- 🔹 VEHICLE HEADER -->
+  <div class="vehicle-header">
+    <div>
+      <h1>{{ vehicleNo }}</h1>
+      <p>{{ monthName }} {{ year }} Distance Report</p>
+    </div>
+
+    <div class="chip">
+      <!-- <ion-icon :icon="calendarOutline"></ion-icon> -->
+      <span>{{ monthName }} {{ year }}</span>
+    </div>
+  </div>
+
+  <!-- 🔹 METRICS (BENTO STYLE) -->
+  <div class="metrics-grid">
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <ion-icon :icon="gitNetworkOutline" style="size: 24px;"></ion-icon>
+        <span>Distance</span>
+      </div>
+      <div class="metric-value">
+        {{ Distance_tot }} <small>({{ Distance_per }})</small>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <ion-icon :icon="timeOutline"></ion-icon>
+        <span>Moving</span>
+      </div>
+      <div class="metric-value">
+        {{ movingDuration1 }} <small>({{ movingDuration2 }})</small>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <ion-icon :icon="warningOutline" class="danger"></ion-icon>
+        <span>Violations</span>
+      </div>
+      <div class="metric-value danger">
+        {{ violation1 }} <small>({{ violation2 }})</small>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <ion-icon :icon="speedometerOutline"></ion-icon>
+        <span>Fuel</span>
+      </div>
+      <div class="metric-value">
+        {{ fuelCons1 }} <small>({{ fuelCons2 }})</small>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 🔹 CALENDAR -->
+  <div class="calendar-card">
+
+    <!-- HEADER -->
+    <div class="calendar-top">
+      <h3>Daily Distance Activity</h3>
+
+      <!-- 🔥 LEGEND -->
+      <div class="legend">
+        <div><span class="dot low"></span> &lt; 20 km</div>
+        <div><span class="dot mid"></span> 20-100 km</div>
+        <div><span class="dot high"></span> &gt; 100 km</div>
+      </div>
+    </div>
+
+    <!-- DAYS -->
+    <div class="days">
+      <div v-for="day in days" :key="day">{{ day }}</div>
+    </div>
+
+    <!-- DATES -->
+    <div class="dates">
+      <div
+        v-for="(date, index) in calendar"
+        :key="index"
+        class="date-box"
+        :class="[
+  'date-box',
+  date.value < 20 ? 'low' : 
+  date.value <= 100 ? 'mid' : 
+  'high'
+]"
+      >
+        <span class="date-number" :class="[
+  'date-number',
+  date.value > 100 ? 'text-white' : 'text-dark'
+]">
+          {{ date.day }}
+        </span>
+
+        <span class="date-value" :class="[
+  'date-number',
+  date.value > 100 ? 'text-white' : 'text-dark'
+]">
+          {{ date.value }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>
     
-<ion-content fullscreen class="no-safe-bottom">
+<!-- <ion-content fullscreen class="no-safe-bottom">
       <div class="header-container">
         <div class="month-info">
           <div class="month-year">{{ monthName }} {{ year }}</div>
@@ -114,15 +227,343 @@
         </ion-grid>
       </ion-item>
     </ion-list>
-    </ion-content>
+    </ion-content> -->
   </ion-page>
 </template>
+
+<style>
+.dashboard-content {
+  --background: #f3faff;
+  padding: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 🔹 HEADER */
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.vehicle-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.vehicle-header p {
+  font-size: 14px;
+  color: #6e7a71;
+}
+
+/* CHIP */
+.chip {
+  background: #e6f6ff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 🔹 METRICS GRID */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 10px 20px 10px 20px;
+}
+
+.metric-card {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3e4942;
+  text-transform: uppercase;
+}
+
+ion-icon{
+  height: 24px;
+  width: 24px;
+  color: var(--ion-color-primary);
+}
+.metric-value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.metric-value small {
+  font-size: 12px;
+  color: #3e4942;
+}
+
+.danger {
+  color: var(--ion-color-danger);
+}
+
+/* 🔹 CALENDAR */
+.calendar-card {
+  background: #e6f6ff;
+  padding: 10px;
+  border-radius: 16px;
+  margin: 10px;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+/* TOP */
+.calendar-top {
+  /* display: flex; */
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-top h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 5px 0px 10px 0px;
+}
+
+/* LEGEND */
+.legend {
+  display: flex;
+    justify-content: flex-end;   /* 🔥 push to right */
+
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6e7a71;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.low { background: #c3deec; }
+/* .mid { background: rgba(0, 135, 90, 0.3); } */
+.high { background: var(--ion-color-primary); }
+
+/* DAYS */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6e7a71;
+  text-align: center;
+}
+
+/* DATES */
+.dates {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.date-box {
+  border-radius: 10px;
+  padding: 6px 2px;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;   /* 🔥 IMPORTANT */
+  align-items: center;      /* center horizontally */
+  justify-content: center;  /* center vertically */
+  text-align: center;
+}
+
+/* 🔹 COLORS EXACT MATCH */
+.date-box.low {
+  background: #c3deec;   /* <20 */
+    color: #021f29;
+
+}
+
+.date-box.mid {
+  background: rgba(0, 107, 71, 0.3);  /* 20–100 */
+    color: #021f29;
+
+}
+
+.date-box.high {
+  background: var(--ion-color-primary);   /* >100 */
+  color: white;
+}
+
+h3{
+  margin: 0px;
+}
+
+
+.date-number {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.date-value {
+  font-size: 12px;
+  font-weight: 800;
+}
+</style>
+<!-- <style scoped>
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f3faff;
+  margin-top: 5px;
+}
+
+.month-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+
+.month-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.sub-text {
+  margin-top: 2px;
+  font-size: 10px;
+}
+.bars-container {
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.bar-color {
+  width: 10px;
+  height: 5px;
+  margin-right: 2px;
+}
+
+.bar-value {
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+.right-text {
+  font-size: 1em;
+  text-align: right;
+}
+
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.day-names {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  margin-bottom: 5px;
+  padding-top: 10px;
+  background-color: #f3faff;
+}
+.day-name {
+  width: 14.28%; /* 100% / 7 days */
+  text-align: center;
+}
+.dates {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: space-around;
+}
+.date-item {
+  width: 14.28%; /* 100% / 7 days */
+  text-align: center;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.date {
+  font-size: 14px;
+}
+.value {
+  margin-top: 2px;
+  font-size: 10px;
+  color: gray;
+}
+.dash-bar {
+  width: 40%;
+  height: 2px;
+  margin-top: 2px;
+}
+.disabled {
+  color: #d3d3d3;
+}
+.month-below {
+  display: flex;
+  background-color: #f3faff;
+  padding: 10px;
+  flex-direction: inherit;
+  align-items: center;
+}
+.month-total {
+  font-size: 14px;
+}
+.today-total {
+  font-size: 11px;
+  align-content: center;
+}
+.text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.text1 ,.text3{
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  color: grey;
+}
+.text2 {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  color: #5d5b5b;
+  font-weight: bold;
+}
+</style> -->
+
 
 <script>
 import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonIcon,  loadingController,IonItem,IonList
 } from '@ionic/vue';
-import { addCircleOutline } from 'ionicons/icons';
+import { addCircleOutline,gitNetworkOutline, timeOutline,warningOutline,speedometerOutline, calendarOutline, } from 'ionicons/icons';
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
 import storage from "@/services/storagefile";
@@ -160,7 +601,7 @@ export default defineComponent({
   const route = useRoute();
       const router = useRouter();
 
-  const days = ref(['S', 'M', 'T', 'W', 'T', 'F', 'S']);
+  const days = ref(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']);
   const calendar = ref([]);
   const monthName = ref('');
   const year = ref('');
@@ -331,7 +772,7 @@ loading.dismiss();    }
       vehicleName: props.vehicleName,
       groupname:props.groupname,
     days,
-    
+    gitNetworkOutline, timeOutline,warningOutline,speedometerOutline,calendarOutline,
     calendar,
     monthName,
     year,
@@ -353,135 +794,3 @@ loading.dismiss();    }
 });
 </script>
 
-<style scoped>
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f4f2f2;
-  margin-top: 5px;
-}
-
-.month-info {
-  display: flex;
-  flex-direction: column;
-  margin-left: 5px;
-}
-
-.month-name {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.sub-text {
-  margin-top: 2px;
-  font-size: 10px;
-}
-.bars-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.bar-color {
-  width: 10px;
-  height: 5px;
-  margin-right: 2px;
-}
-
-.bar-value {
-  font-size: 10px;
-  margin-right: 2px;
-}
-
-.right-text {
-  font-size: 1em;
-  text-align: right;
-}
-
-.calendar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.day-names {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-  margin-bottom: 5px;
-  padding-top: 10px;
-  background-color: #f4f2f2;
-}
-.day-name {
-  width: 14.28%; /* 100% / 7 days */
-  text-align: center;
-}
-.dates {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-  justify-content: space-around;
-}
-.date-item {
-  width: 14.28%; /* 100% / 7 days */
-  text-align: center;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.date {
-  font-size: 14px;
-}
-.value {
-  margin-top: 2px;
-  font-size: 10px;
-  color: gray;
-}
-.dash-bar {
-  width: 40%;
-  height: 2px;
-  margin-top: 2px;
-}
-.disabled {
-  color: #d3d3d3;
-}
-.month-below {
-  display: flex;
-  background-color: #f4f2f2;
-  padding: 10px;
-  flex-direction: inherit;
-  align-items: center;
-}
-.month-total {
-  font-size: 14px;
-}
-.today-total {
-  font-size: 11px;
-  align-content: center;
-}
-.text-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.text1 ,.text3{
-  margin: 0;
-  padding: 0;
-  font-size: 16px;
-  color: grey;
-}
-.text2 {
-  margin: 0;
-  padding: 0;
-  font-size: 16px;
-  color: #5d5b5b;
-  font-weight: bold;
-}
-</style>

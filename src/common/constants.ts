@@ -60,11 +60,11 @@ class Constants {
   };
 
   public static Veh_color = {
-    Key_Active_Color: '#68c521',
-    key_Stopped_Color: '#078dfc',
-    Key_Offline_Color: '#a9a9a9',
+    Key_Active_Color: '#006b47',
+    key_Stopped_Color: '#b02e00',
+    Key_Offline_Color: '#cbd5db',
     Key_Idle_Color: '#fe6911',
-    Key_Towing_Color: "fe6911"
+    Key_Towing_Color: "#fe6911"
   };
 
   public static storageValue = {

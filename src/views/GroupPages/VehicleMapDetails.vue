@@ -7,28 +7,32 @@
       <!-- Pass the vehicleObject directly to InfoBox, and only display it if vehicleObject is present -->
       <InfoBox v-if="vehicleObject" :vehicleData="vehicleObject" />
 
-          <ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
-            <ion-fab-button ref="fabButton" @click="toggleFab">
-          <ion-icon :icon="fabIcon" style="color: white;"></ion-icon>
-        </ion-fab-button>
-        <ion-fab-list side="top">
-          <!-- Each FAB button with icon on the left and label on the right -->
-          <div class="fab-item" @click="navigateToPage(1)">
-            <img src="\ic_btn_search_landmark.png" class="fab-image" />
-            <ion-label class="fab-label">Get direction to landmark</ion-label>
-          </div>
+        <!-- FAB BUTTON -->
+<ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
+  <ion-fab-button @click="toggleFab">
+    <ion-icon :icon="fabIcon" style="color: white;"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
 
-          <div class="fab-item" @click="navigateToPage(2)">
-            <img src="\ic_btn_search_closest_vehicle.png"  class="fab-image" />
-            <ion-label class="fab-label">Get direction to another vehicle</ion-label>
-          </div>
+<!-- 🔥 CUSTOM POPUP MENU -->
+<div class="fab-popup" :class="{ open: isFabOpen }">
 
-          <div class="fab-item" @click="navigateToPage(3)">
-            <img src="\filter_layer.png"  class="fab-image" />
-            <ion-label class="fab-label">Change Map</ion-label>
-          </div>
-        </ion-fab-list>
-      </ion-fab>
+  <div class="menu-item active" @click="navigateToPage(1)">
+          <ion-icon :icon="gitBranchOutline"></ion-icon>
+    <span>Get direction to landmark</span>
+  </div>
+
+  <div class="menu-item active" @click="navigateToPage(2)">
+          <ion-icon :icon="carOutline"></ion-icon>
+    <span>Get direction to another vehicle</span>
+  </div>
+
+  <div class="menu-item active" @click="navigateToPage(3)">
+          <ion-icon :icon="navigateCircleOutline"></ion-icon>
+    <span>Change Map</span>
+  </div>
+
+</div>
     </ion-content>
   </ion-page>
 </template>
@@ -66,9 +70,12 @@ import storage from '@/services/storagefile';
 
 
 import {
+  
   chevronUpCircle,
   colorPalette,
-  globe,
+  gitBranchOutline,
+  globe,carOutline,
+  navigateCircleOutline,
 } from 'ionicons/icons';
 import { onBeforeRouteLeave } from 'vue-router';
 import { Loader } from "@googlemaps/js-api-loader";
@@ -241,28 +248,24 @@ loading.dismiss();    }
       fabIcon.value = isFabOpen.value ? close : add; // Update icon based on FAB state
     };
 
-const RunData = async (vehicleObject: any) => {
+    const RunData = async (vehicleObject: any) => {
+
   // ✅ Wait for Google Maps to load
+  await loadGoogleMaps();
 
-   await loadGoogleMaps();
-  
- 
+  const initialLat = parseFloat(vehicleObject.lat);
+  const initialLong = parseFloat(vehicleObject.lon);
+  const initialZoom = 16;
+  const initialCenter = { lat: initialLat, lng: initialLong };
+  const storedMapType = await storage.get('groupmapType') || 'roadmap';
 
-
-                const initialLat = parseFloat(vehicleObject.lat);
-                const initialLong = parseFloat(vehicleObject.lon);
-                const initialZoom = 16;
-                const initialCenter = { lat: initialLat, lng: initialLong };
-                const storedMapType =  await storage.get('groupmapType') || 'roadmap';
- 
-
- // ✅ CREATE MAP ONLY FIRST TIME
+  // ✅ CREATE MAP ONLY FIRST TIME
   if (!mapRef.value) {
 
     newMap = new google.maps.Map(mapContainer.value, {
       center: initialCenter,
-      zoom: 16,
-      mapTypeId: 'roadmap',
+      zoom: initialZoom,
+      mapTypeId: storedMapType,
       zoomControl: true,
       mapTypeControl: false,
       fullscreenControl: false,
@@ -272,125 +275,325 @@ const RunData = async (vehicleObject: any) => {
     mapRef.value = newMap;
 
   } else {
+
     // ✅ Only move camera on updates
     mapRef.value.setCenter(initialCenter);
   }
 
-const markerColor = vehicleObject.sts_colr || '#FF0000';
+  const markerColor = vehicleObject.sts_colr || '#FF0000';
 
-const markerIcon = {
-  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-  fillColor: markerColor,
-  fillOpacity: 1,
-  strokeWeight: 0,
-  scale: 5,
-};
+  const markerIcon = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    fillColor: markerColor,
+    fillOpacity: 1,
+    strokeWeight: 0,
+    scale: 5,
+  };
 
-// ✅ Remove old marker
-if (markerRef.value) {
-  markerRef.value.setMap(null);
-  markerRef.value = null;
+  // // ✅ Remove old marker
+  // if (markerRef.value) {
+  //   markerRef.value.setMap(null);
+  //   markerRef.value = null;
+  // }
+
+  // // ✅ Create new marker
+  // markerRef.value = new google.maps.Marker({
+  //   position: initialCenter,
+  //   map: mapRef.value,
+  //   icon: markerIcon,
+  // });
+
+
+  // ✅ CREATE MARKER ONLY FIRST TIME
+if (!markerRef.value) {
+
+  markerRef.value = new google.maps.Marker({
+    position: initialCenter,
+    map: mapRef.value,
+    icon: markerIcon,
+  });
+
+
+} else {
+
+  markerRef.value.setPosition(initialCenter);
+
+  markerRef.value.setIcon({
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    fillColor: markerColor,
+    fillOpacity: 1,
+    strokeWeight: 0,
+    scale: 5,
+    rotation: vehicleObject.angle || 0
+  });
+
 }
 
-// ✅ Create new marker
-markerRef.value = new google.maps.Marker({
-  position: initialCenter,
-  map: mapRef.value,
-  icon: markerIcon,
-});
+
+  // ✅ CREATE CONTROL CONTAINER ONLY ONCE
+  if (!controlContainerRef.value) {
+
+    const controlContainer = document.createElement('div');
+
+    controlContainer.style.position = 'absolute';
+    controlContainer.style.right = '20px';
+    controlContainer.style.bottom = '100px';
+    controlContainer.style.display = 'flex';
+    controlContainer.style.gap = '10px';
+    controlContainer.style.alignItems = 'center';
+    controlContainer.style.background = 'white';
+    controlContainer.style.borderRadius = '5px';
+    controlContainer.style.padding = '5px';
+
+    controlContainerRef.value = controlContainer;
+
+    // ✅ Add container ONLY ONCE
+    mapRef.value.controls[
+      google.maps.ControlPosition.RIGHT_BOTTOM
+    ].push(controlContainerRef.value);
+  }
+
+  // ✅ CLEAR OLD ICONS BEFORE ADDING NEW ONES
+  controlContainerRef.value.innerHTML = '';
+
+  // ✅ MAP ICON
+  const mapControlDiv = document.createElement('div');
+
+  mapControlDiv.innerHTML = `
+    <button style="background: transparent; border: none;">
+      <img src="/pin.png" alt="Map" width="40" height="40">
+    </button>
+  `;
+
+  mapControlDiv.style.display = 'none';
+
+  // ✅ NAVIGATION ICON
+  const navControlDiv = document.createElement('div');
+
+  navControlDiv.innerHTML = `
+    <button style="background: transparent; border: none;">
+      <img src="/navigation.png" alt="Navigator" width="40" height="40">
+    </button>
+  `;
+
+  navControlDiv.style.display = 'none';
+
+  // ✅ APPEND ONLY ONCE
+  controlContainerRef.value.appendChild(navControlDiv);
+  controlContainerRef.value.appendChild(mapControlDiv);
+
+  // ✅ INFO WINDOW
+  const infoWindow = new google.maps.InfoWindow();
+
+  // ✅ Vue component container
+  const infoWindowContainer = document.createElement('div');
+
+  const app = createApp(InfowindowgroupMap, {
+    vehicleData: vehicleObject
+  });
+
+  app.mount(infoWindowContainer);
+
+  infoWindow.setContent(infoWindowContainer);
+
+  // ✅ MARKER CLICK
+  markerRef.value.addListener('click', () => {
+
+    // ✅ SHOW CONTROLS
+    navControlDiv.style.display = 'block';
+    mapControlDiv.style.display = 'block';
+
+    const lat = markerRef.value.getPosition().lat();
+    const lng = markerRef.value.getPosition().lng();
+
+    console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+
+    // ✅ REMOVE OLD EVENTS
+    navControlDiv.replaceWith(navControlDiv.cloneNode(true));
+    mapControlDiv.replaceWith(mapControlDiv.cloneNode(true));
+
+    // ✅ GET NEW REFERENCES
+    const newNavControlDiv = controlContainerRef.value.children[0];
+    const newMapControlDiv = controlContainerRef.value.children[1];
+
+    // ✅ NAVIGATION CLICK
+    newNavControlDiv.addEventListener('click', () => {
+      window.location.href =
+        `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    });
+
+    // ✅ MAP CLICK
+    newMapControlDiv.addEventListener('click', () => {
+      window.location.href =
+        `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    });
+
+    // ✅ OPEN INFO WINDOW
+    infoWindow.open({
+      anchor: markerRef.value,
+      map: mapRef.value,
+    });
+
+  });
+
+};
+// const RunData = async (vehicleObject: any) => {
+//   // ✅ Wait for Google Maps to load
+
+//    await loadGoogleMaps();
+  
+ 
+
+
+//                 const initialLat = parseFloat(vehicleObject.lat);
+//                 const initialLong = parseFloat(vehicleObject.lon);
+//                 const initialZoom = 16;
+//                 const initialCenter = { lat: initialLat, lng: initialLong };
+//                 const storedMapType =  await storage.get('groupmapType') || 'roadmap';
+ 
+
+//  // ✅ CREATE MAP ONLY FIRST TIME
+//   if (!mapRef.value) {
+
+//     newMap = new google.maps.Map(mapContainer.value, {
+//       center: initialCenter,
+//       zoom: 16,
+//       mapTypeId: 'roadmap',
+//       zoomControl: true,
+//       mapTypeControl: false,
+//       fullscreenControl: false,
+//       streetViewControl: false,
+//     });
+
+//     mapRef.value = newMap;
+
+//   } else {
+//     // ✅ Only move camera on updates
+//     mapRef.value.setCenter(initialCenter);
+//   }
+
+// const markerColor = vehicleObject.sts_colr || '#FF0000';
+
+// const markerIcon = {
+//   path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+//   fillColor: markerColor,
+//   fillOpacity: 1,
+//   strokeWeight: 0,
+//   scale: 5,
+// };
+
+// // ✅ Remove old marker
+// if (markerRef.value) {
+//   markerRef.value.setMap(null);
+//   markerRef.value = null;
+// }
+
+// // ✅ Create new marker
+// markerRef.value = new google.maps.Marker({
+//   position: initialCenter,
+//   map: mapRef.value,
+//   icon: markerIcon,
+// });
 
 
 
-            if (!controlContainerRef.value) {
+//             if (!controlContainerRef.value) {
 
-                            // Create custom controls for navigator and map icons
-                            const controlContainer = document.createElement('div');
-                          controlContainer.style.position = 'absolute';
-                          controlContainer.style.right = '20px';
-                          controlContainer.style.bottom = '100px'; // Adjust to position it below the zoom controls
-                          controlContainer.style.display = 'flex';
-                          controlContainer.style.gap = '10px'; // Add spacing between the icons
-                          controlContainer.style.alignItems = 'center';
-                          controlContainer.style.background = 'white'; // Optional: to match the background of the buttons
-                          controlContainer.style.borderRadius = '5px'; // Optional: rounded corners
-                          controlContainer.style.padding = '5px'; // Optional: add some padding
+//                             // Create custom controls for navigator and map icons
+//                             const controlContainer = document.createElement('div');
+//                           controlContainer.style.position = 'absolute';
+//                           controlContainer.style.right = '20px';
+//                           controlContainer.style.bottom = '100px'; // Adjust to position it below the zoom controls
+//                           controlContainer.style.display = 'flex';
+//                           controlContainer.style.gap = '10px'; // Add spacing between the icons
+//                           controlContainer.style.alignItems = 'center';
+//                           controlContainer.style.background = 'white'; // Optional: to match the background of the buttons
+//                           controlContainer.style.borderRadius = '5px'; // Optional: rounded corners
+//                           controlContainer.style.padding = '5px'; // Optional: add some padding
 
                          
-                        controlContainerRef.value = controlContainer;
-            }
+//                         controlContainerRef.value = controlContainer;
+//             }
 
-                 // Add the map icon
-                          const mapControlDiv = document.createElement('div');
-                          mapControlDiv.innerHTML = `
-                            <button style="background: transparent; border: none;">
-                              <img src="/pin.png" alt="Map" width="40" height="40">
-                            </button>`;
-                          mapControlDiv.style.display = 'none'; // Initially hidden
+//                  // Add the map icon
+//                           const mapControlDiv = document.createElement('div');
+//                           mapControlDiv.innerHTML = `
+//                             <button style="background: transparent; border: none;">
+//                               <img src="/pin.png" alt="Map" width="40" height="40">
+//                             </button>`;
+//                           mapControlDiv.style.display = 'none'; // Initially hidden
 
                          
-                         // Add the navigator icon
-                          const navControlDiv = document.createElement('div');
-                          navControlDiv.innerHTML = `
-                            <button style="background: transparent; border: none;">
-                              <img src="/navigation.png" alt="Navigator" width="40" height="40">
-                            </button>`;
-                          navControlDiv.style.display = 'none'; // Initially hidden
+//                          // Add the navigator icon
+//                           const navControlDiv = document.createElement('div');
+//                           navControlDiv.innerHTML = `
+//                             <button style="background: transparent; border: none;">
+//                               <img src="/navigation.png" alt="Navigator" width="40" height="40">
+//                             </button>`;
+//                           navControlDiv.style.display = 'none'; // Initially hidden
 
-                          // Append the icons to the container
-                          controlContainerRef.value.appendChild(navControlDiv);
-                          controlContainerRef.value.appendChild(mapControlDiv);
+//                           // Append the icons to the container
+//                           controlContainerRef.value.appendChild(navControlDiv);
+//                           controlContainerRef.value.appendChild(mapControlDiv);
 
-                          // Append the container to the map controls
-                          newMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainerRef.value);
-
-
-                            const infoWindow = new google.maps.InfoWindow();
-
-                    // Create a new div to mount your Vue component
-                    const infoWindowContainer = document.createElement('div');
-
-                    // Use Vue's createApp to mount the InfoBox component inside the div
-                    const app = createApp(InfowindowgroupMap, { vehicleData: vehicleObject });
-                    app.mount(infoWindowContainer);
-
-                    // Set the infoWindow's content to the container with the Vue component
-                    infoWindow.setContent(infoWindowContainer);
+//                           // Append the container to the map controls
+//                           newMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainerRef.value);
 
 
-                // Add click event to the marker to show info window
-                markerRef.value.addListener('click', () => {
+//                             const infoWindow = new google.maps.InfoWindow();
+
+//                     // Create a new div to mount your Vue component
+//                     const infoWindowContainer = document.createElement('div');
+
+//                     // Use Vue's createApp to mount the InfoBox component inside the div
+//                     const app = createApp(InfowindowgroupMap, { vehicleData: vehicleObject });
+//                     app.mount(infoWindowContainer);
+
+//                     // Set the infoWindow's content to the container with the Vue component
+//                     infoWindow.setContent(infoWindowContainer);
+
+// let navigationControl: { remove: () => void; } | null = null;
+
+//                 // Add click event to the marker to show info window
+//                 markerRef.value.addListener('click', () => {
+
+//                    // REMOVE OLD NAVIGATION CONTROL
+//   if (navigationControl) {
+//     navigationControl.remove();
+//     navigationControl = null;
+//   }
                          
-                      // Show the custom controls when the marker is clicked
-                                  navControlDiv.style.display = 'block';
-                                  mapControlDiv.style.display = 'block';
+//                       // Show the custom controls when the marker is clicked
+//                                   navControlDiv.style.display = 'block';
+//                                   mapControlDiv.style.display = 'block';
 
-                                  // Log latitude and longitude
-                                  const lat = markerRef.value.getPosition().lat();
-                                  const lng = markerRef.value.getPosition().lng();
-                                  console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+//                                   // Log latitude and longitude
+//                                   const lat = markerRef.value.getPosition().lat();
+//                                   const lng = markerRef.value.getPosition().lng();
+//                                   console.log(`Latitude: ${lat}, Longitude: ${lng}`);
 
-                                  // Add click event listeners to controls to perform desired actions
-                                  navControlDiv.addEventListener('click', () => {
-                                    window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-                                  });
+//                                   // Add click event listeners to controls to perform desired actions
+//                                   navControlDiv.addEventListener('click', () => {
+//                                     window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+//                                   });
 
-                                  mapControlDiv.addEventListener('click', () => {
-                                    window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-                                  });
+//                                   mapControlDiv.addEventListener('click', () => {
+//                                     window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+//                                   });
 
-                      infoWindow.open({
-                            anchor: markerRef.value,
-                            map: newMap,
+//                       infoWindow.open({
+//                             anchor: markerRef.value,
+//                             map: newMap,
                           
-                          });
+//                           });
 
-                   });
+//                    });
 
 
 
       
       
-    };
+//     };
 
       
     // FAB button click handling
@@ -582,7 +785,9 @@ intervalId.value = setInterval(async () =>
       isFabOpen,toggleFab,
       fabIcon,
       intervalId,
-      RunData,
+      RunData,gitBranchOutline,
+  carOutline,
+  navigateCircleOutline,
     };
   },
 
@@ -595,6 +800,90 @@ intervalId.value = setInterval(async () =>
 </script>
 
 <style scoped>
+
+/* 🔥 Popup container */
+.fab-popup {
+  position: fixed;
+  bottom: 90px; /* above FAB */
+  left: 16px;
+  width: 260px;
+
+  background: white;
+  border-radius: 16px;
+  padding: 10px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+  transform: translateY(20px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: all 0.25s ease;
+  z-index: 999;
+}
+
+/* 🔥 Open animation */
+.fab-popup.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 🔥 Menu items */
+.fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 50px;
+
+  padding: 12px;
+  border-radius: 16px;
+  margin-top: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+  /* color: #475569; */
+
+  /* transition: 0.2s; */
+}
+
+.menu-item ion-icon {
+  font-size: 20px;
+  color: var(--ion-color-primary);
+}
+
+/* Hover */
+.menu-item:hover {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.menu-item:hover ion-icon {
+  color: #059669;
+}
+
+/* Active */
+.menu-item.active {
+  background: #ecfdf5;
+  color: #065f46;
+  font-weight: bold;
+}
+
+.menu-item.active ion-icon {
+  color: #059669;
+}
+
 .fab-image{
   height: 32px;
   width: 32px;
@@ -629,7 +918,7 @@ intervalId.value = setInterval(async () =>
 
 .fab-icon {
   font-size: 24px;
-  color:#D01526;
+  color:#00875A;
 }
 
 /* Reduce the size of the close button for the InfoWindow */

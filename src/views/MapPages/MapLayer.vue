@@ -12,19 +12,23 @@
 
     <!-- Radio Buttons for Map Types -->
     <div class="radio-group">
-      <label>
+      <label class="radio-label">
+
         <input type="radio" value="roadmap" v-model="selectedMapType" />
         NORMAL
       </label>
-      <label>
+     <label class="radio-label">
+
         <input type="radio" value="satellite" v-model="selectedMapType" />
         SATELLITE
       </label>
-      <label>
+     <label class="radio-label">
+
         <input type="radio" value="hybrid" v-model="selectedMapType" />
         HYBRID
       </label>
-      <label>
+     <label class="radio-label">
+
         <input type="radio" value="terrain" v-model="selectedMapType" />
         TERRAIN
       </label>
@@ -98,7 +102,7 @@
 /* Label styling */
 label {
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* Optional: Customize radio button appearance */
@@ -111,4 +115,17 @@ input[type="radio"] {
   font-weight: bold;
   font-size: 18px;
 }
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-label input[type="radio"] {
+  transform: scale(1.6);
+  cursor: pointer;
+}
+
+
 </style>

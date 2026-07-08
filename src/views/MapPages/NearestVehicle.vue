@@ -55,10 +55,10 @@
               :vehicle="vehicle" 
               @click="navigateToPage(vehicle)"
             />
-            <ion-item-divider 
+            <!-- <ion-item-divider 
               v-if="index < movingItems.length - 1" 
               class="custom-divider">
-            </ion-item-divider>
+            </ion-item-divider> -->
           </template>
         </ion-list>
       </div>
@@ -71,10 +71,10 @@
               :vehicle="vehicle" 
               @click="navigateToPage(vehicle)"
             />
-            <ion-item-divider 
+            <!-- <ion-item-divider 
               v-if="index < stoppedItems.length - 1" 
               class="custom-divider">
-            </ion-item-divider>
+            </ion-item-divider> -->
           </template>
         </ion-list>
       </div>
@@ -87,10 +87,10 @@
               :vehicle="vehicle" 
               @click="navigateToPage(vehicle)"
             />
-            <ion-item-divider 
+            <!-- <ion-item-divider 
               v-if="index < idleItems.length - 1" 
               class="custom-divider">
-            </ion-item-divider>
+            </ion-item-divider> -->
           </template>
         </ion-list>
       </div>
@@ -103,10 +103,10 @@
               :vehicle="vehicle" 
               @click="navigateToPage(vehicle)"
             />
-            <ion-item-divider 
+            <!-- <ion-item-divider 
               v-if="index < allItems.length - 1" 
               class="custom-divider">
-            </ion-item-divider>
+            </ion-item-divider> -->
           </template>
         </ion-list>
       </div>
@@ -377,9 +377,7 @@ ion-list {
   padding: 0;
 }
 
-ion-content {
-  --ion-background-color: #fff;
-}
+
 
 .button-group {
   display: flex;
@@ -388,10 +386,10 @@ ion-content {
   padding: 0 10px 0 10px;
 }
 ion-button {
-  --border-color:#D01526;
+  --border-color:#00875A;
   --border-width: 1px;
   --border-style: solid;
-  --color:#D01526;
+  --color:#00875A;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -402,7 +400,7 @@ ion-button {
 }
 
 ion-button.selected {
-   --background:#D01526;
+   --background:#00875A;
 
   --color: white;
   font-size: 10px;
@@ -416,7 +414,7 @@ ion-button.selected {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
+  background-color: var(--ion-background-color);
   padding: 5px 10px;
   border: 1px solid #ccc;
 }
@@ -429,7 +427,7 @@ ion-button.selected {
 }
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

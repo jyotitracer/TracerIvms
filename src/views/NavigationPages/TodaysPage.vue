@@ -5,7 +5,8 @@
      <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
        Connected to Network
      </div> -->
-<ion-content fullscreen class="safe-bottom">
+<ion-content fullscreen class="safe-bottom padding-class">
+  
    <div class="month-below1">
      <div class="month-total date" @click="clickForDatePage">
        {{ formattedCurrentDate }}
@@ -20,113 +21,543 @@
      </div>
    </div>
 
-   <div class="custom-item">
-     <div id="chart-container">
-       <canvas ref="pieChartRef"></canvas>
-     </div>
-     <div class="item-content">
-       <div class="status">
-         <div :style="{ color: moving_color }" class="status-item">
-           <span class="status-label">Active</span>
-           <span class="status-value">{{ chartData.moving }}</span>
-         </div>
+  <div class="custom-card">
 
-         <div class="status-item stopped">
-           <span class="status-label">Stopped</span>
-           <span class="status-value">{{ chartData.stopped }}</span>
-         </div>
-         <div class="status-item offline">
-           <span class="status-label">Offline</span>
-           <span class="status-value">{{ chartData.offline }}</span>
-         </div>
-       </div>
-     </div>
-   </div>
-   <div class="month-below">
+  <!-- Chart -->
+  <div class="chart-wrapper">
+    <canvas ref="pieChartRef"></canvas>
+
+    <!-- CENTER TEXT -->
+    <div class="center-text">
+      <span style="font-weight:bold">TOTAL COUNT<br>  </span>
+      <span style="font-size: 20px; font-weight: 600; color: black;">{{ totalCount }}</span>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-row">
+
+    <div class="status-box">
+      <div class="dot active"></div>
+     
+      <span class="status-value">{{ chartData.moving }}</span>
+       <span class="status-label">Active</span>
+    </div>
+
+    <div class="status-box">
+      <div class="dot stopped"></div>
+     
+      <span class="status-value">{{ chartData.stopped }}</span>
+       <span class="status-label">Stopped</span>
+    </div>
+
+    <div class="status-box">
+      <div class="dot offline"></div>
+     
+      <span class="status-value">{{ chartData.offline }}</span>
+       <span class="status-label">Offline</span>
+    </div>
+
+  </div>
+
+</div>
+
+   <!-- <div class="month-below">
      <div class="month-total">Fleet Total - </div>
      <div class="today-total">(Per Vehicle Average)</div>
+   </div> -->
+
+  <!-- Distance -->
+   <div class="below_cust_part">
+
+<ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+          <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Distance travelled</p>
+          <div class="value-row">
+            <p class="text2">{{ Distance_tot }}</p>
+            <p class="text3">({{ Distance_per }})</p>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Moving Duration -->
+<ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+           <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Moving Duration</p>
+          <div class="value-row">
+            <p class="text2">{{ movingDuration1 }}</p>
+            <p class="text3">({{ movingDuration2 }})</p>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Violation -->
+<ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+          <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Violation Count</p>
+          <div class="value-row">
+            <p class="text2">{{ violation1 }}</p>
+            <p class="text3">({{ violation2 }})</p>
+          </div>
+        </div>
+      </div>
+
+     
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Fuel -->
+<ion-card class="custom-metric-card" v-if="IsFuelEnable">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+           <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Fuel Consumed</p>
+          <div class="value-row">
+            <p class="text2">{{ fuelCons1 }}</p>
+            <p class="text3">({{ fuelCons2 }})</p>
+          </div>
+        </div>
+      </div>
+
+      
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
    </div>
-   <ion-list>
-     <ion-item>
-       <ion-grid>
-         <ion-row style="align-items: center;">
-           <ion-col size="auto">
-             <ion-icon :icon="iconName" style="font-size: 30px;" />
-           </ion-col>
-           <ion-col>
-             <div class="text-container">
-               <p class="text1">Distance travelled</p>
-               <div style="display: flex;">
-                 <p class="text2">{{ Distance_tot }} </p>
-                 <p class="text2">-</p>
-                 <p class="text3">({{ Distance_per }}) </p>
-               </div>
-             </div>
-           </ion-col>
-         </ion-row>
-       </ion-grid>
-     </ion-item>
-     <ion-item>
-       <ion-grid>
-         <ion-row style="align-items: center;">
-           <ion-col size="auto">
-             <ion-icon :icon="iconName" style="font-size: 30px;" />
-           </ion-col>
-           <ion-col>
-             <div class="text-container">
-               <p class="text1">Moving Duration</p>
-               <div style="display: flex;">
-                 <p class="text2">{{ movingDuration1 }}</p>
-                 <p class="text2">-</p>
-                 <p class="text3">({{ movingDuration2 }})</p>
-               </div>
-             </div>
-           </ion-col>
-         </ion-row>
-       </ion-grid>
-     </ion-item>
-     <ion-item>
-       <ion-grid>
-         <ion-row style="align-items: center;">
-           <ion-col size="auto">
-             <ion-icon :icon="iconName" style="font-size: 30px;" />
-           </ion-col>
-           <ion-col>
-             <div class="text-container">
-               <p class="text1">Violation Count</p>
-               <div style="display: flex;">
-                 <p class="text2">{{ violation1 }}</p>
-                 <p class="text2">-</p>
-                 <p class="text3">({{ violation2 }})</p>
-               </div>
-             </div>
-           </ion-col>
-         </ion-row>
-       </ion-grid>
-     </ion-item>
-     <ion-item v-if="IsFuelEnable">
-       <ion-grid>
-         <ion-row style="align-items: center;">
-           <ion-col size="auto">
-             <ion-icon :icon="iconName" style="font-size: 30px;" />
-           </ion-col>
-           <ion-col>
-             <div class="text-container">
-               <p class="text1">Fuel Consumed</p>
-               <div style="display: flex;">
-                 <p class="text2">{{ fuelCons1 }}</p>
-                 <p class="text2">-</p>
-                 <p class="text3">({{ fuelCons2 }})</p>
-               </div>
-             </div>
-           </ion-col>
-         </ion-row>
-       </ion-grid>
-     </ion-item>
-   </ion-list>
  </ion-content>
 </template>
 
+
+
+<style scoped>
+
+.below_cust_part{
+  margin: 20px;
+}
+.custom-metric-card {
+  margin: 10px;
+  border-radius: 16px;
+
+  background: #e6f6ff; /* surface-container-low */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+/* hover effect */
+.custom-metric-card:hover {
+  background: #d8f2ff;
+}
+
+.custom-metric-card:hover .right-icon {
+  color: var(--ion-color-primary);
+}
+
+/* layout */
+.card-row {
+  display: flex;
+  align-items: center;
+}
+
+/* left side */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* icon box */
+.icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.icon-box ion-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
+}
+
+/* text */
+.label-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b787f;
+  margin: 0;
+}
+
+.value-text {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+  color: #021f29;
+}
+
+.unit-text {
+  font-size: 14px;
+  color: #6b787f;
+  font-weight: 500;
+}
+
+/* right icon */
+.right-icon {
+  font-size: 22px;
+  color: #9aa6ad;
+  transition: 0.3s;
+}
+
+
+
+.item-inner {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: var(--inner-padding-top);
+    padding-bottom: var(--inner-padding-bottom);
+    padding-right: 0px;
+    padding-left: 0px;
+    display: -ms-flexbox;
+    display: flex;
+    position: relative;
+    -ms-flex: 1;
+    flex: 1;
+    -ms-flex-direction: inherit;
+    flex-direction: inherit;
+    -ms-flex-align: inherit;
+    align-items: inherit;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+    min-height: inherit;
+    border-width: var(--inner-border-width);
+    border-style: var(--border-style);
+    border-color: var(--border-color);
+    -webkit-box-shadow: var(--inner-box-shadow);
+    box-shadow: var(--inner-box-shadow);
+    overflow: inherit;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/* 🔥 CARD STYLE */
+.custom-card {
+  background: white;
+  border-radius: 16px;
+  padding: 10px;
+  margin: 10px 20px 20px 20px;
+
+  /* soft shadow like your HTML */
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.padding-class{
+    padding: 100px;
+
+}
+
+/* CHART */
+.chart-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-top: 20px;
+}
+
+/* CENTER TEXT */
+.center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.center-text span {
+  font-size: 12px;
+  color: #535f66;
+}
+
+.center-text b {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+/* STATUS ROW */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 40px;
+}
+
+/* EACH STATUS */
+.status-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+/* OPTIONAL CENTER DIVIDER */
+.status-box.mid {
+  border-left: 1px solid rgba(189, 202, 192, 0.2);
+  border-right: 1px solid rgba(189, 202, 192, 0.2);
+}
+
+/* DOT */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+/* COLORS */
+.dot.active {
+  background: v-bind(moving_color);
+}
+
+.dot.stopped {
+  background: v-bind(stopped_color);
+}
+
+.dot.offline {
+  background: v-bind(offline_color);
+}
+
+/* TEXT */
+.status-label {
+  font-size: 12px;
+  color: #535f66;
+}
+.dot.active, .dot.offline , .dot.stopped{
+      width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+}
+
+.status-value {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.custom-item {
+ display: flex;
+ align-items: center;
+ flex-direction: column;
+ margin: 10px;
+
+
+}
+
+#chart-container {
+ width: 150px;
+ height: 180px;
+ margin-right: 10px;
+ top: 20px; /* Distance from the top of the screen */
+ left: 50%; /* Center horizontally */
+}
+.item-content {
+ flex: 1;
+ 
+}
+.group-name {
+ font-weight: bold;
+ margin-bottom: 10px;
+ margin-left: 5px;
+}
+.status {
+ display: flex;
+ flex-direction: column;
+}
+.status-item {
+ display: flex;
+ align-items: center;
+ justify-content: space-between; /* Add this to space the label and value */
+ margin-bottom: 15px;
+ border-radius: 15px;
+ padding: 5px 10px;
+ font-size: 0.9em;
+ background-color: white; /* White background for all status items */
+ border: 1px solid; /* Set a border for all status items */
+}
+
+.moving {
+ color: v-bind(moving_color); /* Dynamic text color */
+}
+
+.idle {
+ color: v-bind(idle_color); /* Dynamic text color */
+}
+
+.stopped {
+ color: v-bind(stopped_color); /* Dynamic text color */
+}
+
+.offline {
+ color: v-bind(offline_color); /* Dynamic text color */
+}
+
+
+
+.month-below {
+ display: flex;
+ padding: 10px;
+ align-content: center;
+ flex-direction: inherit;
+ justify-content: center;
+}
+.month-total {
+ font-size: 16px;
+ text-align: center;
+}
+.today-total {
+ font-size: 11px;
+ align-content: center;
+}
+.text-container {
+ /* display: flex;
+ flex-direction: column; */
+ justify-content: center;
+}
+
+.text1 ,.text3{
+ margin: 0;
+ padding: 0;
+ font-size: 14px;
+ /* color: grey; */
+ font-weight: 400;
+}
+.text2 {
+ margin: 0;
+ padding: 0;
+ font-size: 18px;
+ /* color: #5d5b5b; */
+ font-weight: bold;
+}
+
+
+.month-below1 {
+ display: flex;
+ align-items: center;
+ position: relative;
+ /* background-color: #f3faff; */
+ padding: 10px;
+ margin-top: 10px;
+ font-size: 14px;
+}
+
+.month-total.date {
+ position: absolute;
+ left: 50%;
+ transform: translateX(-50%);
+ color: var(--ion-color-primary);
+ font-size: 16px;
+
+}
+
+.right-group {
+ display: flex;
+ align-items: center;
+ color: var(--ion-color-primary);
+
+ margin-left: auto; /* Pushes the right-group to the right side */
+}
+
+.icon-arrow {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+
+  filter: invert(34%) sepia(91%) saturate(400%) hue-rotate(120deg);
+}
+.network-status-bar {
+ background-color:#00875A;
+ color: white;
+ text-align: center;
+ padding: 5px;
+ font-size: 14px;
+}
+
+
+.network-status-bar.connected {
+ background-color: green;
+}
+.custom-item-card {
+  --background: #e6f6ff; /* like your HTML section */
+  --border-width: 0px;   /* remove default line */
+  --inner-border-width: 0px;
+
+  border-radius: 8px;
+  margin: 10px 20px 20px 20px;
+
+  /* soft elevation */
+  box-shadow: 0px 4px 12px rgba(2, 31, 41, 0.04);
+}
+
+/* REMOVE LIST LINES */
+ion-list {
+  background: transparent;
+}
+</style>
 
 <script>
 import {
@@ -136,6 +567,7 @@ import {
  watch,
  onBeforeUnmount,
  nextTick,
+ computed,
 } from "vue";
 import {
  IonContent,
@@ -145,12 +577,12 @@ import {
  IonItem,
  IonList,
  IonGrid,
- loadingController,
+ loadingController,IonCard,IonCardContent,
 } from "@ionic/vue";
 import { checkTimeDifference } from "@/services/dateTimeUtils"; // Make sure this path is correct
 
 import { Chart, registerables } from "chart.js";
-import { addCircleOutline } from "ionicons/icons";
+import { addCircleOutline, checkboxSharp } from "ionicons/icons";
 import router from "@/router/index"; // Assuming your router file is named router.js
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
@@ -171,7 +603,7 @@ let isPeriodChange=false;
 
 export default defineComponent({
  name: "PieChartView",
- components: { IonContent, IonIcon, IonCol, IonRow, IonItem, IonList,IonGrid },
+ components: { IonContent, IonIcon, IonCol, IonRow, IonItem, IonList,IonGrid,IonCard,IonCardContent},
 
  data() {
     return {
@@ -187,6 +619,8 @@ export default defineComponent({
     const stoppedStoredColor = await storage.get('stoppedcolor');
     const idleStoredColor = await storage.get('idlecolor');
     const offlineStoredColor = await storage.get('offlinecolor');
+
+      
 
     this.moving_color = movingStoredColor || Constants.Veh_color.Key_Active_Color;
     this.stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
@@ -212,6 +646,12 @@ const checkNetworkStatus = async () => {
  isConnected.value = status.connected;
 };
 
+
+const totalCount = computed(() => {
+  return Number(chartData.value.moving || 0) +
+         Number(chartData.value.stopped || 0) +
+         Number(chartData.value.offline || 0);
+});
 const listenToNetworkChanges = () => {
      Network.addListener('networkStatusChange', (status) => {
        isConnected.value = status.connected;
@@ -364,13 +804,16 @@ const listenToNetworkChanges = () => {
                            console.error("Empty response data");
                            return Promise.reject(new Error("Empty response data"));
                          }
+
+                          loading.dismiss();   
+
                        })
                        .catch(error => {
          console.error("Error:", error);
        })
-       .finally(() => {
+       .finally(async () => {
         if(isFirstTimeDataCall){
-loading.dismiss();   
+            await loading.dismiss();   
                          isFirstTimeDataCall=false;
 
  }
@@ -463,6 +906,10 @@ loading.dismiss();
               const idleStoredColor = await storage.get('idlecolor');
               const offlineStoredColor = await storage.get('offlinecolor');
 
+
+            
+
+
               const moving_color = movingStoredColor || Constants.Veh_color.Key_Active_Color;
               const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
               const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
@@ -522,46 +969,46 @@ loading.dismiss();
                            },
                      },
                      plugins: [
-                         {
-                           id: "centerText",
-                           beforeDraw: (chart) => {
-                             const width = chart.width;
-                             const height = chart.height;
-                             const ctx = chart.ctx;
-                             ctx.restore();
-                             const fontSize = (height / 150).toFixed(2);
-                             ctx.font = `${fontSize}em sans-serif`;
-                             ctx.textBaseline = "middle";
-                             ctx.fillStyle = "#000";
+                        //  {
+                        //    id: "centerText",
+                        //    beforeDraw: (chart) => {
+                        //      const width = chart.width;
+                        //      const height = chart.height;
+                        //      const ctx = chart.ctx;
+                        //      ctx.restore();
+                        //      const fontSize = (height / 150).toFixed(2);
+                        //      ctx.font = `${fontSize}em sans-serif`;
+                        //      ctx.textBaseline = "middle";
+                        //      ctx.fillStyle = "#000";
 
-                             // const text = total.toString();
-                             // const textX = Math.round((width - ctx.measureText(text).width) / 2);
-                             // const textY = height / 2;
-                             // ctx.fillText(text, textX, textY);
-                             // ctx.save();
+                        //      // const text = total.toString();
+                        //      // const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        //      // const textY = height / 2;
+                        //      // ctx.fillText(text, textX, textY);
+                        //      // ctx.save();
 
-                             // Custom text
-                         const text1 = "Total";
-                         const text2 = "Count";
-                         const text3 = total.toString();
+                        //      // Custom text
+                        //  const text1 = "Total";
+                        //  const text2 = "Count";
+                        //  const text3 = total.toString();
 
-                         // Calculate positions
-                         const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
-                         const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
-                         const textX3 = Math.round((width - ctx.measureText(text3).width) / 2);
+                        //  // Calculate positions
+                        //  const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
+                        //  const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
+                        //  const textX3 = Math.round((width - ctx.measureText(text3).width) / 2);
 
-                         const textY1 = height / 2 - 20;
-                         const textY2 = height / 2;
-                         const textY3 = height / 2 + 20;
+                        //  const textY1 = height / 2 - 20;
+                        //  const textY2 = height / 2;
+                        //  const textY3 = height / 2 + 20;
 
-                         // Draw text
-                         ctx.fillText(text1, textX1, textY1);
-                         ctx.fillText(text2, textX2, textY2);
-                         ctx.fillText(text3, textX3, textY3);
+                        //  // Draw text
+                        //  ctx.fillText(text1, textX1, textY1);
+                        //  ctx.fillText(text2, textX2, textY2);
+                        //  ctx.fillText(text3, textX3, textY3);
 
-                         ctx.save();
-                           },
-                         },
+                        //  ctx.save();
+                        //    },
+                        //  },
                        ],
                    });
                  }
@@ -676,7 +1123,7 @@ loading.dismiss();
                  });
 
                  return {
-                   
+                   totalCount,
                    formattedCurrentDate,
                    receivedDate,
                    pieChartRef,
@@ -724,148 +1171,4 @@ loading.dismiss();
 </script>
 
 
-<style scoped>
-.custom-item {
- display: flex;
- align-items: center;
- flex-direction: row;
- margin-bottom: 20px;
- margin-right: 20px;
- margin-left: 20px;
- margin-top: 20px;
-}
 
-#chart-container {
- width: 150px;
- height: 150px;
- margin-right: 10px;
- top: 20px; /* Distance from the top of the screen */
- left: 50%; /* Center horizontally */
-}
-.item-content {
- flex: 1;
-}
-.group-name {
- font-weight: bold;
- margin-bottom: 10px;
- margin-left: 5px;
-}
-.status {
- display: flex;
- flex-direction: column;
-}
-.status-item {
- display: flex;
- align-items: center;
- justify-content: space-between; /* Add this to space the label and value */
- margin-bottom: 15px;
- border-radius: 15px;
- padding: 5px 10px;
- font-size: 0.9em;
- background-color: white; /* White background for all status items */
- border: 1px solid; /* Set a border for all status items */
-}
-.status-label {
- margin-right: 10px; /* Adjust this value as needed */
-}
-.moving {
- color: v-bind(moving_color); /* Dynamic text color */
-}
-
-.idle {
- color: v-bind(idle_color); /* Dynamic text color */
-}
-
-.stopped {
- color: v-bind(stopped_color); /* Dynamic text color */
-}
-
-.offline {
- color: v-bind(offline_color); /* Dynamic text color */
-}
-
-
-
-.month-below {
- display: flex;
- background-color: #f4f2f2;
- padding: 10px;
- align-content: center;
- flex-direction: inherit;
- justify-content: center;
-}
-.month-total {
- font-size: 16px;
- text-align: center;
-}
-.today-total {
- font-size: 11px;
- align-content: center;
-}
-.text-container {
- display: flex;
- flex-direction: column;
- justify-content: center;
-}
-
-.text1 ,.text3{
- margin: 0;
- padding: 0;
- font-size: 16px;
- color: grey;
-}
-.text2 {
- margin: 0;
- padding: 0;
- font-size: 16px;
- color: #5d5b5b;
- font-weight: bold;
-}
-
-
-.month-below1 {
- display: flex;
- align-items: center;
- position: relative;
- background-color: #f4f2f2;
- padding: 10px;
- font-size: 14px;
-}
-
-.month-total.date {
- position: absolute;
- left: 50%;
- transform: translateX(-50%);
- color: var(--ion-color-tertiary-shade);
- font-size: 14px;
-
-}
-
-.right-group {
- display: flex;
- align-items: center;
- color: var(--ion-color-tertiary-shade);
-
- margin-left: auto; /* Pushes the right-group to the right side */
-}
-
-.icon-arrow {
- margin-left: 10px; /* Adjust the margin as needed */
- height: 25px;
- width: 25px;
- color: var(--ion-color-tertiary-shade);
-}
-
-.network-status-bar {
- background-color:#D01526;
- color: white;
- text-align: center;
- padding: 5px;
- font-size: 14px;
-}
-
-
-.network-status-bar.connected {
- background-color: green;
-}
-</style>

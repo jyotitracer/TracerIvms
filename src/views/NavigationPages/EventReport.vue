@@ -52,28 +52,28 @@
             <ul>
               <li v-for="(vehicle, detailIndex) in date.details" :key="detailIndex" class="detail-row">
                 <ion-grid>
-                  <ion-row class="circle-and-rows">
-                    <ion-col size="auto">
-                      <div class="circle" :style="{ backgroundColor: vehicle.circle_color }">
+                 
+                 <ion-row class="text-row" style="margin-top: 10px;">
+                  <div class="circle" :style="{ backgroundColor: vehicle.circle_color }">
                         <span class="circle-text">{{vehicle.label}}</span>
                       </div>
-                    </ion-col>
-                    <ion-col>
+                          <span class="text-item custom_back" style="color: var(--ion-color-primary);">{{vehicle.lastStatusUpdate}}</span>
+
+                      </ion-row>
+
+                  <ion-row class="circle-and-rows">
+                    
+                    <ion-col style="padding: 0px;">
                       <div class="text-rows">
                         <div class="text-row">
                           <span class="text-item1">{{vehicle.vehno}}</span>
                           <span class="text-item">({{vehicle.driver}})</span>
                         </div>
-                        <div class="text-row">
+                        <div class="text-row" style="margin-top: 5px;">
                           <span class="text-item1">{{ vehicle.eventstring }}</span>
-                          <span class="text-item" style="color:#D01526;">{{vehicle.lastStatusUpdate}}</span>
                         </div>
-                        <ion-row class="text-row">
-                          <ion-col class="text-item2"> {{vehicle.datestring }} </ion-col>
-                          <ion-col size="4" class="text-item3"> {{vehicle.duration }}</ion-col>
-
-                        </ion-row>
-                        <div class="location">
+                       
+                        <div class="location" style="margin-top: 5px;">
                           
                           <img src="/ic_gps.png" alt="location icon" class="icon-img" />
                           <span class="text-item"style="color: black;">{{ vehicle.location }}</span>
@@ -85,12 +85,19 @@
                       </div>
                     </ion-col>
                   </ion-row>
+                 
+                  <ion-row class="text-row" style="margin-top: 10px;">
+                          <ion-col class="text-item2" style="font-size: 14px;"> {{vehicle.datestring }} </ion-col>
+                          <ion-col size="4" class="text-item3"> {{vehicle.duration }}</ion-col>
+
+                        </ion-row>
                 </ion-grid>
                 <ion-item-divider v-if="detailIndex < date.details.length - 1" class="custom-divider"></ion-item-divider>
               </li>
             </ul>
           </div>
         </div>
+
       </div>
       </div>
     </ion-content>
@@ -485,7 +492,18 @@ let selectedEvents;
 
 <style scoped>
 
+.custom_back{
+  font-weight: bold; font-size: 14px;
+  background-color:var( --ion-background-color);
+padding-top: 5px;
+padding-bottom: 5px;
+padding-left: 10px;
+padding-right: 10px;
+border-radius: 12px;
+border: 1px solid transparent;
+color: var(--ion-color-primary);
 
+}
 
 
 ion-grid{
@@ -499,10 +517,10 @@ ion-grid{
 
 }
 .button_other{
-font-size: 11px;
+font-size: 12px;
 text-align: left;
 text-transform: none;
-color: #078DFC;
+color: var(--ion-color-primary);
 }
 
 .button_submit {
@@ -511,7 +529,7 @@ color: #078DFC;
   padding: 0px;
   width: 70px;
   color: white;
-  --background: #078DFC; /* Change the background color to blue */
+  --background: var(--ion-color-primary); /* Change the background color to blue */
   --border-radius: 0px; /* Set custom border radius */
   --height: 30px; /* Set custom height */
   height: 30px; /* Ensure height is applied as fallback */
@@ -530,35 +548,36 @@ margin-bottom: 20px;
 
 
 .group-header {
-background-color: #e0e0e0;
+background-color: var(--ion-color-primary);
 padding: 10px;
 font-weight: bold;
-color: #272626;
+color: white;
 font-size: 14px;
 }
 
 
 .date {
 margin-bottom: 2px;
+margin: 20px;
 }
 
 .date-header {
 display: flex;
 
 align-items: center;
-background-color: hwb(0 95% 4%);
+background-color:white;
 padding: 10px 5px 10px 10px;
-border: 1px solid red;
+border: 1px solid var(--ion-color-primary);
 }
 .date-display{
 font-size: 14px;
-color:#D01526;
+color:#00875A;
 font-weight: bold;
 }
 
 .item-details {
 padding: 0px 5px;
-border: 1px solid #ccc;
+border: 1px solid var(--ion-color-primary);
 background-color: #ffffff;
 align-items: center;
 }
@@ -587,6 +606,7 @@ margin: 0px;
 justify-content: space-between;
 align-items: center;
 align-content: center;
+padding-left: 10px;
 }
 
 .detail-right {
@@ -642,7 +662,7 @@ cursor: pointer;
 .circle {
 width: 40px;
 height: 40px;
-background-color:#D01526; /* Green background color */
+background-color:#00875A; /* Green background color */
 border-radius: 50%;
 display: flex;
 justify-content: center;
@@ -659,7 +679,8 @@ font-weight: bold;
 .circle-and-rows {
 display: flex;
 align-items: center; /* Center the rows vertically with the circle */
-margin: 0px;
+margin: 10px 0px 0px 0px;
+
 }
 
 .icon-img {
@@ -675,9 +696,13 @@ flex-direction: column;
 justify-content: space-around; /* Space the rows evenly */
 }
 
+
+
 .text-row {
-margin: 1px 0; /* Add some spacing between the rows */
-align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 🔥 pushes right item to end */
+  width: 100%;
 }
 .text-item
 {

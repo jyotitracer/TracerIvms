@@ -578,10 +578,10 @@ loading.dismiss();    }
 }
 
 ion-button {
-  --border-color:#D01526;
+  --border-color:#00875A;
   --border-width: 1px;
   --border-style: solid;
-  --color:#D01526;
+  --color:#00875A;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -592,7 +592,7 @@ ion-button {
 }
 
 ion-button.selected {
-   --background:#D01526;
+   --background:#00875A;
 
   --color: white;
   font-size: 10px;
@@ -606,7 +606,7 @@ ion-button.selected {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
+  background-color: var(--ion-background-color);
   padding: 5px 10px;
   border: 1px solid #ccc;
 }
@@ -659,7 +659,7 @@ ion-button.selected {
   gap: 10px; /* Optional: Add gap between columns */
   align-items: center; /* Center items vertically */
   justify-items: center; /* Center items horizontally */
-  background-color: #f0f0f0; /* Optional: Background color for grid items */
+  background-color: var(--ion-background-color); /* Optional: Background color for grid items */
   border: 1px solid #4a4a4a; /* Optional: Border for grid items */
 }
 
@@ -707,7 +707,7 @@ ion-button.selected {
 }
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

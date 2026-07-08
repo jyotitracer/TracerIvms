@@ -17,10 +17,23 @@
 
 <ion-content fullscreen class="safe-bottom">
       <ion-list>
-        <ion-item v-for="(statuscolor, index) in statusList" :key="index">
+        
+          <ion-card 
+        v-for="(statuscolor, index) in statusList" 
+        :key="index"
+        class="home-card"
+       
+      >
+        <ion-card-content class="card-row">
+          <span>{{ statuscolor.status }}</span>
+         <ion-icon slot="end" :icon="ellipseIcon" :style="{ color: statuscolor.color, height: '40px', width: '40px' }"></ion-icon>
+        </ion-card-content>
+      </ion-card>
+
+        <!-- <ion-item v-for="(statuscolor, index) in statusList" :key="index">
           <ion-label>{{ statuscolor.status }}</ion-label>
           <ion-icon slot="end" :icon="ellipseIcon" :style="{ color: statuscolor.color, height: '40px', width: '40px' }"></ion-icon>
-        </ion-item>
+        </ion-item> -->
       </ion-list>
     </ion-content>
   </ion-page>
@@ -101,7 +114,7 @@ export default defineComponent({
 
 <style scoped>
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;
@@ -115,5 +128,28 @@ export default defineComponent({
 
 ion-icon {
   font-size: 24px;
+}
+
+.home-card {
+    background-color:white;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 🔥 pushes check icon to right */
+  width: 100%;
+}
+
+/* Title */
+.card-row span {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Check icon */
+.check-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
 }
 </style>

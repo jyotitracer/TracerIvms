@@ -171,27 +171,38 @@ export default defineComponent({
     const labels = [ 'Moving', 'Stopped', 'Idle','All']; // Filter labels
 
     // Load vehicle details from Key_GroupAPI
-    const loadVehicleDetails = async () => {
-      const storedGroupData = await storage.get(Constants.storageValue.Key_GroupAPI);
-      console.log("display",storedGroupData);
+  const loadVehicleDetails = async () => {
+  let storedGroupData = await storage.get(Constants.storageValue.key_VehicleDetails_v1);
 
-      if (storedGroupData && storedGroupData.length > 0) {
-        // Collect all vehicles from all groups
-        items.value = storedGroupData.flatMap((group) =>
-          group.veh_arr.map((veh) => ({
-            vehid: veh.veh_id,
-            vehname: veh.veh_no,
-            vehstatus: veh.veh_sts, // status for filtering
-            vehColor: veh.sts_colr,
-            lat: veh.lat,
-            lon: veh.lon,
-            status: veh.status,
-            loc_str: veh.loc_str
-          }))
-        );
-      }
-    };
+  console.log("RAW DATA:", storedGroupData);
 
+  // ✅ If data is string → convert to JSON
+  if (typeof storedGroupData === 'string') {
+    storedGroupData = JSON.parse(storedGroupData);
+  }
+
+  // ✅ Ensure it's always an array
+  if (!Array.isArray(storedGroupData)) {
+    storedGroupData = [storedGroupData];
+  }
+
+  if (storedGroupData.length > 0) {
+    items.value = storedGroupData.flatMap((group) =>
+      (group?.veh_arr || []).map((veh) => ({
+        vehid: veh.veh_id,
+        vehname: veh.veh_no,
+        vehstatus: veh.veh_sts,
+        vehColor: veh.sts_colr,
+        lat: veh.lat,
+        lon: veh.lon,
+        status: veh.status,
+        loc_str: veh.loc_str,
+      }))
+    );
+
+    console.log("FINAL:", items.value);
+  }
+};
 
     // Toggle search bar visibility
     const toggleSearch = () => {
@@ -302,9 +313,6 @@ ion-list {
   padding: 0;
 }
 
-ion-content {
-  --ion-background-color: #fff;
-}
 
 .button-group {
   display: flex;
@@ -313,10 +321,10 @@ ion-content {
   padding: 0 10px 0 10px;
 }
 ion-button {
-  --border-color:#D01526;
+  --border-color:#00875A;
   --border-width: 1px;
   --border-style: solid;
-  --color:#D01526;
+  --color:#00875A;
   --background: transparent;
   --border-radius: 0;
   margin-right: -2px;
@@ -327,7 +335,7 @@ ion-button {
 }
 
 ion-button.selected {
-   --background:#D01526;
+   --background:#00875A;
 
   --color: white;
   font-size: 10px;
@@ -341,7 +349,7 @@ ion-button.selected {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
+  background-color: var(--ion-background-color);
   padding: 5px 10px;
   border: 1px solid #ccc;
 }
@@ -355,7 +363,7 @@ ion-button.selected {
 
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

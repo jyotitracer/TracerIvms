@@ -260,4 +260,19 @@ export default {
   margin-top: 20px;
   font-size: 16px;
 }
+
+ion-content {
+  --background: #f3faff;
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-searchbar {
+  --background: #ffffff;
+  --box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  --border-radius: 12px;
+  padding: 10px 20px;
+}
 </style>

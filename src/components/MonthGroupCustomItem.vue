@@ -1,8 +1,9 @@
 <template>
-  <div>
+    <div class="custom-card">
+
     <div class="group-name">{{ item.group }}</div>
-    <ion-item class="custom-item">
-      <ion-grid style="padding: 0;">
+    <div class="custom-item">
+      <div style="padding: 0;">
         <!-- First row: Bar chart -->
         <ion-row style="height: 150px;"> 
           <bar-chart-view :data="item.grphArr" /> <!-- Bar chart component -->
@@ -20,48 +21,48 @@
         <!-- Third row: Distance travelled and violation count -->
         <ion-row class="border-bottom">
           <ion-col class="centered with-border">
-            <ion-item>
-              <ion-icon :icon="iconName" class="icon-style" />
+      <div class="info-item">
+                <ion-icon :icon="iconName" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.distance1 }}</p>
                 <p class="text2">({{ item.distance2 }})</p>
               </div>
-            </ion-item>
+            </div>
           </ion-col>
           <ion-col>
-            <ion-item>
+            <div class="info-item">
               <ion-icon :icon="iconName" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.vio1 }}</p>
                 <p class="text2">({{ item.vio2 }})</p>
               </div>
-            </ion-item>
+            </div>
           </ion-col>
         </ion-row>
 
         <!-- Fourth row: Moving duration and fuel consumed -->
         <ion-row>
           <ion-col class="centered with-border">
-            <ion-item>
+            <div class="info-item">
               <ion-icon :icon="iconName" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.moving1 }}</p>
                 <p class="text2">({{ item.moving2 }})</p>
               </div>
-            </ion-item>
+            </div>
           </ion-col>
           <ion-col>
-            <ion-item>
-              <ion-icon :icon="iconName" class="icon-style" />
+           <div class="info-item">
+                <ion-icon :icon="iconName" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.fuel1 }}</p>
                 <p class="text2">({{ item.fuel2 }})</p>
               </div>
-            </ion-item>
+            </div>
           </ion-col>
         </ion-row>
-      </ion-grid>
-    </ion-item>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -95,11 +96,45 @@ export default {
 </script>
 
 <style scoped>
-/* Layout and spacing for the group item */
+
+
 .custom-item {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.info-item {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  margin: 0;
 }
+
+ion-row,
+ion-col {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+
+
+/* 🔥 CARD STYLE */
+.custom-card {
+  background: white;
+  border-radius: 16px;
+  margin: 10px;
+
+  /* soft shadow like your HTML */
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
 
 /* Group name style */
 .group-name {

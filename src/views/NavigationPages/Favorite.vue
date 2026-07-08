@@ -218,6 +218,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
 .custom-divider {
   margin: 0;
   padding: 0;
@@ -244,8 +245,5 @@ ion-list {
   padding: 0;
 }
 
-ion-content {
-  --ion-background-color: #fff;
-}
 
 </style>

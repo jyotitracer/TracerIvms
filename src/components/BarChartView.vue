@@ -1,13 +1,12 @@
 <template>
-  <ion-content>
+  <div class="chart-scroll-wrapper">
     <canvas ref="barChart"></canvas>
-  </ion-content>
+  </div>
 </template>
 
 <script>
 import { ref, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { IonContent } from '@ionic/vue';
 import Constants from "@/common/constants";
 import storage from "@/services/storagefile";
 
@@ -18,19 +17,15 @@ Chart.register(...registerables);
  
 export default {
   name: 'BarChartView',
-  components: { IonContent },
   props: {
     data: Object, // Data passed to configure the chart
   },
    setup(props) {
-    // Set colors from constants
 
     const barChart = ref(null);
-     // Check if data exists in storage
- 
+
     // Initialize chart when component is mounted
     onMounted(async () => {
-  // Log the passed data for debugging
   console.log("Data:", props.data[0]);
 
   const labels = [];
@@ -48,24 +43,29 @@ export default {
 
   // Determine maximum value to configure chart steps
   const maxValue = Math.max(...activeData, ...stoppedData, ...offlineData);
-  const stepSize = Math.ceil(maxValue / 4.5); // Define step size for 6 intervals
+  const stepSize = Math.ceil(maxValue / 4.5);
 
 
   const movingStoredColor = await storage.get('movingcolor');
   const stoppedStoredColor = await storage.get('stoppedcolor');
   const offlineStoredColor = await storage.get('offlinecolor');
 
+  const moving_color =  movingStoredColor || Constants.Veh_color.Key_Active_Color;
+  const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
+  const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
 
-   const moving_color =  movingStoredColor || Constants.Veh_color.Key_Active_Color;
-   const idle_color =  Constants.Veh_color.Key_Idle_Color;
-   const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
-   const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
+  await nextTick();
 
-                      await nextTick();
-
-  // If the chart is ready, render the chart
   if (barChart.value) {
-  
+
+    // ✅ KEY FIX: Give each date 45px of canvas space so labels never overlap
+    // The wrapper div scrolls horizontally to show all dates
+    const BAR_WIDTH = 45;
+    const canvasWidth = Math.max(labels.length * BAR_WIDTH, 300);
+    barChart.value.width  = canvasWidth;
+    barChart.value.height = 150;
+    barChart.value.style.width  = canvasWidth + 'px';
+    barChart.value.style.height = '150px';
 
     new Chart(barChart.value, {
       type: 'bar',
@@ -74,83 +74,74 @@ export default {
         datasets: [
           {
             label: 'Active',
-            data: activeData,  // Dynamic data for 'Active'
+            data: activeData,
             backgroundColor: moving_color,
           },
           {
             label: 'Stopped',
-            data: stoppedData,  // Dynamic data for 'Stopped'
+            data: stoppedData,
             backgroundColor: stopped_color,
           },
           {
             label: 'Offline',
-            data: offlineData,  // Dynamic data for 'Offline'
+            data: offlineData,
             backgroundColor: offline_color,
           },
         ],
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false, // Allow chart to be responsive
+        responsive: false,          // ✅ false = respect the explicit canvas width we set
+        maintainAspectRatio: false,
         scales: {
           x: {
             title: {
-              display: true,
-              text: 'Date (scroll to see more data)',
+              display: false,
             },
             ticks: {
-              autoSkip: false, // Disable auto-skipping of ticks
+              autoSkip: false,    // ✅ Show every label — canvas is wide enough
+              maxRotation: 45,    // ✅ Rotate if still tight
+              minRotation: 0,
+              font: { size: 10 },
             },
-            min: 0, // Start displaying from the first label (index 0)
-            max: 6, // Show up to the 7th label (index 6)
           },
           y: {
             title: {
               display: true,
               text: 'Vehicle Count',
             },
-            beginAtZero: false,
-            max: stepSize * 5, // Ensure the max is a multiple of the step size
+            beginAtZero: true,
+            max: stepSize * 5,
             ticks: {
-              stepSize: stepSize, // Dynamic step size
+              stepSize: stepSize,
             },
           },
         },
         plugins: {
           datalabels: {
-            display: true, // Display the labels
-            color: '#000', // Label color
-            anchor: 'end', // Position of the label
-            align: 'top', // Position of the label
+            display: true,
+            color: '#000',
+            anchor: 'end',
+            align: 'top',
             formatter: (value) => {
-              return value > 0 ? value : '0'; // Display only positive values
+              return value > 0 ? value : '';
             },
             font: {
-              size: 8, // Set font size to small (adjust as needed)
-              weight: 'normal', // Set font weight to normal
+              size: 8,
+              weight: 'normal',
             },
-            offset: 1, // Adjust this value to move labels up or down
+            offset: 1,
           },
           zoom: {
-            pan: {
-              enabled: true,
-              mode: 'x', // Enable horizontal panning
-            },
+            pan:  { enabled: false },
             zoom: {
-              wheel: {
-                enabled: true, // Enable zooming with the mouse wheel
-              },
-              drag: {
-                enabled: true, // Enable zooming by dragging
-              },
-              pinch: {
-                enabled: true, // Enable pinch zooming on touch devices
-              },
-              mode: 'x', // Enable zooming in the x direction only
+              wheel:  { enabled: false },
+              drag:   { enabled: false },
+              pinch:  { enabled: false },
+              mode: 'x',
             },
           },
           legend: {
-            display: false, // Disable the legend
+            display: false,
           },
         },
       },
@@ -158,12 +149,18 @@ export default {
   }
 });
 
-
     return { barChart };
   },
 };
 </script>
 
 <style scoped>
-/* Scoped styles for your chart component */
+/* ✅ Scrollable wrapper — swipe left/right to see all dates */
+.chart-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+  padding-bottom: 4px;
+}
 </style>

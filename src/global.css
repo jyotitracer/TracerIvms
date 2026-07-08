@@ -8,6 +8,66 @@ ion-footer ion-toolbar {
   border: none;
 } */
 
+
+@import './theme/variables.css';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--surface);
+  color: var(--ion-text-color);
+}
+ion-title {
+  font-family: 'Manrope', sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Headings */
+.display-lg {
+  font-family: 'Manrope', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+}
+
+.headline-sm {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* ===== SURFACE SYSTEM ===== */
+
+.surface-section {
+  background: var(--surface-container-low);
+  border-radius: 1.5rem;
+  padding: 1rem;
+}
+
+.surface-card {
+  background: var(--surface-container-highest);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+/* NO LINE RULE */
+.no-border {
+  border: none !important;
+}
+
+/* ===== GLASS HEADER ===== */
+.glass-header {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== SHADOW ===== */
+.soft-shadow {
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+
 ion-footer,
 ion-footer ion-toolbar {
   --background: transparent;
@@ -18,12 +78,18 @@ ion-footer ion-toolbar {
 
   ion-header, ion-header ion-toolbar
   {
-    --background: #f31212; /* Set the background color of the header */
+    --background: var(--ion-color-primary); /* Set the background color of the header */
   }
 
  
+  ion-item,ion-grid{
+    --background: white;
+     --border-width: 0;          /* remove outer line */
+  --inner-border-width: 0;    /* remove inner divider */
+  }
+
   ion-title {
-    color: white !important; /* Set the text color of the title */
+    --color: white !important; /* Set the text color of the title */
   }
   
   ion-buttons ion-back-button {
@@ -35,14 +101,44 @@ ion-footer ion-toolbar {
   }
 
   ion-toggle {
-    --handle-background-checked: #D01526; /* The color of the toggle handle */
-    --background-checked: #D01526; /* The color of the background when the toggle is selected */
+   /* OFF state (default) */
+  --background: #d1d5db; /* grey */
+
+  /* ON state (checked) */
+  --background-checked: #00875A; /* your primary green */
+
+  /* Handle (ball) */
+  --handle-background: #ffffff; /* white */
+  --handle-background-checked: #ffffff; /* white */
+
+  font-weight: 500; /* bold */
+  font-size: 18px;
+
+   --width: 60px;   /* increase width */
+  --height: 32px;  /* increase height */
+
+  
+
   }
 
-  ion-list{
-    --background: #fff; /* Set the background color of the header */
+  /* OFF state (default) */
+ion-toggle::part(track) {
+  background: #d1d5db !important; /*  */
+   
+}
 
-  }
+/* ON state (checked) */
+ion-toggle.toggle-checked::part(track) {
+  background: #00875A !important; /* green background */
+}
+
+/* BALL (handle) always white */
+ion-toggle::part(handle) {
+  background: #ffffff !important;
+}
+
+
+
 
   /* iOS absolute final fix */
 html,
@@ -86,9 +182,12 @@ ion-content.no-safe-bottom::part(scroll) {
   margin-bottom: 0 !important;
 }
 
-* {
-  font-family: var(--ion-font-family) !important;
-}
- 
 
+ 
+.big-toggle::part(track) {
+  width: 50px;
+  height: 25px;
+ margin-top: 20px;
+ margin-bottom: 20px;
+}
   

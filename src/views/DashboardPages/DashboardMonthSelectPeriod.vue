@@ -218,28 +218,48 @@ initNetworkListener();
       }
     },
 
-    scrollToMonth() {
+    async scrollToMonth() {
+      if (!this.receivedFromDate) {
+        console.error('receivedFromDate is not set');
+        return;
+      }
 
-if (!this.receivedFromDate) {
-  console.error('receivedFromDate is not set');
-  return;
-}
+      const selectedMonthIndex = this.receivedFromDate.getMonth();
 
-const selectedMonthIndex = this.receivedFromDate.getMonth();
+      await this.$nextTick(); // Wait for Vue DOM updates
 
-this.$nextTick(() => {
-const monthElements = document.querySelectorAll('.month');
+      // Wait for Ionic's ion-content to finish its internal layout
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-if (monthElements[selectedMonthIndex]) {
+      const monthElements = document.querySelectorAll('.month');
 
-  console.log("displaydata",monthElements[selectedMonthIndex]);
-  // Scroll to the correct month
-  monthElements[selectedMonthIndex].scrollIntoView({ behavior: 'smooth' });
-} else {
-  console.error('Month element not found');
-}
-});
-},
+      if (!monthElements[selectedMonthIndex]) {
+        console.error('Month element not found for index:', selectedMonthIndex);
+        return;
+      }
+
+      const ionContent = this.$refs.content.$el;
+
+      try {
+        // Get the actual scrollable inner element from ion-content's shadow DOM
+        const scrollEl = await ionContent.getScrollElement();
+        const monthEl = monthElements[selectedMonthIndex];
+
+        // Calculate position relative to the scroll container
+        let offsetTop = 0;
+        let el = monthEl;
+        while (el && el !== scrollEl) {
+          offsetTop += el.offsetTop;
+          el = el.offsetParent;
+        }
+
+        await ionContent.scrollToPoint(0, offsetTop, 500); // smooth scroll in 500ms
+      } catch (e) {
+        // Fallback: use basic offsetTop if getScrollElement fails
+        const monthTop = monthElements[selectedMonthIndex].offsetTop;
+        await ionContent.scrollToPoint(0, monthTop, 500);
+      }
+    },
 
     goBack() {
       this.$router.back();
@@ -286,7 +306,7 @@ if (monthElements[selectedMonthIndex]) {
   font-size: 16px;
 }
 .month h5 {
-  color: #D01526;;
+  color: #00875A;;
   font-size: 16px;
   text-align: center;
 }
@@ -313,12 +333,12 @@ if (monthElements[selectedMonthIndex]) {
 }
 .start-date,
 .end-date {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   border-radius: 50%;
 }
 .in-range {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
 }
 .disabled {
@@ -327,14 +347,14 @@ if (monthElements[selectedMonthIndex]) {
   pointer-events: none;
 }
 .custom-button {
-  --background: #D01526;;
+  --background: #00875A;;
   --border-radius: 0;
   --border-color: black;
   --border-width: 1px;
   --color: white;
 }
 .network-status-bar {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   text-align: center;
   padding: 5px;

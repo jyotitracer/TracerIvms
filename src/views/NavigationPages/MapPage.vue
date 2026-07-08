@@ -28,10 +28,73 @@
           />
         </div>
   
+    <!-- 🔘 Button to open popup -->
+
+        <!-- FAB BUTTON -->
+<ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
+  <ion-fab-button @click="toggleFab">
+        <ion-icon :icon="fabIcon" style="color: white;"></ion-icon>
+
+  </ion-fab-button>
+</ion-fab>
+
+
+
+      
   
+
+    
+<div class="fab-popup" :class="{ open: isFabOpen }">
+
+        <!-- Show Trip -->
+        <div class="menu-item active" @click="navigateToPage('1')">
+          <ion-icon :icon="mapOutline"></ion-icon>
+          <span>Show Trip</span>
+        </div>
+
+        <!-- Select Group -->
+        <div class="menu-item active" @click="navigateToPage('2')">
+          <ion-icon :icon="peopleOutline"></ion-icon>
+          <span>Select Group</span>
+        </div>
+
+
+           <!-- Settings -->
+        <div class="menu-item active" @click="navigateToPage('3')">
+          <ion-icon :icon="settingsOutline"></ion-icon>
+          <span>Settings</span>
+        </div>
+        
+        <!-- Home -->
+        <div class="menu-item active" @click="navigateToPage('4')">
+          <ion-icon :icon="homeOutline"></ion-icon>
+          <span>Home Location</span>
+        </div>
+
+        <!-- Home -->
+        <div class="menu-item active" @click="navigateToPage('5')">
+          <ion-icon :icon="searchOutline"></ion-icon>
+          <span>Search Closest Vehicle From Landmark</span>
+        </div>
+
+         <!-- Home -->
+        <div class="menu-item active" @click="navigateToPage('6')">
+          <ion-icon :icon="carOutline"></ion-icon>
+          <span>Search Vehicle</span>
+        </div>
+
+
+        <!-- Search Vehicle -->
+        <div class="menu-item active" @click="navigateToPage('7')">
+          <ion-icon :icon="locationOutline"></ion-icon>
+          <span>Search Landmark</span>
+        </div>
+    </div>
+
+
         
   
-        <ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
+        <!-- <ion-fab slot="fixed" vertical="bottom" horizontal="start" style="bottom: 30px;">
         <ion-fab-button ref="fabButton">
           <ion-icon :icon="chevronUpCircle" style="color: white;"></ion-icon>
         </ion-fab-button>
@@ -79,7 +142,7 @@
   
         
         </ion-fab-list>
-      </ion-fab>
+      </ion-fab> -->
       
     </div>
   
@@ -88,7 +151,8 @@
   
   <div class="filter-section" v-if="ishowPath" >
   
-    <ion-icon :icon="closeCircle" style="color: white; margin-bottom: 10px;" class="close-icon" @click="closeShowPath(1)"></ion-icon>
+    <ion-icon :icon="closeCircle" style="color: white; margin-bottom: 10px;" 
+    class="close-icon" @click="closeShowPath(1)"></ion-icon>
   
     <div class="from-to-section" v-if="isMarkerShowPath">
   
@@ -214,6 +278,103 @@
 </template>
   
   <style scoped>
+/* 🔥 Top-right (end) */
+.closeicon {
+  position: absolute;
+  right: 10px;   /* 👉 end of screen */
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 24px;
+  color: var(--ion-color-primary);
+  z-index: 10;
+  cursor: pointer;
+}
+ion-fab-button {
+  --background: #006b47;
+  --background-hover: #00875A;
+  --box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+.fab-popup {
+  position: fixed;
+  bottom: 90px; /* above FAB */
+  left: 16px;
+  width: 260px;
+
+  background: white;
+  border-radius: 16px;
+  padding: 12px;
+
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+
+  transform: translateY(20px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: all 0.25s ease;
+  z-index: 999;
+}
+
+/* 🔥 Open animation */
+.fab-popup.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+/* Menu Item */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 50px;
+
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #021f29;
+  transition: background 0.2s ease;
+}
+
+.menu-item ion-icon {
+  font-size: 20px;
+  color: #535f66;
+}
+
+/* Hover */
+.menu-item:hover {
+  background: #e6f6ff;
+  color: #006b47;
+}
+
+.menu-item:hover ion-icon {
+  color: #006b47;
+}
+
+/* Active */
+.menu-item.active {
+  background: #e6f6ff;
+  color: #006b47;
+  font-weight: bold;
+}
+
+.menu-item.active ion-icon {
+  color: #006b47;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 10px 0;
+}
+
+
   ion-range{
     --knob-size: 16px;
     --height: 38px;
@@ -261,7 +422,11 @@
 
   }
   
-  
+  .modelclass{
+     border-radius: 20px 20px 0 0;
+      margin: 5px;
+   box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+  }
   
   .map-container {
   height: calc(100%); /* adjust 120px for controls */
@@ -334,7 +499,7 @@
   
   ion-icon {
     font-size: 24px;
-    color:#D01526;
+    color:#00875A;
   }
   
   
@@ -419,7 +584,7 @@
   
   .custom-datetime {
     --ion-text-color: #000;
-    --ion-background-color: #f0f0f0;
+    --ion-background-color: var(--ion-background-color);
     --ion-color-primary: #3b83f6;
     --ion-color-secondary: #ffcc00;
     
@@ -447,7 +612,7 @@
     height: 40px;  /* Height of the circle */
     display: flex;
     align-items: center;
-     --background:#D01526;
+     --background:#00875A;
 
       --color: white;
       padding: 0px;
@@ -482,7 +647,7 @@
     font-size: 12px;
     align-items:end;
     color: white;
-     --background:#D01526;
+     --background:#00875A;
 
     text-transform: none;
     width: auto;
@@ -581,7 +746,18 @@ import {
   pauseCircle,
   star,
   close,
-  closeCircle
+  closeCircle,
+  mapOutline,
+  peopleOutline,
+  home,
+  homeOutline,
+  settingsOutline,
+  carOutline,
+  searchOutline,
+  locationOutline,
+  closeOutline,
+  add,
+  
 } from 'ionicons/icons';
 
 import router from '@/router/index';
@@ -617,6 +793,14 @@ import * as tz from "date-fns-tz";
 
 import { selectedPage } from '@/services/userstate';
 import { loadGoogleMaps } from '@/services/googleMapsLoader';
+// State
+    const isFabOpen = ref(false);
+    const fabIcon = ref(add);
+
+    const  toggleFab = () => {
+      isFabOpen.value = !isFabOpen.value;
+      fabIcon.value = isFabOpen.value ? close : add; // Update icon based on FAB state
+    };
 
 
 /* ===========================
@@ -920,8 +1104,13 @@ const userTimeZone = ref('Asia/Kolkata');
       closeCircle,
       chevronUpCircle,
       colorPalette,
-      globe,
-
+      globe,fabIcon,
+    mapOutline,add,close,
+  peopleOutline,
+  home,closeOutline,
+  homeOutline,searchOutline,
+  settingsOutline,
+  carOutline,locationOutline,
       mapContainer,
       navigateToPage,
       closeShowPath,
@@ -967,7 +1156,8 @@ const userTimeZone = ref('Asia/Kolkata');
       selectedDateTime,
       canPlay,
 
-      openModal,
+      openModal,      toggleFab ,isFabOpen,
+
       progressValue,
       speedValue,
 
@@ -1347,6 +1537,13 @@ const closeShowPath = (count: number) => {
 
 
 const navigateToPage = (pageName) => {
+   if (fabButton.value) {
+        fabButton.value.$el?.click(); // Access the native element and trigger a click
+      }
+
+       isFabOpen.value = false;
+          fabIcon.value = add;
+
   isMapBusyWithRoute.value = false;
   closeShowPath(1);
 
@@ -1372,6 +1569,10 @@ const navigateToPage = (pageName) => {
   } else {
     console.warn('Invalid page number:', pageName);
   }
+
+
+    // Close the FAB list and toggle the icon to 'add' when navigating
+         
 };
   
 
@@ -2087,9 +2288,10 @@ async function CallTripPath() {
         await loadingPlay.present();
 
         await processAnimation(1);
-        canPlay.value = true;
+       await loadingPlay.dismiss();
+               canPlay.value = true;
 
-        loadingPlay.dismiss();
+
       } else if (responsejson.arr_data.length == 1) {
         showToastMessage("Start and end location getting same.");
       }

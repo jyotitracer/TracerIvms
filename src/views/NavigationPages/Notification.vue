@@ -8,7 +8,7 @@
             <div class="text">{{ page.msg }}</div>
             <div class="separator"></div>
             <div class="action-buttons">
-                <ion-icon style="height: 30px; width: 30px; color:#D01526;" name="share-outline" @click="shareItem(page.msg)"></ion-icon>
+                <ion-icon style="height: 30px; width: 30px; color:#00875A;" name="share-outline" @click="shareItem(page.msg)"></ion-icon>
                 <ion-checkbox v-model="page.selected" class="large-checkbox"></ion-checkbox>
               </div>
           </div>
@@ -119,6 +119,9 @@ export default defineComponent({
           } else {
             console.warn('Empty response data');
           }
+
+                  await loading.dismiss();   
+
         } else {
           console.error(`API Error: ${response.status}`);
          // showToastMessage('Error fetching data. Please try again.');
@@ -128,7 +131,7 @@ export default defineComponent({
        // showToastMessage('Error fetching data. Please check your connection.');
       } finally {
          if(isFirstTimeDataCall){
-loading.dismiss();   
+        await loading.dismiss();   
  }
       }
     };
@@ -226,7 +229,7 @@ loading.dismiss();
             });
             
             loadItemsFromStorage();
-      fetchDataFromAPI();
+            fetchDataFromAPI();
 
     });
 
@@ -257,7 +260,7 @@ loading.dismiss();
   justify-content: center;    /* ✅ CENTER BOTH BUTTONS */
   align-items: center;
   gap: 12px;
-  background: #d32f2f;
+  background: var(--ion-color-primary);
   z-index: 100;
 }
 
@@ -280,7 +283,7 @@ loading.dismiss();
   --size: 22px; /* Adjust this value to increase or decrease the checkbox size */
 }
 .red-button {
-  --color:#D01526; /* Text color */
+  --color:var(--ion-color-primary); /* Text color */
   --background: transparent; /* Background color (optional) */
 }
 

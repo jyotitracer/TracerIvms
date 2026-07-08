@@ -218,7 +218,7 @@ const next = () => {
   justify-content: center;
   align-items: center;
   display: flex;
-  background-color: blue;
+  background-color: var(--ion-color-primary);
   color: #fff;
 }
 
@@ -277,7 +277,7 @@ const next = () => {
 }
 
 .network-status-bar {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   text-align: center;
   padding: 5px;

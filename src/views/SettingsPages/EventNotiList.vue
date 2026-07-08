@@ -24,7 +24,8 @@
           v-model="searchQuery" 
           placeholder="Search Events"
         ></ion-searchbar>
-        <ion-toggle  mode="md" 
+        <ion-toggle  
+          class="big-toggle"
           @ionChange="toggleAllItems" 
           :checked="allToggled"
         ></ion-toggle>
@@ -34,8 +35,10 @@
         <ion-item 
           v-for="(page, index) in filteredItems" 
           :key="index"
+          
         >
-          <ion-toggle  mode="md" 
+          <ion-toggle  
+          class="big-toggle" 
             justify="space-between" 
             v-model="page.checked" 
             @ionChange="updateToggleStatus(page)"
@@ -252,5 +255,6 @@ ion-item {
 .network-status-bar.connected {
   background-color: green;
 }
+
 
 </style>

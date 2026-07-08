@@ -349,12 +349,12 @@ loading.dismiss();    }
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  color:#D01526; /* Text color */
-  background-color: #dbd7d7; /* Background for the text */
+  color:#00875A; /* Text color */
+  background-color: #DFF4FF; /* Background for the text */
 }
 
 .tooltip-section:hover {
-  background-color: #f0f0f0; /* Hover effect */
+  background-color: var(--ion-background-color); /* Hover effect */
 }
 
 .tooltip-icon {
@@ -370,13 +370,13 @@ loading.dismiss();    }
 .month-below1 {
   align-items: center;
   position: relative;
-  background-color: #f4f2f2;
+  background-color: #f3faff;
   text-align: center;
   margin-top: 5px;
 }
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

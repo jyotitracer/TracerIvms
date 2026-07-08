@@ -37,6 +37,7 @@ export default defineComponent({
                 const stoppedStoredColor = await storage.get('stoppedcolor');
                 const offlineStoredColor = await storage.get('offlinecolor');
 
+       
                  const movingColor =  movingStoredColor || Constants.Veh_color.Key_Active_Color;
                  const stoppedColor = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
                  const offlineColor = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;

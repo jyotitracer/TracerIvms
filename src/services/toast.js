@@ -21,7 +21,7 @@ export const showToastMessage = async (message) => {
       message: message,
       duration: 1000,
       position: 'bottom',
-      color: 'danger',
+    color: 'primary' // 🔥 THIS LINE
       // buttons: [
       //   {
       //     text: 'Ok',
@@ -37,7 +37,7 @@ export const topshowToastMessage = async (message) => {
       message: message,
       duration: 1000,
       position: 'top',
-      color: 'danger',
+    color: 'primary' // 🔥 THIS LINE
       // buttons: [
       //   {
       //     text: 'Ok',

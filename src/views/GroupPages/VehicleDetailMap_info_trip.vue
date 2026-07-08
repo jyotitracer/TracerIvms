@@ -212,7 +212,7 @@ export default defineComponent({
 /* Default tab style */
 ion-tab-button {
   --color: #8e8e93;              /* iOS gray */
-  --color-selected: #007aff;     /* iOS blue */
+  --color-selected: var(--ion-color-primary);     /* iOS blue */
   font-size: 11px;
 }
 
@@ -230,17 +230,17 @@ ion-tab-button ion-label {
 /* Selected tab */
 .tab-selected ion-icon,
 .tab-selected ion-label {
-  color: #007aff !important; /* iOS native blue */
+  color: var(--ion-color-primary) !important; /* iOS native blue */
 }
 
 
 .tab-selected ion-icon,
 .tab-selected ion-label {
-  color: red !important; /* Set selected tab icon and label to red */
+  color: var(--ion-color-primary) !important; /* Set selected tab icon and label to red */
 }
 
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

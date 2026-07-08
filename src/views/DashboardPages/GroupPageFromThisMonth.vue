@@ -50,14 +50,15 @@
       </div>
 
       <div class="custom-legend">
+          
         <div class="legend-item">
-          <span class="legend-box" :style="{ backgroundColor: moving_color }"></span> Active
+          <span class="legend-box" :style="{ backgroundColor: moving_color ,border:moving_color}"></span> Active
         </div>
         <div class="legend-item">
-          <span class="legend-box" :style="{ backgroundColor: stopped_color }"></span> Stopped
+          <span class="legend-box" :style="{ backgroundColor: stopped_color ,border: stopped_color }"></span> Stopped
         </div>
         <div class="legend-item">
-          <span class="legend-box" :style="{ backgroundColor: offline_color }"></span> Offline
+          <span class="legend-box" :style="{ backgroundColor: offline_color , border: stopped_color }"></span> Offline
         </div>
       </div>
 
@@ -67,10 +68,106 @@
           :key="item.id"
           :item="item"
         />
+        
       </ion-list>
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+
+.subtitle {
+  cursor: pointer;
+  position: relative;
+  font-size: 12px;
+  color: #fff; /* Optional: Change color to indicate interactivity */
+  margin-top: 8px; /* Adjust as necessary for spacing */
+}
+
+.tooltip {
+  display: flex;
+  top: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+  z-index: 1000; /* Higher z-index to ensure it overlays other elements */
+  opacity: 1; /* Ensure it's visible when shown */
+  pointer-events: auto;
+}
+
+.tooltip-section {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center items horizontally */
+  justify-content: center; /* Center items vertically */
+  flex: 1;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  color:#00875A; /* Text color */
+  background-color: #DFF4FF; /* Background for the text */
+}
+
+.tooltip-section:hover {
+  background-color: var(--ion-background-color); /* Hover effect */
+}
+
+.tooltip-icon {
+  height: 20px; /* Adjust size as needed */
+  width: 20px; /* Adjust size as needed */
+  margin-bottom: 5px; /* Space between icon and text */
+}
+
+.tooltip-text {
+  font-size: 12px; /* Adjust text size as needed */
+}
+
+.custom-legend {
+  display: flex;
+  justify-content: right;
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+.legend-box {
+   width: 10px;              /* smaller = premium look */
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;      /* 🔥 makes it circle */
+}
+
+
+.month-below1 {
+  align-items: center;
+  position: relative;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.network-status-bar {
+  background-color:#00875A;
+  color: white;
+  text-align: center;
+  padding: 5px;
+  font-size: 14px;
+}
+
+
+.network-status-bar.connected {
+  background-color: green;
+}
+
+
+</style>
+
 
 <script lang="ts">
 import {
@@ -410,96 +507,3 @@ watch(searchQuery, () => {
 });
 </script>
 
-<style scoped>
-
-.subtitle {
-  cursor: pointer;
-  position: relative;
-  font-size: 12px;
-  color: #fff; /* Optional: Change color to indicate interactivity */
-  margin-top: 8px; /* Adjust as necessary for spacing */
-}
-
-.tooltip {
-  display: flex;
-  top: 0;
-  left: 0;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
-  z-index: 1000; /* Higher z-index to ensure it overlays other elements */
-  opacity: 1; /* Ensure it's visible when shown */
-  pointer-events: auto;
-}
-
-.tooltip-section {
-  display: flex;
-  flex-direction: column; /* Stack items vertically */
-  align-items: center; /* Center items horizontally */
-  justify-content: center; /* Center items vertically */
-  flex: 1;
-  padding: 5px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 14px;
-  color:#D01526; /* Text color */
-  background-color: #dbd7d7; /* Background for the text */
-}
-
-.tooltip-section:hover {
-  background-color: #f0f0f0; /* Hover effect */
-}
-
-.tooltip-icon {
-  height: 20px; /* Adjust size as needed */
-  width: 20px; /* Adjust size as needed */
-  margin-bottom: 5px; /* Space between icon and text */
-}
-
-.tooltip-text {
-  font-size: 12px; /* Adjust text size as needed */
-}
-
-.custom-legend {
-  display: flex;
-  justify-content: center;
-  margin-top: 5px;
-  margin-bottom: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-right: 5px;
-}
-
-.legend-box {
-  width: 15px;
-  height: 15px;
-  margin-right: 5px;
-  border: 1px solid;
-}
-
-.month-below1 {
-  align-items: center;
-  position: relative;
-  background-color: #f4f2f2;
-  text-align: center;
-  margin-top: 5px;
-}
-
-.network-status-bar {
-  background-color:#D01526;
-  color: white;
-  text-align: center;
-  padding: 5px;
-  font-size: 14px;
-}
-
-
-.network-status-bar.connected {
-  background-color: green;
-}
-
-
-</style>

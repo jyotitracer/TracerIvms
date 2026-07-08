@@ -1,24 +1,184 @@
 <template>
-  <div class="group-name">{{ item.group }}</div>
-  <ion-item class="custom-item" @click="handleClick">
-    <pie-chart :data="item.sts_arr" />
-    <div class="item-content">
-      <div class="status">
-        <div
-              v-for="status in statusMap"
-              :key="status.sts_lbl"
-              :class="['status-item', statusClass(status.sts_lbl)]"
-              :style="{ borderColor: getStatusColor(status.sts_lbl), color: getStatusColor(status.sts_lbl) }"
-            >        
-           <span class="status-label">{{ status.sts_lbl }}</span>
-          <span class="status-value">{{ status.sts_cnt }}</span>
-        </div>
-        </div>
-    </div>
-   <!-- <img src="\right-arrow.png" alt="event icon" class="icon-arrow" @click="callnextPage" /> -->
 
-  </ion-item>
+
+  <!-- 📊 Status Row -->
+  <ion-item class="custom-item" @click="handleClick">
+
+  <!-- 🔵 Pie Chart (CENTER) -->
+  <div class="chart-section">
+    <pie-chart :data="item.sts_arr" />
+  </div>
+
+  <!-- 🏷️ Group Name (LEFT) -->
+  <div class="group-name">
+    {{ item.group }}
+  </div>
+
+  <!-- 📊 Status List -->
+  <div class="status-row">
+    <div
+      v-for="status in statusMap"
+      :key="status.sts_lbl"
+      class="status-item"
+    >
+      <!-- 🔴 Color Dot -->
+      <span 
+        class="status-dot"
+        :style="{ backgroundColor: getStatusColor(status.sts_lbl) }"
+      ></span>
+
+      <!-- Label -->
+      <span class="status-label">
+        {{ status.sts_lbl }}
+      </span>
+
+      <!-- Value -->
+      <span class="status-value">
+        {{ status.sts_cnt }}
+      </span>
+    </div>
+  </div>
+
+</ion-item>
 </template>
+
+
+
+<style scoped>
+/* 🔥 Override Ionic */
+.custom-item::part(native) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;   /* 🔥 important (not center) */
+}
+
+ion-item {
+  --inner-border-width: 0px;
+  --border-width: 0px;
+  --padding-start: 0px;
+  --inner-padding-end: 0px;
+}
+
+/* Card style */
+.custom-item {
+  border-radius: 16px;
+  background: white;
+  margin: 10px 20px;
+  padding: 10px;
+  border: none;
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+/* Chart center */
+.chart-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+/* Group name LEFT */
+.group-name {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #021f29;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* Status container */
+.status-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* Each row */
+.status-item {
+  display: flex;
+  align-items: center;
+    font-size: 14px;
+
+  justify-content: space-between; /* 🔥 value to right */
+}
+
+/* Left part (dot + label) */
+.status-label {
+  flex: 1;
+  margin-left: 8px;
+  color: #535f66;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Dot */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Value (right) */
+.status-value {
+  font-weight: 600;
+}
+</style>
+
+<!-- <style scoped>
+
+.custom-item::part(native) {
+  display: flex;
+  flex-direction: column;   /* 🔥 make vertical */
+  align-items: center;
+  justify-content: center;
+}
+
+
+.custom-item {
+  display: flex;
+  flex-direction: column; /* 🔥 vertical layout */
+  align-items: center;
+  text-align: center;
+
+   border-radius: 16px;
+  border: 1px solid #f5f5f5;
+  margin: 10px;
+
+}
+
+/* Chart */
+.chart-section {
+  margin-bottom: 8px;
+}
+
+/* Group Name */
+.group-name {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* 🔥 Status Row */
+.status-row {
+  display: flex;
+  flex-wrap: wrap;      /* wrap if many items */
+  justify-content: center;
+    flex-direction: column;  /* 🔥 important */
+
+  gap: 8px;
+}
+
+/* Status Item */
+.status-item {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+
+
+  font-size: 12px;
+}
+</style> -->
+
 
 <script>
 import PieChart from '@/components/PieChartViewGroup.vue';
@@ -127,40 +287,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.custom-item {
-  display: flex;
-  align-items: center;
-}
-.item-content {
-  flex: 1;
-}
-.group-name {
-  font-weight: bold;
-  margin-bottom: 10px;
-  margin-left: 5px;
-}
-.status {
-  display: flex;
-  flex-direction: column;
-}
-.status-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 5px;
-  border-radius: 15px;
-  padding: 5px 10px;
-  font-size: 0.9em;
-  background-color: #f5f5f5; /* Use a subtle background color */
-  border: 1px solid;
-  transition: background-color 0.2s, color 0.2s;
-}
-.status-label {
-  margin-right: 10px; /* Adjust this value as needed */
-}
-
-
-
-</style>

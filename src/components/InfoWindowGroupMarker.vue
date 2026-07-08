@@ -15,17 +15,24 @@
   </template>
   
   <script>
-  export default {
-    props: {
-      vehicleData: Object
-    },
-    computed: {
-      driverName() {
-        return this.vehicleData.drv_name || "Driver not available";
-      }
+export default {
+  props: {
+    vehicleData: {
+      type: Object,
+      default: () => ({})
     }
-  };
-  </script>
+  },
+
+  computed: {
+    driverName() {
+
+      console.log(this.vehicleData);
+
+      return this.vehicleData?.drv_name || "Driver not available";
+    }
+  }
+};
+</script>
   
   <style scoped>
   .info-box {

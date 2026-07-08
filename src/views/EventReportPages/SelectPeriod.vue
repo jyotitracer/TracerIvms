@@ -243,7 +243,7 @@ export default {
 }
 
 .month h5 {
-  color:#D01526;
+  color:#00875A;
   font-size: 16px;
   text-align: center;
 }
@@ -274,13 +274,13 @@ export default {
 
 .start-date,
 .end-date {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   border-radius: 50%;
 }
 
 .in-range {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
 }
 
@@ -291,14 +291,14 @@ export default {
 }
 
 .custom-button {
-  --background:#D01526;
+  --background:#00875A;
   --border-radius: 0;
   --border-color: black;
   --border-width: 1px;
   --color: white;
 }
 .network-status-bar {
-  background-color:#D01526;
+  background-color:#00875A;
   color: white;
   text-align: center;
   padding: 5px;

@@ -18,11 +18,24 @@
 
 
 <ion-content fullscreen class="safe-bottom">
+  
       <ion-list>
-        <ion-item v-for="(page, index) in selectedItems" :key="index" @click="toggleSelection(page,index)">
-          <ion-label>{{ page.title }}</ion-label>
-          <ion-icon v-if="selectedIndex === index" name="checkmark-circle" slot="end"></ion-icon>
-        </ion-item>
+
+          <ion-card 
+        v-for="(page, index) in selectedItems" 
+        :key="index"
+        class="home-card"
+        :class="{ active: selectedIndex === index }"
+        @click="toggleSelection(page, index)"
+      >
+        <ion-card-content class="card-row">
+          <span>{{ page.title }}</span>
+
+           <ion-icon v-if="selectedIndex === index" name="checkmark-circle" slot="end"></ion-icon>
+
+        </ion-card-content>
+      </ion-card>
+
       </ion-list>
     </ion-content>
   </ion-page>
@@ -38,6 +51,7 @@ import {
 import storage from "@/services/storagefile";
 import router from '@/router/index'; // Assuming your router file is named router.js
 import { useRouter, useRoute } from 'vue-router';
+import { checkmarkCircle } from 'ionicons/icons';
 
 
 export default defineComponent({
@@ -209,6 +223,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+.home-card {
+    background-color:white;
+}
 ion-icon {
   font-size: 24px;
 }
@@ -224,6 +242,27 @@ ion-icon {
 
 .network-status-bar.connected {
   background-color: green;
+}
+
+
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 🔥 pushes check icon to right */
+  width: 100%;
+}
+
+/* Title */
+.card-row span {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Check icon */
+.check-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
 }
 
 </style>

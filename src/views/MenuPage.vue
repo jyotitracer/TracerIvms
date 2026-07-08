@@ -329,7 +329,7 @@ const handleBackButton = async () => {
 
 .tooltip-section {
 
-   --background: #dbd7d7;
+   --background: #DFF4FF;
   background: var(--background);
 
   
@@ -341,12 +341,12 @@ const handleBackButton = async () => {
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  color: #D01526;; /* Text color */
-  background-color: #dbd7d7; /* Background for the text */
+  color: #00875A;; /* Text color */
+  background-color: #DFF4FF; /* Background for the text */
 }
 
 .tooltip-section:hover {
-  background-color: #f0f0f0; /* Hover effect */
+  background-color: var(--ion-background-color); /* Hover effect */
 }
 
 .tooltip-icon {
@@ -361,7 +361,7 @@ const handleBackButton = async () => {
 
 
 .network-status-bar {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   text-align: center;
   padding: 5px;

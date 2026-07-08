@@ -1,6 +1,6 @@
 <template>
-  <ion-item class="vehicle-item" :style="{ backgroundColor: vehicle.sts_colr }">
-    <ion-grid class="custom-grid">
+  <ion-item class="vehicle-item" >
+    <ion-grid class="custom-grid" >
       
       <!-- First Row: Header with Vehicle Info -->
       <ion-row>
@@ -14,15 +14,24 @@
             />
             
             <div class="vehicle-details">
-              <div class="vehicle-number">{{ vehicle.veh_no }}</div>
-              <div class="label" :style="{ color: vehicle.sts_colr }">
-                <span>{{ vehicle.veh_sts }}</span>
-              </div>
+              <div class="vehicle-number" style="font-size: 18px;">{{ vehicle.veh_no }}</div>
+
+                                        <div class="status-item">
+                      <div class="dot_color" :style="{ background: vehicle.sts_colr }"></div>
+
+                      <div class="label" :style="{ color: vehicle.sts_colr }">
+                        {{ vehicle.veh_sts }}
+                      </div>
+                    </div>
             </div>
           </div>
 
           <div class="driver-status">
-            <img :src="driverIconSrc" alt="driver icon" class="icon-img-people" />
+             <div size="8" class="last-status-update">
+    <span>Last Status Update - {{ lastStatusUpdate }}</span>
+             </div>
+
+            <!-- <img :src="driverIconSrc" alt="driver icon" class="icon-img-people" />
 
             
             <div class="vehicle-details">
@@ -30,7 +39,7 @@
               <div>
                 <span style="font-size: 10px;"> {{ vehicle.drv_alloc_dt ?  "Allocated- "+ vehicle.drv_alloc_dt : ''  }}</span>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <!-- <div class="driver-status">
@@ -47,7 +56,9 @@
       <!-- Second Row: Location -->
       <ion-row>
         <ion-col size="12" class="location">
-          <img :src="getLocation" alt="location icon" class="icon-img" />
+          <!-- <img :src="getLocation" alt="location icon" class="icon-img" /> -->
+            <ion-icon :icon="locationOutline" class="icon-img" ></ion-icon>
+
           <span>{{ vehicle.loc_str }}</span>
         </ion-col>
       </ion-row>
@@ -81,12 +92,21 @@
       </ion-row>
 
       <!-- Fourth Row: Last Status Update -->
-      <ion-row>
-        <ion-col size="12" class="last-status-update">
-          <span>Last Status Update - {{ lastStatusUpdate }}</span>
-        </ion-col>
-      </ion-row>
+     <!-- <ion-row class="status-row-align">
 
+  LEFT -->
+  <!-- <ion-col size="8" class="last-status-update">
+    <span>Last Status Update - {{ lastStatusUpdate }}</span>
+  </ion-col>
+
+
+</ion-row> -->
+<ion-row class="btn-row">
+  <ion-button class="track-btn" size="small"  @click="navigateToPage(vehicle,vehicle.veh_id, vehicle.veh_no,groupname)"
+>
+    Track Details
+  </ion-button>
+</ion-row>
     </ion-grid>
   </ion-item>
 </template>
@@ -94,14 +114,17 @@
 
 <script>
 import { defineComponent } from 'vue';
-import { IonItem, IonGrid, IonRow, IonCol } from '@ionic/vue';
+import { IonItem, IonGrid, IonRow, IonCol,IonButton,IonIcon } from '@ionic/vue';
 import storage from '@/services/storagefile';
 import { ref ,watch} from 'vue';
+import { locationOutline } from 'ionicons/icons';
+import Constants from '@/common/constants';
+import { useRouter } from 'vue-router';
 
 
 export default defineComponent({
   name: 'VehicleItem',
-  components: { IonItem, IonGrid, IonRow, IonCol },
+  components: { IonItem, IonGrid, IonRow, IonCol ,IonButton,IonIcon},
   props: {
     vehicle: {
       type: Object,
@@ -110,11 +133,33 @@ export default defineComponent({
     isFavorite: {
       type: Boolean,
       default: false
+    },
+    groupname:{
+      type : String,
+      required:true
     }
   },
   setup(props) {
     const lastStatusUpdate = ref(''); // Reactive ref for storing the update
 
+
+    const router = useRouter();
+
+
+        const navigateToPage = async (vehicle,veh_id, veh_no,group) => {
+      //console.log("displayData",JSON.stringify(vehicle));
+     await storage.set('selectedVeh',JSON.stringify(vehicle));
+      await storage.set('SelectGroup',group);
+
+      // router.push({ 
+      //   name: 'VehcileMapInfoTripPage', 
+      //   params: { vehicleId: veh_id, vehicleName: veh_no,groupname:groupname.value} ,
+
+      // });
+
+      router.push(`/vehtabs/${veh_id}/${veh_no}/${props.groupname}/map`);
+
+    };
 
 
 
@@ -213,7 +258,7 @@ export default defineComponent({
   { immediate: true, deep: true }
 );
     return {
-      lastStatusUpdate,
+      lastStatusUpdate,locationOutline,navigateToPage
     };
   },
   computed: {
@@ -365,11 +410,12 @@ async getLastStatusUpdate(inputDate) {
 
 
 <style scoped>
+
+
 .vehicle-item {
   position: relative;
-  padding-left: 3px;
-  --padding-start: 10px; 
-  --inner-padding-end: 10px;   
+  --padding-start: 5px; 
+  --inner-padding-end: 5px;   
 
 }
 
@@ -385,6 +431,9 @@ async getLastStatusUpdate(inputDate) {
 .header {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: flex-start;
 }
 
 .vehicle-id {
@@ -411,7 +460,10 @@ async getLastStatusUpdate(inputDate) {
 
 .driver-status {
   display: flex;
-  align-items: left;
+  align-items: flex-end;
+  justify-content: flex-end;
+  text-align: right;
+  flex: 1;
   font-size: 14px;
   font-weight: bold;
   color: gray;
@@ -434,11 +486,30 @@ async getLastStatusUpdate(inputDate) {
   font-size: 14px;
 }
 
-.location .icon-img {
-  margin-right: 10px;
-  height: 30px;
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* space between dot and text */
 }
 
+.dot_color {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+
+/* .location .icon-img {
+  margin-right: 10px;
+  height: 30px;
+} */
+
+.location .icon-img{
+    height: 30px;
+    width: 30px;
+    color: var(--ion-color-primary);
+
+}
 .fuel {
   display: flex;
   align-items: center;
@@ -457,7 +528,17 @@ async getLastStatusUpdate(inputDate) {
   font-size: 10px;
   font-style: oblique;
   margin-top: 0;
+
 }
+.status-row-align {
+  align-items: center; /* vertical center */
+}
+
+.btn-row {
+  display: flex;
+  justify-content: flex-end; /* 🔥 push button to right */
+}
+
 
 .icons-row {
   margin-top: 0;
@@ -478,6 +559,20 @@ async getLastStatusUpdate(inputDate) {
   padding-right: 0;
   margin: 0;
 }
+.track-btn {
+  --background: var(--ion-background-color);        /* emerald-50 */
+  --color: var(--ion-color-primary);             /* emerald-800 */
+  --border-radius: 9999px;      /* full rounded */
 
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0px 5px 0px 5px;
+}
+
+/* Hover effect */
+.track-btn:hover {
+  --background: #d1fae5;        /* emerald-100 */
+}
 
 </style>

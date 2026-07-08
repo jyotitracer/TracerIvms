@@ -8,7 +8,12 @@
              <img src="\right-arrow.png" alt="event icon" class="icon-arrow" @click="callnextPage" />
           </div>  
         </div>
-        <div class="custom-legend">
+        <div class="custom-card">
+          <span style="font-weight: bold; font-size: 14px;">Fleet Status Overview</span>
+          <span style="font-weight: 200; font-size: 12px;">Monthly Vehicle Count By Date</span>
+
+        <div class="custom-legend ">
+          
         <div class="legend-item">
           <span class="legend-box" :style="{ backgroundColor: moving_color ,border:moving_color}"></span> Active
         </div>
@@ -20,93 +25,123 @@
         </div>
       </div>
 
-        <div class="chart-container">
-      <canvas ref="barChart"></canvas>
-    </div>
+        
 
+        <div class="chart-wrapper">
+    <div class="chart-scroll">
+        <canvas ref="barChart"></canvas>
+    </div>
+</div>
+
+
+        </div>
+<!-- 
       <div class="month-below">
         <div class="month-total">Fleet Total - </div>
         <div class="today-total">(Per Vehicle Average)</div>
+      </div> -->
+       <ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+          <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Distance travelled</p>
+          <div class="value-row">
+            <p class="text2">{{ Distance_tot }}</p>
+            <p class="text3">({{ Distance_per }})</p>
+          </div>
+        </div>
       </div>
+
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Moving Duration -->
+<ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+           <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Moving Duration</p>
+          <div class="value-row">
+            <p class="text2">{{ movingDuration1 }}</p>
+            <p class="text3">({{ movingDuration2 }})</p>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Violation -->
+<ion-card class="custom-metric-card">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+          <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Violation Count</p>
+          <div class="value-row">
+            <p class="text2">{{ violation1 }}</p>
+            <p class="text3">({{ violation2 }})</p>
+          </div>
+        </div>
+      </div>
+
+     
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+<!-- Fuel -->
+<ion-card class="custom-metric-card" v-if="IsFuelEnable">
+  <ion-card-content>
+    <div class="card-row">
+
+      <div class="left-section">
+        <div class="icon-box">
+           <ion-icon :icon="iconName" style="font-size: 30px;" />
+        </div>
+
+        <div class="text-container">
+          <p class="text1">Fuel Consumed</p>
+          <div class="value-row">
+            <p class="text2">{{ fuelCons1 }}</p>
+            <p class="text3">({{ fuelCons2 }})</p>
+          </div>
+        </div>
+      </div>
+
       
-      <ion-list>
-      <ion-item>
-        <ion-grid>
-          <ion-row style="align-items: center;">
-            <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
-            </ion-col>
-            <ion-col>
-              <div class="text-container">
-                <p class="text1">Distance travelled</p>
-                <div style="display: flex;">
-                  <p class="text2">{{ Distance_tot }} </p>
-                  <p class="text2">-</p>
-                  <p class="text3">({{ Distance_per }}) </p>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-item>
-      <ion-item>
-        <ion-grid>
-          <ion-row style="align-items: center;">
-            <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
-            </ion-col>
-            <ion-col>
-              <div class="text-container">
-                <p class="text1">Moving Duration</p>
-                <div style="display: flex;">
-                  <p class="text2">{{ movingDuration1 }}</p>
-                  <p class="text2">-</p>
-                  <p class="text3">({{ movingDuration2 }})</p>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-item>
-      <ion-item>
-        <ion-grid>
-          <ion-row style="align-items: center;">
-            <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
-            </ion-col>
-            <ion-col>
-              <div class="text-container">
-                <p class="text1">Violation Count</p>
-                <div style="display: flex;">
-                  <p class="text2">{{ violation1 }}</p>
-                  <p class="text2">-</p>
-                  <p class="text3">({{ violation2 }})</p>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-item>
-      <ion-item>
-        <ion-grid>
-          <ion-row style="align-items: center;">
-            <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
-            </ion-col>
-            <ion-col>
-              <div class="text-container">
-                <p class="text1">Fuel Consumed</p>
-                <div style="display: flex;">
-                  <p class="text2">{{ fuelCons1 }}</p>
-                  <p class="text2">-</p>
-                  <p class="text3">({{ fuelCons2 }})</p>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-item>
-    </ion-list>
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
+
   </ion-content>
 </template>
 
@@ -115,7 +150,9 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { addCircleOutline } from 'ionicons/icons';
-import {   IonContent,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid,  loadingController} from '@ionic/vue';
+import {   IonContent,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid,  loadingController, 
+  IonCard,IonCardContent,
+} from '@ionic/vue';
 import router from '@/router/index'; // Assuming your router file is named router.js
 import Constants from  '@/common/constants';
 import { fetchData } from "@/services/ApiService";
@@ -137,7 +174,7 @@ let isPeriodChange = false;
    
 export default {
   name: 'Dashboard',
-  components:{IonContent,IonIcon,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid},
+  components:{IonContent,IonIcon,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid,IonCard,IonCardContent},
   data() {
     return {
       moving_color: '',  // To store the dynamic color
@@ -153,6 +190,12 @@ export default {
     const idleStoredColor = await storage.get('idlecolor');
     const offlineStoredColor = await storage.get('offlinecolor');
 
+    //  const movingStoredColor = '';
+    // const stoppedStoredColor = '';
+    // const idleStoredColor = '';
+    // const offlineStoredColor = '';
+
+
     this.moving_color = movingStoredColor || Constants.Veh_color.Key_Active_Color;
     this.stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
     this.offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
@@ -163,7 +206,7 @@ export default {
 
     const { isConnected } = useNetwork();
     let isFirstTimeDataCall = true;
-
+ const IsFuelEnable=ref(true);
     
 
   // Variables to hold the values from the API
@@ -385,130 +428,123 @@ export default {
   };
 
 
-  const createChart = async (labels, activeData, stoppedData, offlineData) => {
+ const createChart = async (labels, activeData, stoppedData, offlineData) => {
 
-     // Check if data exists in storage
-     const movingStoredColor = await storage.get('movingcolor');
-                const stoppedStoredColor = await storage.get('stoppedcolor');
-                const offlineStoredColor = await storage.get('offlinecolor');
+  const movingStoredColor = await storage.get('movingcolor');
+  const stoppedStoredColor = await storage.get('stoppedcolor');
+  const offlineStoredColor = await storage.get('offlinecolor');
 
-                 const moving_color =  movingStoredColor || Constants.Veh_color.Key_Active_Color;
-                 const idle_color =  Constants.Veh_color.Key_Idle_Color;
-                 const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
-                 const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
+ 
+    
 
-                 
-    const maxValue = Math.max(
-      ...activeData, 
-      ...stoppedData, 
-      ...offlineData
-    );
+  const moving_color = movingStoredColor || Constants.Veh_color.Key_Active_Color;
+  const stopped_color = stoppedStoredColor || Constants.Veh_color.key_Stopped_Color;
+  const offline_color = offlineStoredColor || Constants.Veh_color.Key_Offline_Color;
 
-    // Define the step size based on the maximum value
-    const stepSize = Math.ceil((maxValue) / 5.5); // 6 intervals
+  await nextTick();
 
-    console.log("stepSize",stepSize+" "+maxValue);
+const canvas = barChart.value;
 
-     await nextTick();
+canvas.width = Math.max(labels.length * 20, 400);
+canvas.height = 250;
 
-    if (chartInstance) {
-        chartInstance.destroy();
-      }
 
-      // Create a new chart instance
-      chartInstance = new Chart(barChart.value, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Active',
-            data: activeData,  // Dynamic data for 'Active'
-            backgroundColor: moving_color,
-          },
-          {
-            label: 'Stopped',
-            data: stoppedData,  // Dynamic data for 'Stopped'
-            backgroundColor: stopped_color,
-          },
-          {
-            label: 'Offline',
-            data: offlineData,  // Dynamic data for 'Offline'
-            backgroundColor: offline_color,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // Allow chart to be responsive
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(barChart.value, {
+    type: 'bar',
+    data: {
+      labels: labels,
+datasets: [
+  {
+    label: 'Active',
+    data: activeData,
+    backgroundColor: moving_color,
+    borderWidth: 1,
+    borderColor: '#f3faff',
+    stack: 'fleet',
+
+    barThickness: 8,      // <-- Make bar thinner
+    maxBarThickness: 8
+  },
+  {
+    label: 'Stopped',
+    data: stoppedData,
+    backgroundColor: stopped_color,
+    borderWidth: 1,
+    borderColor: '#f3faff',
+    stack: 'fleet',
+
+    barThickness: 8,
+    maxBarThickness: 8
+  },
+  {
+    label: 'Offline',
+    data: offlineData,
+    backgroundColor: offline_color,
+    borderWidth: 1,
+    borderColor: '#f3faff',
+    stack: 'fleet',
+
+    barThickness: 8,
+    maxBarThickness: 8
+  }
+]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+
+      scales: {
+        x: {
+          stacked: true,   // ✅ KEY LINE
+          ticks: {
+             autoSkip: false,
+                maxRotation: 0,
+                minRotation: 0
+          }
+        },
         
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Date (scroll to see more data)',
-            },
-            ticks: {
-              autoSkip: false, // Disable auto-skipping of ticks
+        y: {
+           stacked: true,
+  beginAtZero: true,
+  grace: '10%',      // Adds some space above the tallest bar
 
-            },
-            min: 0, // Start displaying from the first label (index 0)
-            max: 6, // Show up to the 7th label (index 6)
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Vehicle Count',
-            },
-            beginAtZero: false,
-            max: stepSize * 6, // Ensure the max is a multiple of the step size
-            ticks: {
-              stepSize: stepSize, // Dynamic step size
-            },
-          },
-        },
-        plugins: {
-          datalabels: {
-            display: true, // Display the labels
-            color: '#000', // Label color
-            anchor: 'end', // Position of the label
-            align: 'top', // Position of the label
-            formatter: (value) => {
-              return value > 0 ? value : '0'; // Display only positive values
-            },
-            font: {
-              size: 8, // Set font size to small (adjust as needed)
-              weight: 'normal', // Set font weight to normal
-            },
-            offset: 1, // Adjust this value to move labels up or down
-          },
-          zoom: {
-            pan: {
-              enabled: true,
-              mode: 'x', // Enable horizontal panning
-            },
-            zoom: {
-              wheel: {
-                enabled: true, // Enable zooming with the mouse wheel
-              },
-              drag: {
-                enabled: true, // Enable zooming by dragging
-              },
-              pinch: {
-                enabled: true, // Enable pinch zooming on touch devices
-              },
-              mode: 'x', // Enable zooming in the x direction only
-            },
-          },
-          legend: {
-            display: false, // Disable the legend
-          },
-        },
+  ticks: {
+    precision: 0
+  }
+
+        }
       },
-    });
-  };
+
+      plugins: {
+        legend: {
+          display: false
+        },
+
+        datalabels: {
+          display: false
+        },
+
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${context.raw}`;
+            }
+          }
+        }
+      }
+    }
+  });
+};
 
   onMounted(async () => {
+
+     const loginResponse = await storage.get('login_data');
+                  const loginisfuel = loginResponse.isFuel;
+                  IsFuelEnable.value = loginisfuel === 1 ? true : false;
 
     useBackButton(9999, async () => {
 
@@ -604,7 +640,7 @@ export default {
     violation1,
     violation2,
     fuelCons1,
-    fuelCons2,
+    fuelCons2,IsFuelEnable,
     CallAPIForTodayData,
   };
 },
@@ -640,10 +676,124 @@ export default {
 
 <style scoped>
 
+.custom-metric-card {
+  margin: 10px;
+  border-radius: 16px;
+
+  background: #e6f6ff; /* surface-container-low */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+}
+
+/* hover effect */
+.custom-metric-card:hover {
+  background: #d8f2ff;
+}
+
+.custom-metric-card:hover .right-icon {
+  color: var(--ion-color-primary);
+}
+
+
+/* layout */
+.card-row {
+  display: flex;
+  align-items: center;
+}
+
+/* left side */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* icon box */
+.icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.icon-box ion-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
+}
+.item-inner {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: var(--inner-padding-top);
+    padding-bottom: var(--inner-padding-bottom);
+    padding-right: 0px;
+    padding-left: 0px;
+    display: -ms-flexbox;
+    display: flex;
+    position: relative;
+    -ms-flex: 1;
+    flex: 1;
+    -ms-flex-direction: inherit;
+    flex-direction: inherit;
+    -ms-flex-align: inherit;
+    align-items: inherit;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+    min-height: inherit;
+    border-width: var(--inner-border-width);
+    border-style: var(--border-style);
+    border-color: var(--border-color);
+    -webkit-box-shadow: var(--inner-box-shadow);
+    box-shadow: var(--inner-box-shadow);
+    overflow: inherit;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/* 🔥 CARD STYLE */
+.custom-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 10px;
+
+  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;   /* 🔥 IMPORTANT (not center) */
+}
+
+.custom-item-card {
+  --background: #e6f6ff; /* like your HTML section */
+  --border-width: 0px;   /* remove default line */
+  --inner-border-width: 0px;
+
+  border-radius: 8px;
+  margin: 10px 20px 20px 20px;
+
+  /* soft elevation */
+  box-shadow: 0px 4px 12px rgba(2, 31, 41, 0.04);
+}
+
+
+
+/* REMOVE LIST LINES */
+ion-list {
+  background: transparent;
+}
+
 .custom-legend {
   display: flex;
-  justify-content: center;
-  margin-top: 5px;
+  justify-content: right;
+  margin-top: 20px;
   margin-bottom: 10px;
 }
 
@@ -651,19 +801,33 @@ export default {
   display: flex;
   align-items: center;
   margin-right: 5px;
+  font-size: 12px;
 }
 
 .legend-box {
-  width: 15px;
-  height: 15px;
-  margin-right: 5px;
-  border: 1px solid;
+   width: 10px;              /* smaller = premium look */
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;      /* 🔥 makes it circle */
 }
 
 .chart-container {
   white-space: nowrap; /* Prevent chart from wrapping */
   height: 200px;
-  margin-top: 20px;
+}
+
+.chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.chart-scroll {
+    height: 250px;
+}
+
+.chart-scroll canvas {
+    display: block;
 }
 
 .date-range {
@@ -672,7 +836,7 @@ export default {
   align-items: center;
   padding: 16px;
   background-color: #f1f1f1;
-  color:#D01526;
+  color:#00875A;
 }
 .fleet-info {
   padding: 16px;
@@ -689,7 +853,6 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
-  background-color: #f4f2f2;
   padding: 10px;
   
 }
@@ -710,13 +873,15 @@ export default {
 }
 
 .icon-arrow {
-  margin-left: 10px; /* Adjust the margin as needed */
-  height: 25px;
-  width: 25px;
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+
+  filter: invert(34%) sepia(91%) saturate(400%) hue-rotate(120deg);
 }
 .month-below {
   display: flex;
-  background-color: #f4f2f2;
+  background-color: #f3faff;
   padding: 10px;
   align-content: center;
   flex-direction: inherit;

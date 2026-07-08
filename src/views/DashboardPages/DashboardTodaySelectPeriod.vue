@@ -42,7 +42,7 @@
 
     <ion-footer class="ion-no-border">
       <ion-toolbar style="--background: white;">
-        <ion-button expand="full" class="custom-button" @click="confirmSelection" ref="doneBtn">
+        <ion-button expand="full" class="custom-button" @click="confirmSelection">
           Done
         </ion-button>
       </ion-toolbar>
@@ -64,7 +64,7 @@ import {
 } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import useNetwork from '@/services/networkService'; // Import the network service
-import { nextTick, onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import storage from "@/services/storagefile";
 
 
@@ -85,20 +85,11 @@ export default {
     : new Date(); // Fallback to current date if no date is passed
 
 
-const doneBtn = ref();
-
-
     onMounted(async () => {
-
-   await nextTick();
-  doneBtn.value?.$el?.scrollIntoView({ behavior: 'smooth' });
-
-
       initNetworkListener();
+    });
 
-      });   
-
-return {
+    return {
       receivedDate,
       isConnected, showReconnectedMessage, initNetworkListener
     };
@@ -183,27 +174,45 @@ return {
         this.goBack();
       }
     },
-    scrollToMonth() {
+    async scrollToMonth() {
+      // Use receivedDate month if available, otherwise fall back to currentMonth
+      const monthIndex = (this.receivedDate instanceof Date && !isNaN(this.receivedDate))
+        ? this.receivedDate.getMonth()
+        : this.currentMonth;
 
-          if (!this.receivedDate) {
-            console.error('receivedDate is not set');
-            return;
-          }
-      
-      const selectedMonthIndex = this.receivedDate.getMonth();
+      await this.$nextTick(); // Wait for Vue DOM updates
 
-      this.$nextTick(() => {
-        const monthElements = document.querySelectorAll('.month');
-    
-          if (monthElements[selectedMonthIndex]) {
+      // Wait for Ionic's ion-content to finish its internal layout
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-            console.log("displaydata",monthElements[selectedMonthIndex]);
-            // Scroll to the correct month
-            monthElements[selectedMonthIndex].scrollIntoView({ behavior: 'smooth' });
-          } else {
-            console.error('Month element not found');
-          }
-      });
+      const monthElements = document.querySelectorAll('.month');
+
+      if (!monthElements[monthIndex]) {
+        console.error('Month element not found for index:', monthIndex);
+        return;
+      }
+
+      const ionContent = this.$refs.contentRef.$el;
+
+      try {
+        // Get the actual scrollable inner element from ion-content's shadow DOM
+        const scrollEl = await ionContent.getScrollElement();
+        const monthEl = monthElements[monthIndex];
+
+        // Calculate position relative to the scroll container
+        let offsetTop = 0;
+        let el = monthEl;
+        while (el && el !== scrollEl) {
+          offsetTop += el.offsetTop;
+          el = el.offsetParent;
+        }
+
+        await ionContent.scrollToPoint(0, offsetTop, 500); // smooth scroll in 500ms
+      } catch (e) {
+        // Fallback: use basic offsetTop if getScrollElement fails
+        const monthTop = monthElements[monthIndex].offsetTop;
+        await ionContent.scrollToPoint(0, monthTop, 500);
+      }
     }
   }
 };
@@ -216,7 +225,7 @@ return {
 }
 
 .month h5 {
-  color: #D01526;;
+  color: #00875A;;
   font-size: 16px;
   text-align: center;
 }
@@ -246,7 +255,7 @@ return {
 }
 
 .selected-date {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   border-radius: 50%;
 }
@@ -258,7 +267,7 @@ return {
 }
 
 .custom-button {
-  --background: #D01526;;
+  --background: #00875A;;
   --border-radius: 0;
   --border-color: black;
   --border-width: 1px;
@@ -266,7 +275,7 @@ return {
 }
 
 .network-status-bar {
-  background-color: #D01526;;
+  background-color: #00875A;;
   color: white;
   text-align: center;
   padding: 5px;
