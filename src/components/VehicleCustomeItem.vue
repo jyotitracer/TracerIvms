@@ -57,7 +57,7 @@
       <ion-row>
         <ion-col size="12" class="location">
           <!-- <img :src="getLocation" alt="location icon" class="icon-img" /> -->
-            <ion-icon :icon="locationOutline" class="icon-img" ></ion-icon>
+            <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
 
           <span>{{ vehicle.loc_str }}</span>
         </ion-col>
@@ -117,7 +117,7 @@ import { defineComponent } from 'vue';
 import { IonItem, IonGrid, IonRow, IonCol,IonButton,IonIcon } from '@ionic/vue';
 import storage from '@/services/storagefile';
 import { ref ,watch} from 'vue';
-import { locationOutline } from 'ionicons/icons';
+import { locationSharp } from 'ionicons/icons';
 import Constants from '@/common/constants';
 import { useRouter } from 'vue-router';
 
@@ -258,7 +258,7 @@ export default defineComponent({
   { immediate: true, deep: true }
 );
     return {
-      lastStatusUpdate,locationOutline,navigateToPage
+      lastStatusUpdate,locationSharp,navigateToPage
     };
   },
   computed: {

@@ -24,13 +24,13 @@
       <div v-if="showTooltip" class="tooltip">
         <div class="tooltip-section" @click="takeTour(pageId)">
           <!-- Icon from Code -->
-          <img src="\ic_tour_data.png" alt="star icon" class="tooltip-icon" />
+          <ion-icon :icon="trailSignOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Take a Tour</span>
         </div>
         <div class="tooltip-section" @click="shareScreen">
           <!-- Icon from Code -->
-          <img src="\ic_share_data.png" alt="star icon" class="tooltip-icon" />
+          <ion-icon :icon="shareSocialOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Share Screen</span>
         </div>
@@ -69,7 +69,7 @@ import {
 } from "@ionic/vue";
 
 import useNetwork from "@/services/networkService"; // Import the network service
-import { search, refreshOutline, refreshSharp } from "ionicons/icons";
+import { search, refreshOutline, refreshSharp, trailSignOutline, shareSocialOutline } from "ionicons/icons";
 import { defineComponent, ref, onMounted, watch, onUnmounted } from "vue";
 import storage from "@/services/storagefile";
 import html2canvas from "html2canvas";
@@ -288,6 +288,8 @@ const handleBackButton = async () => {
       showTooltip,
       takeTour,
       shareScreen,
+      trailSignOutline,
+      shareSocialOutline,
       showHeader,
       pageTitle,
       pageId,

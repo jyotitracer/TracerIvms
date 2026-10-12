@@ -22,7 +22,7 @@
         <ion-row class="border-bottom">
           <ion-col class="centered with-border">
       <div class="info-item">
-                <ion-icon :icon="iconName" class="icon-style" />
+                <ion-icon :icon="distanceIcon" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.distance1 }}</p>
                 <p class="text2">({{ item.distance2 }})</p>
@@ -31,7 +31,7 @@
           </ion-col>
           <ion-col>
             <div class="info-item">
-              <ion-icon :icon="iconName" class="icon-style" />
+              <ion-icon :icon="violationIcon" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.vio1 }}</p>
                 <p class="text2">({{ item.vio2 }})</p>
@@ -44,7 +44,7 @@
         <ion-row>
           <ion-col class="centered with-border">
             <div class="info-item">
-              <ion-icon :icon="iconName" class="icon-style" />
+              <ion-icon :icon="durationIcon" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.moving1 }}</p>
                 <p class="text2">({{ item.moving2 }})</p>
@@ -53,7 +53,7 @@
           </ion-col>
           <ion-col>
            <div class="info-item">
-                <ion-icon :icon="iconName" class="icon-style" />
+                <ion-icon :icon="fuelIcon" class="icon-style" />
               <div class="text-container">
                 <p class="text2">{{ item.fuel1 }}</p>
                 <p class="text2">({{ item.fuel2 }})</p>
@@ -69,7 +69,8 @@
 <script>
 import BarChartView from '@/components/BarChartView.vue'; // Adjust the path as per your project structure
 import { IonItem, IonCol, IonRow, IonGrid, IonIcon } from '@ionic/vue';
-import { addCircleOutline } from 'ionicons/icons';
+import { warningOutline, timeOutline, waterOutline } from 'ionicons/icons';
+import { distanceRouteIcon } from "@/common/customIcons";
 
 export default {
   name: 'GroupCustomItem',
@@ -83,7 +84,10 @@ export default {
   },
   data() {
     return {
-      iconName: addCircleOutline, // You can replace with any desired icon
+      distanceIcon: distanceRouteIcon,
+      violationIcon: warningOutline,
+      durationIcon: timeOutline,
+      fuelIcon: waterOutline,
     };
   },
   props: {

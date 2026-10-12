@@ -17,13 +17,13 @@
        <div v-if="showTooltip" class="tooltip">
         <div class="tooltip-section" @click="takeTour(pageId)">
           <!-- Icon from Code -->
-          <img src="\ic_tour_data.png" alt="star icon" class="tooltip-icon" />
+          <ion-icon :icon="trailSignOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Take a Tour</span>
         </div>
         <div class="tooltip-section" @click="shareScreen">
           <!-- Icon from Code -->
-          <img src="\ic_share_data.png" alt="star icon" class="tooltip-icon" />
+          <ion-icon :icon="shareSocialOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Share Screen</span>
         </div>
@@ -60,8 +60,9 @@
 <script lang="ts">
 import { 
   IonButtons, IonBackButton, IonContent, IonHeader, IonPage, 
-  IonTitle, IonToolbar, IonList, IonSearchbar, loadingController 
+  IonTitle, IonToolbar, IonList, IonSearchbar, loadingController, IonIcon 
 } from '@ionic/vue';
+import { trailSignOutline, shareSocialOutline } from 'ionicons/icons';
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import CustomItem from '@/components/TodaysGroupCustomItem.vue';
 import { useRoute } from 'vue-router';
@@ -298,6 +299,8 @@ loading.dismiss();    }
       showTooltip,
       takeTour,
       shareScreen,
+      trailSignOutline,
+      shareSocialOutline,
       showHeader,
       pageId
 
@@ -306,7 +309,7 @@ loading.dismiss();    }
 
   components: {
     IonPage, IonContent, IonList, IonSearchbar, CustomItem, 
-    IonButtons, IonBackButton, IonHeader, IonTitle, IonToolbar
+    IonButtons, IonBackButton, IonHeader, IonTitle, IonToolbar, IonIcon
   },
 
   methods: {

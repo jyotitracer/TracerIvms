@@ -154,7 +154,7 @@
         <ion-grid>
           <ion-row style="align-items: center;">
             <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
+              <ion-icon :icon="distanceIcon" style="font-size: 30px;" />
             </ion-col>
             <ion-col>
               <div class="text-container">
@@ -173,7 +173,7 @@
         <ion-grid>
           <ion-row style="align-items: center;">
             <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
+              <ion-icon :icon="durationIcon" style="font-size: 30px;" />
             </ion-col>
             <ion-col>
               <div class="text-container">
@@ -192,7 +192,7 @@
         <ion-grid>
           <ion-row style="align-items: center;">
             <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
+              <ion-icon :icon="violationIcon" style="font-size: 30px;" />
             </ion-col>
             <ion-col>
               <div class="text-container">
@@ -211,7 +211,7 @@
         <ion-grid>
           <ion-row style="align-items: center;">
             <ion-col size="auto">
-              <ion-icon :icon="iconName" style="font-size: 30px;" />
+              <ion-icon :icon="fuelIcon" style="font-size: 30px;" />
             </ion-col>
             <ion-col>
               <div class="text-container">
@@ -563,7 +563,8 @@ h3{
 import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonIcon,  loadingController,IonItem,IonList
 } from '@ionic/vue';
-import { addCircleOutline,gitNetworkOutline, timeOutline,warningOutline,speedometerOutline, calendarOutline, } from 'ionicons/icons';
+import { addCircleOutline,gitNetworkOutline, timeOutline,warningOutline,speedometerOutline, calendarOutline, waterOutline } from 'ionicons/icons';
+import { distanceRouteIcon } from "@/common/customIcons";
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
 import storage from "@/services/storagefile";
@@ -777,7 +778,10 @@ loading.dismiss();    }
     monthName,
     year,
     bars,
-    iconName: addCircleOutline, // Replace with the desired icon
+    distanceIcon: distanceRouteIcon,
+    durationIcon: timeOutline,
+    violationIcon: warningOutline,
+    fuelIcon: waterOutline,
     Distance_tot,
     Distance_per,
     movingDuration1,

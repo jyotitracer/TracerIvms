@@ -151,21 +151,13 @@ const controlContainerRef = ref<HTMLDivElement | null>(null);
 
     const vehicleObject = ref(null);
     const mapContainer = ref(null);
-    const directionsServiceUrl = `https://maps.googleapis.com/maps/api/directions/json`;
-
     const polylineRef = ref<google.maps.Polyline | null>(null);
 
-
-
-const getDirections = async (destLat: number, destLon: number) => {
-
-  // if (!mapRef.value || !vehicleObject.value) {
-  //   console.error('Map or vehicle object is not initialized');
-  //   return;
-  // }
-
-
-
+const getDirections = async (destLat: number | string, destLon: number | string) => {
+  if (!mapRef.value || !vehicleObject.value) {
+    console.error('Map or vehicle object is not initialized');
+    return;
+  }
 
   // ✅ Clear existing polyline
   if (polylineRef.value) {
@@ -173,58 +165,84 @@ const getDirections = async (destLat: number, destLon: number) => {
     polylineRef.value = null;
   }
 
- // ✅ Ensure both origin & destination are numbers
+  // ✅ Ensure both origin & destination are numbers
   const origin = { 
     lat: parseFloat(vehicleObject.value.lat), 
-    lng: parseFloat(vehicleObject.value.lon) 
+    lon: parseFloat(vehicleObject.value.lon) 
   };
   const destination = { 
-    lat: parseFloat(destLat), 
-    lng: parseFloat(destLon) 
+    lat: parseFloat(destLat as string), 
+    lon: parseFloat(destLon as string) 
   };
 
-  // console.log('Getting directions...',origin.lat+" "+origin.lng+"desti= "+destination.lat+" "+destination.lng);
+  if (isNaN(origin.lat) || isNaN(origin.lon) || isNaN(destination.lat) || isNaN(destination.lon)) {
+    console.error('Invalid coordinates for directions:', { origin, destination });
+    showToastMessage('Invalid coordinates for directions');
+    return;
+  }
 
   const loading = await loadingController.create({
     message: 'Loading directions...',
     spinner: 'circles',
   });
- 
 
   try {
-     if(isFirstTimeDataCall){ 
-    await  loading.present();
+    if (isFirstTimeDataCall) {
+      await loading.present();
     }
-    const directionsService = new google.maps.DirectionsService();
-    const result = await directionsService.route({
-       origin,
-      destination,
-      travelMode: google.maps.TravelMode.DRIVING,
+
+    // OSRM coordinates: longitude,latitude
+    const coords = `${origin.lon},${origin.lat};${destination.lon},${destination.lat}`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`OSRM HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+      throw new Error('No OSRM route found');
+    }
+
+    const coordinates = data.routes[0].geometry.coordinates;
+    const path = coordinates.map(
+      ([lng, lat]: [number, number]) => new google.maps.LatLng(lat, lng)
+    );
+
+    polylineRef.value = new google.maps.Polyline({
+      path,
+      geodesic: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 1.0,
+      strokeWeight: 5,
     });
 
-    console.log("DirecttionResult",result.routes);
-
-    if (result.routes && result.routes.length > 0) {
-      const path = result.routes[0].overview_path;
-      polylineRef.value = new google.maps.Polyline({
-        path,
-        geodesic: true,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 5,
-      });
-
-      polylineRef.value.setMap(mapRef.value);
-      moveCameraToLocation(origin.lat, origin.lng, 14);
-    } else {
-      showToastMessage("No route found");
-      console.warn('No routes found');
-    }
+    polylineRef.value.setMap(mapRef.value);
+    moveCameraToLocation(origin.lat, origin.lon, 14);
   } catch (error) {
-    console.error('Error fetching directions:', error);
+    console.error('Error fetching directions via OSRM, falling back to direct line:', error);
+
+    // Fallback: direct line between origin and destination
+    const directPath = [
+      new google.maps.LatLng(origin.lat, origin.lon),
+      new google.maps.LatLng(destination.lat, destination.lon)
+    ];
+
+    polylineRef.value = new google.maps.Polyline({
+      path: directPath,
+      geodesic: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 1.0,
+      strokeWeight: 5,
+    });
+
+    polylineRef.value.setMap(mapRef.value);
+    moveCameraToLocation(origin.lat, origin.lon, 14);
   } finally {
-    if(isFirstTimeDataCall){ await  
-loading.dismiss();    }
+    if (isFirstTimeDataCall) {
+      await loading.dismiss();
+    }
   }
 };
 

@@ -33,7 +33,7 @@
           <!-- GPS location row -->
           <ion-row>
             <ion-col size="12" class="location">
-              <img src="\ic_gps.png" alt="location icon" class="icon-img" />
+              <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
               <span>{{ detail.loc }}</span>
             </ion-col>
           </ion-row>
@@ -47,7 +47,8 @@
 </template>
 
 <script>
-import { IonRow, IonCol, IonItemDivider, IonGrid } from '@ionic/vue'; // Ionic components
+import { IonRow, IonCol, IonItemDivider, IonGrid, IonIcon } from '@ionic/vue'; // Ionic components
+import { locationSharp } from 'ionicons/icons';
 import { ref } from 'vue'; // Vue's reactive reference
 import router from '@/router/index'; // Router for navigation
 
@@ -58,6 +59,7 @@ export default {
     IonCol,
     IonItemDivider,
     IonGrid,
+    IonIcon,
   },
   props: {
     itemDetails: {
@@ -95,6 +97,7 @@ export default {
       getFuelIcon,
       navigationPage,
       openSection,
+      locationSharp,
     };
   },
 };

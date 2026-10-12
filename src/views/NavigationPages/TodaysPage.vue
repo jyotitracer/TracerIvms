@@ -21,6 +21,13 @@
      </div>
    </div>
 
+   <div class="overview-header">
+  <div class="Precision Overview">Precision Overview</div>
+  <div class="overview-time">
+    Updated {{ lastUpdatedText }}
+  </div>
+</div>
+
   <div class="custom-card">
 
   <!-- Chart -->
@@ -76,7 +83,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-          <ion-icon :icon="iconName" style="font-size: 30px;" />
+          <ion-icon :icon="distanceIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -101,7 +108,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-           <ion-icon :icon="iconName" style="font-size: 30px;" />
+           <ion-icon :icon="durationIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -126,7 +133,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-          <ion-icon :icon="iconName" style="font-size: 30px;" />
+          <ion-icon :icon="violationIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -152,7 +159,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-           <ion-icon :icon="iconName" style="font-size: 30px;" />
+           <ion-icon :icon="fuelIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -178,9 +185,29 @@
 
 <style scoped>
 
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 20px 8px;
+}
+
+.overview-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+
+.overview-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .below_cust_part{
   margin: 20px;
 }
+
 .custom-metric-card {
   margin: 10px;
   border-radius: 16px;
@@ -582,7 +609,8 @@ import {
 import { checkTimeDifference } from "@/services/dateTimeUtils"; // Make sure this path is correct
 
 import { Chart, registerables } from "chart.js";
-import { addCircleOutline, checkboxSharp } from "ionicons/icons";
+import { timeOutline, warningOutline, waterOutline, checkboxSharp } from "ionicons/icons";
+import { distanceRouteIcon } from "@/common/customIcons";
 import router from "@/router/index"; // Assuming your router file is named router.js
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
@@ -596,10 +624,11 @@ import { showToastMessage } from '@/services/toast';
 const savedTodaysData = ref("");
     let isFirstTimeDataCall = true;
 
+    let updateTimer;
+
 Chart.register(...registerables);
 
 let isPeriodChange=false;
-
 
 export default defineComponent({
  name: "PieChartView",
@@ -639,6 +668,35 @@ export default defineComponent({
    const showReconnectedMessage = ref(false);
    let reconnectTimeout = null;
    const IsFuelEnable=ref(true);
+
+const lastUpdatedTime = ref('');
+const lastUpdatedText = ref("Just now");
+
+   const formatUpdatedTime = (date) => {
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+
+const updateLastUpdatedText = (apiDate) => {
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - apiDate.getTime()) / 1000);
+
+  if (diff < 60) {
+    lastUpdatedText.value = "Just now";
+  } else if (diff < 3600) {
+    const mins = Math.floor(diff / 60);
+    lastUpdatedText.value = `${mins} min${mins > 1 ? "s" : ""} ago`;
+  } else if (diff < 86400) {
+    const hrs = Math.floor(diff / 3600);
+    lastUpdatedText.value = `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+  } else {
+    const days = Math.floor(diff / 86400);
+    lastUpdatedText.value = `${days} day${days > 1 ? "s" : ""} ago`;
+  }
+};
 
 
 const checkNetworkStatus = async () => {
@@ -773,6 +831,8 @@ const listenToNetworkChanges = () => {
 
                            const currentDateTime = new Date();
                           await storage.set('APIcalledTodaysDate', currentDateTime);
+                            updateLastUpdatedText(currentDateTime);
+
 
                            if (arrData && arrData.length > 0) {
                              console.log("displayerror", arrData[0]);
@@ -845,7 +905,10 @@ const listenToNetworkChanges = () => {
                });
 
                // Icon reference
-                 const iconName = ref(addCircleOutline);
+                 const distanceIcon = ref(distanceRouteIcon);
+                 const durationIcon = ref(timeOutline);
+                 const violationIcon = ref(warningOutline);
+                 const fuelIcon = ref(waterOutline);
 
                  // Variables to hold the values from the API
                  const Distance_tot = ref(0);
@@ -1075,6 +1138,16 @@ const listenToNetworkChanges = () => {
 
                       const ApiCalledDate= await storage.get('APIcalledTodaysDate');
 
+                        if (ApiCalledDate) {
+                                  updateLastUpdatedText(new Date(ApiCalledDate));
+
+                                  if (updateTimer) clearInterval(updateTimer);
+
+                                  updateTimer = setInterval(() => {
+                                    updateLastUpdatedText(new Date(ApiCalledDate));
+                                  }, 60000); // refresh every minute
+                                }
+
                       if(ApiCalledDate!==null)
                       {
                          const isMinDoneOrNot= checkTimeDifference(ApiCalledDate);
@@ -1120,6 +1193,10 @@ const listenToNetworkChanges = () => {
                    if (chartInstance) {
                      chartInstance.destroy();
                    }
+
+                   if (updateTimer) {
+                    clearInterval(updateTimer);
+                  }
                  });
 
                  return {
@@ -1136,13 +1213,17 @@ const listenToNetworkChanges = () => {
                    violation2,
                    fuelCons1,
                    fuelCons2,
-                   iconName,
+                   distanceIcon,
+                   durationIcon,
+                   violationIcon,
+                   fuelIcon,
                    chartData,
                    clickForDatePage,
                    openGroup,
                    IsFuelEnable,
                    isConnected,
-                   showReconnectedMessage
+                   showReconnectedMessage,lastUpdatedTime,  lastUpdatedText
+
 
                  };
                },

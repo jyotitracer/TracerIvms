@@ -64,7 +64,7 @@
           </ion-row>
         <ion-row style="padding: 0px;">
           <ion-col size="12" class="location">
-            <img src="\ic_gps.png" alt="location icon" class="icon-img" />
+            <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
             <span>{{ detail.loc }}</span>
           </ion-col>
         </ion-row>
@@ -101,7 +101,7 @@
           </ion-row>
         <ion-row style="padding: 0px;">
           <ion-col size="12" class="location">
-            <img src="\ic_gps.png" alt="location icon" class="icon-img" />
+            <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
             <span>{{ detail.loc }}</span>
           </ion-col>
         </ion-row>
@@ -137,7 +137,7 @@
           </ion-row>
         <ion-row style="padding: 0px;">
           <ion-col size="12" class="location">
-            <img src="\ic_gps.png" alt="location icon" class="icon-img" />
+            <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
             <span>{{ detail.loc }}</span>
           </ion-col>
         </ion-row>
@@ -155,7 +155,7 @@ import useNetwork from '@/services/networkService'; // Import the network servic
 
 import { IonButton,IonButtons,IonBackButton, IonItemDivider, IonPage, IonHeader, IonContent, IonToolbar, IonIcon,IonGrid,IonRow,
   IonTitle,IonCol,loadingController } from '@ionic/vue';
-import { close } from 'ionicons/icons';
+import { close, locationSharp } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import router from '@/router/index'; // Assuming your router file is named router.js
 import { useRoute } from 'vue-router';
@@ -303,6 +303,7 @@ loading.dismiss();    }
         DropItem,
       getFuelIcon,
       callnextPage,
+      locationSharp,
       isConnected, showReconnectedMessage, initNetworkListener
 
       }

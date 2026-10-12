@@ -215,7 +215,6 @@
                   step="1"
                   :max="Math.max(routePoints.length - 1, 0)"
                   v-model="animationProgress"
-                  :disabled="!isPlaying"
                   @ionChange="updateAnimationProgress"
                 />
           </div>
@@ -814,10 +813,12 @@ const selectedItems = ref([]);
 
 const mapRef = ref<google.maps.Map | null>(null);
 let newMap: google.maps.Map | null = null;
+let mapControlDiv: HTMLDivElement | null = null;
+let navControlDiv: HTMLDivElement | null = null;
 
 const mapContainer = ref<HTMLElement | null>(null);
 const markersArray = ref<google.maps.Marker[]>([]);
-const polylineRef = ref<google.maps.Polyline | null>(null);
+let polylineRef: google.maps.Polyline | null = null;
 
 let vehicleLat: string | number | string[];
 let vehicleLon: string | number | string[];
@@ -826,9 +827,8 @@ const Near_vehicleObject = ref(null);
 const isnearVehObject = ref(false);
 
 const isSumTripObject = ref(false);
-const summaryTripObject = ref(null);
-
 const markersDotsArray: (never[] | google.maps.Marker)[] = [];
+const showPathOverlays: any[] = [];
 
 let currentInfoWindow = null;
 
@@ -897,8 +897,7 @@ const speedValue = ref(5);
    ROUTE & ANIMATION
 =========================== */
 
-const polylinePathsForShowPath = ref();
-const directionsService = ref();
+let polylinePathsForShowPath: google.maps.Polyline | null = null;
 
 const routePoints = ref([]);
 const middleMarkers = ref([]);
@@ -906,7 +905,7 @@ const middleMarkers = ref([]);
 const animationIndex = ref(0);
 const animationTimer = ref();
 
-const animationSpeed = ref(600);
+const animationSpeed = ref(220); // default speed level 5 = 220ms per step
 const animationProgress = ref(0);
 
 const index_route_array = ref([]);
@@ -997,11 +996,13 @@ const userTimeZone = ref('Asia/Kolkata');
     vehicleLat = route.params.vehLat;
     vehicleLon = route.params.vehLon;
 
-    // historyarray.value = route.params.arrayData;
     historyarray.value = [];
     historyarray.value = route.params.arrayData
       ? JSON.parse(route.params.arrayData)
       : [];
+    if (historyarray.value.length > 0) {
+      ishowPath.value = true;
+    }
 
     /* ===========================
        DATE FORMAT FUNCTION
@@ -1037,6 +1038,31 @@ const userTimeZone = ref('Asia/Kolkata');
       (newLen) => {
         if (newLen > 0) {
           animationProgress.value = 0;
+        }
+      }
+    );
+
+    watch(
+      () => route.params.arrayData,
+      async (newArrayData) => {
+        if (newArrayData && typeof newArrayData === 'string' && newArrayData !== '[]') {
+          try {
+            historyarray.value = JSON.parse(newArrayData);
+            if (historyarray.value && historyarray.value.length > 0) {
+              isMapBusyWithRoute.value = true;
+              canPlay.value = false;
+              const loading = await loadingController.create({
+                message: 'Please Wait',
+                spinner: 'circles',
+              });
+              await loading.present();
+              await processAnimation(2);
+              canPlay.value = true;
+              await loading.dismiss();
+            }
+          } catch (err) {
+            console.error("Error parsing arrayData from route:", err);
+          }
         }
       }
     );
@@ -1078,6 +1104,7 @@ const userTimeZone = ref('Asia/Kolkata');
       if (mapRef.value) {
         mapRef.value = null;
       }
+      newMap = null;
 
       closeShowPath(1);
       stopInterval1Min();
@@ -1088,9 +1115,15 @@ const userTimeZone = ref('Asia/Kolkata');
     =========================== */
 
     const clearPolyline = () => {
-      if (polylineRef.value) {
-        polylineRef.value.setMap(null);
-        polylineRef.value = null;
+      if (polylineRef) {
+        polylineRef.setPath([]);
+        polylineRef.setMap(null);
+        polylineRef = null;
+      }
+      if (polylinePathsForShowPath) {
+        polylinePathsForShowPath.setPath([]);
+        polylinePathsForShowPath.setMap(null);
+        polylinePathsForShowPath = null;
       }
 
       isnearVehObject.value = false;
@@ -1124,7 +1157,6 @@ const userTimeZone = ref('Asia/Kolkata');
       getDirections,
 
       Near_vehicleObject,
-      summaryTripObject,
       isnearVehObject,
       isSumTripObject,
 
@@ -1180,21 +1212,17 @@ const userTimeZone = ref('Asia/Kolkata');
 
       formatDateToString,
 
-      extractRoutePoints,
       animateRoute,
       getCurrentWaypointIndex,
 
       polylinePathsForShowPath,
-      directionsService,
       routePoints,
       middleMarkers,
       animationIndex,
       animationTimer,
       animationSpeed,
 
-      fetchRoute,
-      processWaypoints,
-
+processWaypointsWithoutAPI,
       updateSpeed,
       updateAnimationProgress,
       animationProgress
@@ -1214,21 +1242,150 @@ const loadData = () => {
    PROCESS WAYPOINTS
 =========================== */
 
-const processWaypoints = async (waypoints) => {
-  routePoints.value = []; // 🔴 REQUIRED
+/* =========================================================
+   GENERATE SMOOTH ROUTE POINTS (NO DIRECTIONS API FALLBACK)
+========================================================= */
+const processWaypointsWithoutAPI = (historyPoints: Array<{ lat: number; lon: number }>) => {
+  routePoints.value = [];
+  if (historyPoints.length < 2) return;
 
-  for (let i = 0; i < waypoints.length - 1; i++) {
-    const origin = new google.maps.LatLng(
-      waypoints[i].location.lat,
-      waypoints[i].location.lng
-    );
+  for (let i = 0; i < historyPoints.length - 1; i++) {
+    const p1 = new google.maps.LatLng(historyPoints[i].lat, historyPoints[i].lon);
+    const p2 = new google.maps.LatLng(historyPoints[i + 1].lat, historyPoints[i + 1].lon);
 
-    const destination = new google.maps.LatLng(
-      waypoints[i + 1].location.lat,
-      waypoints[i + 1].location.lng
-    );
+    const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+    // Cap at 20 steps max so far-apart dots don't slow down the animation
+    const steps = Math.min(20, Math.max(5, Math.floor(distanceMeters / 5)));
 
-    await fetchRoute(origin, destination, i);
+    for (let step = 0; step < steps; step++) {
+      const fraction = step / steps;
+      const interpolatedPoint = google.maps.geometry.spherical.interpolate(p1, p2, fraction);
+      routePoints.value.push(interpolatedPoint);
+    }
+  }
+
+  const last = historyPoints[historyPoints.length - 1];
+  routePoints.value.push(new google.maps.LatLng(last.lat, last.lon));
+
+  animationIndex.value = 0;
+  animationProgress.value = 0;
+};
+
+/* =========================================================
+   GENERATE SMOOTH ROUTE POINTS ALONG ROADS USING DIRECTIONS API
+========================================================= */
+const interpolatePathPoints = (pathPoints: google.maps.LatLng[]): google.maps.LatLng[] => {
+  const result: google.maps.LatLng[] = [];
+  if (pathPoints.length < 2) return pathPoints;
+
+  for (let i = 0; i < pathPoints.length - 1; i++) {
+    const p1 = pathPoints[i];
+    const p2 = pathPoints[i + 1];
+    const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+    // Cap at 20 steps max between OSRM road points
+    const steps = Math.min(20, Math.max(1, Math.floor(distanceMeters / 5)));
+
+    for (let step = 0; step < steps; step++) {
+      const fraction = step / steps;
+      const interpolatedPoint = google.maps.geometry.spherical.interpolate(p1, p2, fraction);
+      result.push(interpolatedPoint);
+    }
+  }
+  result.push(pathPoints[pathPoints.length - 1]);
+  return result;
+};
+
+const appendSegmentWithoutAPI = (segmentPoints: Array<{ lat: number; lon: number }>, targetArray: google.maps.LatLng[]) => {
+  for (let i = 0; i < segmentPoints.length - 1; i++) {
+    const p1 = new google.maps.LatLng(segmentPoints[i].lat, segmentPoints[i].lon);
+    const p2 = new google.maps.LatLng(segmentPoints[i + 1].lat, segmentPoints[i + 1].lon);
+    const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+    // Cap at 20 steps max per segment
+    const steps = Math.min(20, Math.max(5, Math.floor(distanceMeters / 5)));
+
+    for (let step = 0; step < steps; step++) {
+      const fraction = step / steps;
+      targetArray.push(google.maps.geometry.spherical.interpolate(p1, p2, fraction));
+    }
+  }
+};
+
+/* =========================================================
+   FREE OSRM (OPEN SOURCE ROUTING MACHINE) ROAD ROUTING HELPER
+========================================================= */
+async function fetchOSRMRoute(points: Array<{ lat: number; lon: number }>): Promise<google.maps.LatLng[]> {
+  if (!points || points.length < 2) return [];
+
+  const resultPoints: google.maps.LatLng[] = [];
+  const CHUNK_SIZE = 25;
+
+  for (let i = 0; i < points.length - 1; i += CHUNK_SIZE - 1) {
+    const chunk = points.slice(i, i + CHUNK_SIZE);
+    if (chunk.length < 2) break;
+
+    const coordsString = chunk.map(p => `${p.lon},${p.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.routes && data.routes.length > 0 && data.routes[0].geometry?.coordinates) {
+          const coords = data.routes[0].geometry.coordinates.map(
+            (coord: [number, number]) => new google.maps.LatLng(coord[1], coord[0])
+          );
+          if (resultPoints.length > 0 && coords.length > 0) {
+            resultPoints.push(...coords.slice(1));
+          } else {
+            resultPoints.push(...coords);
+          }
+          continue;
+        }
+      }
+    } catch (err) {
+      console.warn("OSRM routing request failed, fallback segment:", err);
+    }
+
+    for (let j = 0; j < chunk.length; j++) {
+      resultPoints.push(new google.maps.LatLng(chunk[j].lat, chunk[j].lon));
+    }
+  }
+
+  return resultPoints;
+}
+
+const processWaypointsWithRoads = async (
+  historyPoints: Array<{ lat: number; lon: number }>
+) => {
+
+  routePoints.value = [];
+
+  if (!historyPoints || historyPoints.length < 2) {
+    return;
+  }
+
+  try {
+
+    // Get road geometry from OSRM
+    const roadPoints = await fetchOSRMRoute(historyPoints);
+
+    if (roadPoints && roadPoints.length >= 2) {
+
+      // Add extra points for smooth vehicle movement
+      routePoints.value = interpolatePathPoints(roadPoints);
+
+    } else {
+
+      // OSRM failed → use GPS points directly
+      processWaypointsWithoutAPI(historyPoints);
+    }
+
+  } catch (error) {
+
+    console.error("OSRM routing failed:", error);
+
+    // NO Directions API
+    processWaypointsWithoutAPI(historyPoints);
   }
 
   animationIndex.value = 0;
@@ -1236,50 +1393,11 @@ const processWaypoints = async (waypoints) => {
 };
 
 
-/* ===========================
-   FETCH ROUTE
-=========================== */
-
-const fetchRoute = (origin, destination, wayPointIndex) => {
-  return new Promise((resolve, reject) => {
-    const request = {
-      origin,
-      destination,
-      travelMode: google.maps.TravelMode.DRIVING
-    };
-
-    directionsService.value.route(request, (response, status) => {
-      if (status === google.maps.DirectionsStatus.OK) {
-        extractRoutePoints(response, wayPointIndex);
-        resolve();
-      } else {
-        // showToastMessage('Directions failed');
-        console.error("Directions request failed:", status);
-        reject(status);
-      }
-    });
-  });
-};
 
 
-/* ===========================
-   EXTRACT ROUTE POINTS
-=========================== */
 
-const extractRoutePoints = (response, wayPointIndex) => {
-  const route = response.routes[0];
-  const legs = route.legs;
 
-  legs.forEach((leg, legIndex) => {
-    leg.steps.forEach((step, stepIndex) => {
-      const stepPoints = google.maps.geometry.encoding.decodePath(
-        step.polyline.points
-      );
 
-      routePoints.value.push(...stepPoints);
-    });
-  });
-};
 
 
 /* ===========================
@@ -1288,20 +1406,14 @@ const extractRoutePoints = (response, wayPointIndex) => {
 
 // this function used for play pause button
 const togglePlayPause = () => {
-
-  // if (animationIndex.value == 0 && animationProgress.value == 0 && !isPlaying.value) {
-  //   polylinePathsForShowPath.value.setPath([]);
-  //   const s1 ={lat:historyarray.value[0].lat,lng:historyarray.value[0].lon}
-  //   markerMovingIcon.setPosition(s1);
-  //   newMap?.panTo(s1);
-  // }
-
+  // If at the end or at the start, reset to start and clear polyline before replaying
   if (
-    animationIndex.value == 0 &&
-    animationProgress.value == 0 &&
-    !isPlaying.value
+    animationIndex.value >= routePoints.value.length - 1 ||
+    (animationIndex.value === 0 && animationProgress.value === 0)
   ) {
-    polylinePathsForShowPath.value.setPath([]);
+    animationIndex.value = 0;
+    animationProgress.value = 0;
+    polylinePathsForShowPath?.setPath([]);
   }
 
   isPlaying.value = !isPlaying.value;
@@ -1309,23 +1421,40 @@ const togglePlayPause = () => {
   if (isPlaying.value) {
     animateRoute();
   } else {
-    clearTimeout(animationTimer.value);
+    // 🛑 Cancel both requestAnimationFrame and timer when paused
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    if (animationTimer.value) clearTimeout(animationTimer.value);
   }
 };
+
 
 
 /* ===========================
    ANIMATE ROUTE
 =========================== */
+let animationFrameId: number | null = null;
+
 const animateRoute = () => {
   if (!isPlaying.value || animationIndex.value >= routePoints.value.length) {
-    clearTimeout(animationTimer.value);
-    animationIndex.value = 0;
-    animationProgress.value = 0;
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
     isPlaying.value = false;
 
-    markerMovingIcon.setPosition(routePoints.value[0]);
-    newMap?.panTo(routePoints.value[0]);
+    // Keep the vehicle at destination (point B) with full polyline drawn
+    if (routePoints.value.length > 0) {
+      const lastIndex = routePoints.value.length - 1;
+      animationIndex.value = lastIndex;
+      animationProgress.value = lastIndex;
+      markerMovingIcon?.setPosition(routePoints.value[lastIndex]);
+      newMap?.panTo(routePoints.value[lastIndex]);
+
+      const path = polylinePathsForShowPath?.getPath();
+      if (path && path.getLength() !== routePoints.value.length) {
+        path.clear();
+        for (let i = 0; i < routePoints.value.length; i++) {
+          path.push(routePoints.value[i]);
+        }
+      }
+    }
     return;
   }
 
@@ -1335,11 +1464,11 @@ const animateRoute = () => {
       ? routePoints.value[animationIndex.value + 1]
       : currentPoint;
 
+  // Compute smooth vehicle bearing/rotation
   const heading = google.maps.geometry.spherical.computeHeading(currentPoint, nextPoint);
 
-  markerMovingIcon.setPosition(currentPoint);
-
-  markerMovingIcon.setIcon({
+  markerMovingIcon?.setPosition(currentPoint);
+  markerMovingIcon?.setIcon({
     path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
     scale: 3.5,
     strokeColor: "#FF0000",
@@ -1348,14 +1477,19 @@ const animateRoute = () => {
 
   newMap?.panTo(currentPoint);
 
-  const path = polylinePathsForShowPath.value.getPath();
-  path.push(currentPoint);
+  const path = polylinePathsForShowPath?.getPath();
+  path?.push(currentPoint);
 
   animationProgress.value = animationIndex.value;
   animationIndex.value++;
 
-  animationTimer.value = setTimeout(animateRoute, animationSpeed.value);
+  // Schedule next frame using the speed directly as the delay (ms)
+  animationTimer.value = setTimeout(() => {
+    animationFrameId = requestAnimationFrame(animateRoute);
+  }, animationSpeed.value);
+
 };
+
 
 /* ===========================
    GET CURRENT WAYPOINT INDEX
@@ -1381,20 +1515,22 @@ const getCurrentWaypointIndex = (point) => {
 const updateSpeed = (event: { detail: { value: number } }) => {
   speedValue.value = event.detail.value;
 
-  const speeds = {
-    1: 1000, 2: 900, 3: 800, 4: 700, 5: 600,
-    6: 500, 7: 400, 8: 300, 9: 200, 10: 200,
+  // Lower ms = faster animation; speed 1 = 800ms/step, speed 10 = 30ms/step
+  const speeds: Record<number, number> = {
+    1: 800, 2: 600, 3: 450, 4: 320, 5: 220,
+    6: 150, 7: 100, 8: 70, 9: 50, 10: 30,
   };
 
-  animationSpeed.value = speeds[speedValue.value];
+  animationSpeed.value = speeds[speedValue.value] ?? 220;
 };
 
 /* ===========================
    WATCH PROGRESS
 =========================== */
-watch(animationProgress, (newIndex) => {
-  applyAnimationProgress(newIndex);
-});
+// NOTE: We do NOT watch animationProgress here to avoid rebuilding the
+// entire polyline on every animation tick. The polyline is updated
+// incrementally inside animateRoute() (path.push). applyAnimationProgress
+// is only called when the user manually drags the progress slider.
 
 /* ===========================
    APPLY PROGRESS
@@ -1405,11 +1541,11 @@ const applyAnimationProgress = (index: number) => {
   markerMovingIcon.setPosition(routePoints.value[index]);
   newMap.panTo(routePoints.value[index]);
 
-  const path = polylinePathsForShowPath.value.getPath();
-  path.clear();
+  const path = polylinePathsForShowPath?.getPath();
+  path?.clear();
 
   for (let i = 0; i <= index; i++) {
-    path.push(routePoints.value[i]);
+    path?.push(routePoints.value[i]);
   }
 };
 
@@ -1492,46 +1628,70 @@ const openDatePicker = (type: string) => {
    CLOSE SHOW PATH
 =========================== */
 const closeShowPath = (count: number) => {
+  // Stop any running animation first
+  isPlaying.value = false;
+  if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+  if (animationTimer.value) { clearTimeout(animationTimer.value); animationTimer.value = undefined; }
+
   if (count == 1) {
     ishowPath.value = false;
     isMarkerShowPath.value = false;
     isLoadPath.value = false;
     isMapBusyWithRoute.value = false;
+    isSumTripObject.value = false;
+    historyarray.value = [];
   }
 
-  if (polylinePathsForShowPath.value) {
-    polylinePathsForShowPath.value.setPath([]);
-    polylinePathsForShowPath.value.getPath().clearPolyline;
-  }
+  index_route_array.value = [];
+  routePoints.value = [];
+  animationIndex.value = 0;
+  animationProgress.value = 0;
 
-  if (markerMovingIcon) {
-    markerMovingIcon.setMap(null);
-    markerMovingIcon = null;
-  }
+  // Clear ALL tracked show-path overlays completely
+  showPathOverlays.forEach((overlay: any) => {
+    if (overlay) {
+      if (typeof overlay.setPath === 'function') overlay.setPath([]);
+      if (typeof overlay.setMap === 'function') overlay.setMap(null);
+    }
+  });
+  showPathOverlays.length = 0;
 
+  // Clear Start Marker (markerId1)
   if (markerId1) {
     markerId1.setMap(null);
     markerId1 = null;
   }
 
+  // Clear Destination Marker (markerId2)
   if (markerId2) {
     markerId2.setMap(null);
     markerId2 = null;
   }
 
-  function removeMarker(marker: google.maps.Marker) {
-    if (marker) marker.setMap(null);
+  // Clear Moving Marker
+  if (markerMovingIcon) {
+    markerMovingIcon.setMap(null);
+    markerMovingIcon = null;
   }
 
-  if (markersDotsArray.length > 1) {
-    markersDotsArray.forEach(removeMarker);
+  // Clear Polyline (must call setMap(null) and setPath([]) BEFORE setting to null)
+  if (polylinePathsForShowPath) {
+    polylinePathsForShowPath.setPath([]);
+    polylinePathsForShowPath.setMap(null);
+    polylinePathsForShowPath = null;
   }
 
+  if (polylineRef) {
+    polylineRef.setPath([]);
+    polylineRef.setMap(null);
+    polylineRef = null;
+  }
+
+  // Clear Dot Markers
+  if (markersDotsArray.length > 0) {
+    markersDotsArray.forEach((marker: google.maps.Marker) => marker?.setMap?.(null));
+  }
   markersDotsArray.length = 0;
-  index_route_array.value = [];
-  routePoints.value = [];
-  routePoints.value.length = 0;
-  isSumTripObject.value = false;
 };
      
 
@@ -1587,6 +1747,30 @@ if (markersArray.value && markersArray.value.length > 0) {
   });
   markersArray.value = [];
 }
+if (!ishowPath.value) {
+  showPathOverlays.forEach((overlay: any) => {
+    if (overlay) {
+      if (typeof overlay.setPath === 'function') overlay.setPath([]);
+      if (typeof overlay.setMap === 'function') overlay.setMap(null);
+    }
+  });
+  showPathOverlays.length = 0;
+  if (markerId1) { markerId1.setMap(null); markerId1 = null; }
+  if (markerId2) { markerId2.setMap(null); markerId2 = null; }
+  if (markerMovingIcon) { markerMovingIcon.setMap(null); markerMovingIcon = null; }
+  if (polylinePathsForShowPath) {
+    polylinePathsForShowPath.setPath([]);
+    polylinePathsForShowPath.setMap(null);
+    polylinePathsForShowPath = null;
+  }
+  if (polylineRef) {
+    polylineRef.setPath([]);
+    polylineRef.setMap(null);
+    polylineRef = null;
+  }
+  markersDotsArray.forEach((m: any) => m?.setMap?.(null));
+  markersDotsArray.length = 0;
+}
     if (mapContainer.value) {
 
       const login_data = await storage.get('login_data');
@@ -1623,20 +1807,53 @@ if (markersArray.value && markersArray.value.length > 0) {
 
       await loadGoogleMaps();
 
-      newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
-        center: initialCenter,
-        zoom: initialZoom,
-        mapTypeId: initialMapType,
-        zoomControl: true,
-        mapTypeControl: false,
-        fullscreenControl: false,
-        streetViewControl: false,
-      });
+      if (!newMap) {
+        newMap = new google.maps.Map(mapContainer.value as HTMLElement, {
+          center: initialCenter,
+          zoom: initialZoom,
+          mapTypeId: initialMapType,
+          zoomControl: true,
+          mapTypeControl: false,
+          fullscreenControl: false,
+          streetViewControl: false,
+        });
 
-      mapRef.value = newMap;
+        mapRef.value = newMap;
 
-      if (storedMapType) {
-        mapRef.value?.setMapTypeId(storedMapType);
+        if (storedMapType) {
+          mapRef.value?.setMapTypeId(storedMapType);
+        }
+
+        // --- CONTROLS ---
+        const controlContainer = document.createElement('div');
+        controlContainer.style.position = 'absolute';
+        controlContainer.style.right = '20px';
+        controlContainer.style.bottom = '100px';
+        controlContainer.style.display = 'flex';
+        controlContainer.style.gap = '10px';
+        controlContainer.style.alignItems = 'center';
+        controlContainer.style.background = 'white';
+        controlContainer.style.borderRadius = '5px';
+        controlContainer.style.padding = '5px';
+
+        mapControlDiv = document.createElement('div');
+        mapControlDiv.innerHTML = `
+          <button style="background: transparent; border: none;">
+            <img src="/pin.png" width="30" height="30">
+          </button>`;
+        mapControlDiv.style.display = 'none';
+
+        navControlDiv = document.createElement('div');
+        navControlDiv.innerHTML = `
+          <button style="background: transparent; border: none;">
+            <img src="/navigation.png" width="30" height="30">
+          </button>`;
+        navControlDiv.style.display = 'none';
+
+        controlContainer.appendChild(navControlDiv);
+        controlContainer.appendChild(mapControlDiv);
+
+        newMap?.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
       }
 
       const storedGroupData = await storage.get(Constants.storageValue.Key_GroupAPI);
@@ -1681,37 +1898,6 @@ if (markersArray.value && markersArray.value.length > 0) {
         );
         return matchingStatus !== undefined;
       });
-
-      // --- CONTROLS ---
-      const controlContainer = document.createElement('div');
-      controlContainer.style.position = 'absolute';
-      controlContainer.style.right = '20px';
-      controlContainer.style.bottom = '100px';
-      controlContainer.style.display = 'flex';
-      controlContainer.style.gap = '10px';
-      controlContainer.style.alignItems = 'center';
-      controlContainer.style.background = 'white';
-      controlContainer.style.borderRadius = '5px';
-      controlContainer.style.padding = '5px';
-
-      const mapControlDiv = document.createElement('div');
-      mapControlDiv.innerHTML = `
-        <button style="background: transparent; border: none;">
-          <img src="/pin.png" width="30" height="30">
-        </button>`;
-      mapControlDiv.style.display = 'none';
-
-      const navControlDiv = document.createElement('div');
-      navControlDiv.innerHTML = `
-        <button style="background: transparent; border: none;">
-          <img src="/navigation.png" width="30" height="30">
-        </button>`;
-      navControlDiv.style.display = 'none';
-
-      controlContainer.appendChild(navControlDiv);
-      controlContainer.appendChild(mapControlDiv);
-
-      newMap?.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlContainer);
 
       // --- MARKERS ---
       filteredVehicles.forEach(async (vehicle) => {
@@ -1797,22 +1983,24 @@ if (markersArray.value && markersArray.value.length > 0) {
             closeShowPath(1);
           }
 
-          navControlDiv.style.display = 'block';
-          mapControlDiv.style.display = 'block';
+          if (navControlDiv && mapControlDiv) {
+            navControlDiv.style.display = 'block';
+            mapControlDiv.style.display = 'block';
 
-          currentNavControlDiv = navControlDiv;
-          currentMapControlDiv = mapControlDiv;
+            currentNavControlDiv = navControlDiv;
+            currentMapControlDiv = mapControlDiv;
 
-          const lat = markerId.getPosition().lat();
-          const lng = markerId.getPosition().lng();
+            const lat = markerId.getPosition().lat();
+            const lng = markerId.getPosition().lng();
 
-          navControlDiv.addEventListener('click', () => {
-            window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-          });
+            navControlDiv.addEventListener('click', () => {
+              window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            });
 
-          mapControlDiv.addEventListener('click', () => {
-            window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-          });
+            mapControlDiv.addEventListener('click', () => {
+              window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            });
+          }
 
           infoWindomarker.open({
             anchor: markerId,
@@ -1852,10 +2040,12 @@ if (markersArray.value && markersArray.value.length > 0) {
       parseFloat(vehicleLon) !== 0
     ) {
       await moveCameraToLocation(vehicleLat, vehicleLon, 16);
+      vehicleLat = NaN;
+      vehicleLon = NaN;
     }
 
     // Check if there is a history array to process animation
-    if (historyarray.value.length > 0) {
+    if (historyarray.value.length > 0 && ishowPath.value) {
       isMapBusyWithRoute.value = true;
 
       canPlay.value = false;
@@ -1902,7 +2092,7 @@ if (markersArray.value && markersArray.value.length > 0) {
       Nearest_dirLon !== null &&
       Nearest_dirLon !== ""
     ) {
-      getDirections(Nearest_dirLat, Nearest_dirLon, NearesVeh);
+      await getDirections(Nearest_dirLat, Nearest_dirLon, NearesVeh);
     }
 
     // Clean up storage values
@@ -1961,7 +2151,13 @@ async function moveCameraToHomeLocation(): Promise<void> {
 }
 
 // Get driving directions and draw polyline on the map
-async function getDirections(destLat: number, destLon: number, vehicleObject: any): Promise<void> {
+async function getDirections(
+  destLat: number,
+  destLon: number,
+  vehicleObject: any
+): Promise<void> 
+{
+
   if (!mapRef.value || !vehicleObject) {
     console.error("Map or vehicle object is not initialized");
     return;
@@ -1970,61 +2166,177 @@ async function getDirections(destLat: number, destLon: number, vehicleObject: an
   Near_vehicleObject.value = vehicleObject;
 
   // Remove existing polyline
-  if (polylineRef.value) {
-    polylineRef.value.setMap(null);
-    polylineRef.value = null;
+  if (polylineRef) {
+    polylineRef.setPath([]);
+    polylineRef.setMap(null);
+    polylineRef = null;
   }
 
-  const origin = { lat: parseFloat(vehicleObject.lat), lng: parseFloat(vehicleObject.lon) };
-  const destination = { lat: destLat, lng: destLon };
+  const origin = {
+    lat: Number(vehicleObject.lat),
+    lon: Number(vehicleObject.lon)
+  };
 
-  console.log("Fetching directions:", origin, destination);
+  const destination = {
+    lat: Number(destLat),
+    lon: Number(destLon)
+  };
+
+  console.log("========== OSRM TEST ==========");
+  console.log("Origin:", origin);
+  console.log("Destination:", destination);
+
+  // Validate coordinates
+  if (
+    !Number.isFinite(origin.lat) ||
+    !Number.isFinite(origin.lon) ||
+    !Number.isFinite(destination.lat) ||
+    !Number.isFinite(destination.lon)
+  ) {
+    console.error("Invalid coordinates");
+    return;
+  }
+
+  console.log(
+    "Origin valid:",
+    origin.lat >= -90 &&
+    origin.lat <= 90 &&
+    origin.lon >= -180 &&
+    origin.lon <= 180
+  );
+
+  console.log(
+    "Destination valid:",
+    destination.lat >= -90 &&
+    destination.lat <= 90 &&
+    destination.lon >= -180 &&
+    destination.lon <= 180
+  );
 
   const loading = await loadingController.create({
-    message: 'Loading directions...',
-    spinner: 'circles',
+    message: "Loading directions...",
+    spinner: "circles",
   });
+
   await loading.present();
 
   try {
-    const directionsService = new google.maps.DirectionsService();
-    const result = await directionsService.route({
-      origin: origin,
-      destination: destination,
-      travelMode: google.maps.TravelMode.DRIVING,
-    });
 
-    if (result.routes && result.routes.length > 0) {
-      const path = result.routes[0].overview_path;
+    // IMPORTANT:
+    // OSRM = longitude,latitude
+    const coords =
+      `${origin.lon},${origin.lat};` +
+      `${destination.lon},${destination.lat}`;
 
-      polylineRef.value = new google.maps.Polyline({
-        path: path,
+    const url =
+      `https://router.project-osrm.org/route/v1/driving/${coords}` +
+      `?overview=full&geometries=geojson`;
+
+    console.log("OSRM URL:");
+    console.log(url);
+
+    const response = await fetch(url);
+
+    console.log("OSRM HTTP status:", response.status);
+
+    const data = await response.json();
+
+    console.log("OSRM RESPONSE:");
+    console.log(data);
+
+    if (!response.ok) {
+      throw new Error(
+        `OSRM HTTP error: ${response.status}`
+      );
+    }
+
+    if (data.code !== "Ok") {
+      console.error(
+        "OSRM did NOT find route:",
+        data.code
+      );
+
+      throw new Error(
+        `OSRM route error: ${data.code}`
+      );
+    }
+
+    if (
+      !data.routes ||
+      data.routes.length === 0
+    ) {
+      throw new Error("OSRM returned zero routes");
+    }
+
+    console.log(
+      "OSRM route FOUND"
+    );
+
+    console.log(
+      "Distance:",
+      data.routes[0].distance,
+      "meters"
+    );
+
+    console.log(
+      "Duration:",
+      data.routes[0].duration,
+      "seconds"
+    );
+
+    const coordinates =
+      data.routes[0].geometry.coordinates;
+
+    console.log(
+      "Route coordinate count:",
+      coordinates.length
+    );
+
+    const path =
+      coordinates.map(
+        ([lng, lat]: [number, number]) =>
+          new google.maps.LatLng(lat, lng)
+      );
+
+    polylineRef =
+      new google.maps.Polyline({
+        path,
         geodesic: true,
-        strokeColor: '#FF0000',
+        strokeColor: "#FF0000",
         strokeOpacity: 1.0,
         strokeWeight: 5,
       });
 
-      polylineRef.value.setMap(mapRef.value);
-      isnearVehObject.value = true;
+    polylineRef.setMap(mapRef.value);
 
-      // Move camera to vehicle’s location
-      moveCameraToLocation(vehicleObject.lat, vehicleObject.lon, 16);
+    isnearVehObject.value = true;
 
-    } else {
-      console.error("Directions request failed: no routes found");
-    }
+    moveCameraToLocation(
+      origin.lat,
+      origin.lon,
+      16
+    );
+
   } catch (error) {
-    console.error('Error fetching directions:', error);
+
+    console.error(
+      "========== OSRM ROUTE FAILED =========="
+    );
+
+    console.error(error);
+
+    // DON'T draw direct line here while testing
+    isnearVehObject.value = false;
+
   } finally {
+
     await loading.dismiss();
+
   }
 }
 
-
 async function CallOnlyAPI(): Promise<void> {
   console.log("Called from map");
-  isnearVehObject.value = false;
 
   let loading: HTMLIonLoadingElement | null = null;
 
@@ -2138,6 +2450,35 @@ async function processAnimation(fromwhere: number) {
   isSummaryChecked.value = true;
   isTripInfoChecked.value = true;
 
+  // Clean up any existing markers/polyline before drawing a new route
+  showPathOverlays.forEach((overlay: any) => {
+    if (overlay) {
+      if (typeof overlay.setPath === 'function') overlay.setPath([]);
+      if (typeof overlay.setMap === 'function') overlay.setMap(null);
+    }
+  });
+  showPathOverlays.length = 0;
+
+  if (markerMovingIcon) {
+    markerMovingIcon.setMap(null);
+    markerMovingIcon = null;
+  }
+  if (markerId1) {
+    markerId1.setMap(null);
+    markerId1 = null;
+  }
+  if (markerId2) {
+    markerId2.setMap(null);
+    markerId2 = null;
+  }
+  if (polylinePathsForShowPath) {
+    polylinePathsForShowPath.setPath([]);
+    polylinePathsForShowPath.setMap(null);
+    polylinePathsForShowPath = null;
+  }
+  markersDotsArray.forEach((marker: google.maps.Marker) => marker?.setMap?.(null));
+  markersDotsArray.length = 0;
+
   // Extract origin and destination
   const origin = { lat: historyarray.value[0].lat, lng: historyarray.value[0].lon };
   const destination = { lat: historyarray.value[historyarray.value.length - 1].lat, lng: historyarray.value[historyarray.value.length - 1].lon };
@@ -2145,15 +2486,17 @@ async function processAnimation(fromwhere: number) {
   // Create moving marker
   markerMovingIcon = new google.maps.Marker({
     map: newMap,
+    position: origin,
     icon: {
       path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
       scale: 3.5,
       strokeColor: "#FF0000",
     },
   });
+  showPathOverlays.push(markerMovingIcon);
 
   // Create polyline for the path
-  polylinePathsForShowPath.value = new google.maps.Polyline({
+  polylinePathsForShowPath = new google.maps.Polyline({
     path: [],
     geodesic: true,
     strokeColor: "#FF0000",
@@ -2161,55 +2504,60 @@ async function processAnimation(fromwhere: number) {
     strokeWeight: 2.5,
     map: newMap,
   });
+  showPathOverlays.push(polylinePathsForShowPath);
 
-  directionsService.value = new google.maps.DirectionsService();
 
-  // Process waypoints
-  const waypoints = historyarray.value.map((item) => ({
-    location: { lat: item.lat, lng: item.lon },
-    stopover: true,
-  }));
-  processWaypoints(waypoints);
+// Process waypoints along roads using OSRM (road-following route)
+  await processWaypointsWithRoads(historyarray.value);
+
+  if (!ishowPath.value) {
+    showPathOverlays.forEach((overlay: any) => {
+      if (overlay) {
+        if (typeof overlay.setPath === 'function') overlay.setPath([]);
+        if (typeof overlay.setMap === 'function') overlay.setMap(null);
+      }
+    });
+    showPathOverlays.length = 0;
+    if (markerMovingIcon) { markerMovingIcon.setMap(null); markerMovingIcon = null; }
+    if (polylinePathsForShowPath) {
+      polylinePathsForShowPath.setPath([]);
+      polylinePathsForShowPath.setMap(null);
+      polylinePathsForShowPath = null;
+    }
+    return;
+  }
 
   for (let i = 0; i < historyarray.value.length; i++) {
-    const s1 = await snapToRoad(historyarray.value[i].lat, historyarray.value[i].lon);
+    // Snap raw GPS point to the nearest point on the OSRM road route
+    const s1 = findNearestPointOnRoute(historyarray.value[i].lat, historyarray.value[i].lon);
 
-    // Start marker
+    // Start marker (A) — do NOT push to markersArray; handled exclusively by markerId1
     if (i == 0) {
       markerId1 = new google.maps.Marker({
         position: s1,
         map: newMap,
         icon: { url: "/ic_end.png", scaledSize: new google.maps.Size(25, 25) },
       });
-      markersArray.value.push(markerId1);
-      newMap?.setCenter(new google.maps.LatLng(s1));
+      showPathOverlays.push(markerId1);
+      newMap?.setCenter(new google.maps.LatLng(s1.lat, s1.lng));
       newMap?.setZoom(16);
     }
 
-    // End marker
+    // End marker (B) — do NOT push to markersArray; handled exclusively by markerId2
     if (i == historyarray.value.length - 1) {
       markerId2 = new google.maps.Marker({
         position: s1,
         map: newMap,
         icon: { url: "/ic_st.png", scaledSize: new google.maps.Size(25, 25) },
       });
-      markersArray.value.push(markerId2);
+      showPathOverlays.push(markerId2);
     }
 
     // Dot marker based on event type
     let dot_marker: google.maps.Marker;
     const evt = historyarray.value[i].event_type;
-    if (evt === Constants.eventType.Event_Type_Stopped || evt === Constants.eventType.Event_Type_Idel) {
-      dot_marker = createDotMarker(s1, "#ff0000");
-    } else if (
-      evt === Constants.eventType.Event_Type_NoData ||
-      evt === Constants.eventType.Event_Type_IG_OFF_NoGPS ||
-      evt === Constants.eventType.Event_Type_IG_ON_NoGPS
-    ) {
-      dot_marker = createDotMarker(s1, "#999999");
-    } else {
-      dot_marker = createDotMarker(s1, "#999999");
-    }
+    dot_marker = createDotMarker(s1, getDotColor(evt));
+    showPathOverlays.push(dot_marker);
 
     // Mount InfoWindow Vue component
     const infoWindow = new google.maps.InfoWindow();
@@ -2230,10 +2578,27 @@ async function processAnimation(fromwhere: number) {
   }
 }
 
+// Helper: return dot color based on GPS event type
+// Moving (1)=green, Idle (2)=orange, Stopped (3)=red, NoGPS/NoData=dark gray
+function getDotColor(eventType: string): string {
+  switch (eventType) {
+    case Constants.eventType.Event_Type_Moving:      return '#00C853'; // green
+    case Constants.eventType.Event_Type_Idel:        return '#FF6D00'; // orange
+    case Constants.eventType.Event_Type_Stopped:     return '#D50000'; // red
+    case Constants.eventType.Event_Type_IG_ON_NoGPS: return '#546E7A'; // blue-gray
+    case Constants.eventType.Event_Type_IG_OFF_NoGPS:return '#546E7A'; // blue-gray
+    case Constants.eventType.Event_Type_NoData:      return '#9E9E9E'; // gray
+    default:                                         return '#9E9E9E'; // gray
+  }
+}
+
 // Helper function to create dot markers
 function createDotMarker(position: any, color: string) {
+  const lat = typeof position.lat === 'function' ? position.lat() : parseFloat(position.lat);
+  const lng = typeof position.lng === 'function' ? position.lng() : parseFloat(position.lng ?? position.lon);
+
   return new google.maps.Marker({
-    position,
+    position: { lat, lng },
     map: newMap,
     icon: {
       path: google.maps.SymbolPath.CIRCLE,
@@ -2379,28 +2744,27 @@ function calculateDuration(start: string, end: string) {
 }        
  
 
- // Snap a GPS point to the nearest road using Google Directions API
-async function snapToRoad(lat: number, lng: number): Promise<{ lat: number; lng: number }> {
-  return new Promise((resolve) => {
-    const latLng = new google.maps.LatLng(lat, lng);
+// Find the nearest point on the OSRM road route for a given raw GPS coordinate.
+// This ensures dot markers sit exactly on the road polyline.
+function findNearestPointOnRoute(lat: number, lng: number): { lat: number; lng: number } {
+  const pts = routePoints.value;
+  if (!pts || pts.length === 0) return { lat, lng };
 
-    directionsService.value.route(
-      {
-        origin: latLng,
-        destination: latLng,
-        travelMode: google.maps.TravelMode.DRIVING,
-      },
-      (response, status) => {
-        if (status === google.maps.DirectionsStatus.OK && response.routes.length > 0) {
-          const snapped = response.routes[0].legs[0].start_location;
-          resolve({ lat: snapped.lat(), lng: snapped.lng() });
-        } else {
-          // fallback to original GPS coordinates if snapping fails
-          resolve({ lat, lng });
-        }
-      }
-    );
-  });
+  const rawPoint = new google.maps.LatLng(lat, lng);
+  let nearestLat = lat;
+  let nearestLng = lng;
+  let minDist = Infinity;
+
+  for (let i = 0; i < pts.length; i++) {
+    const dist = google.maps.geometry.spherical.computeDistanceBetween(rawPoint, pts[i]);
+    if (dist < minDist) {
+      minDist = dist;
+      nearestLat = pts[i].lat();
+      nearestLng = pts[i].lng();
+    }
+  }
+
+  return { lat: nearestLat, lng: nearestLng };
 }
 
 // Interval callback triggered every 1 minute

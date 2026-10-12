@@ -46,7 +46,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-          <ion-icon :icon="iconName" style="font-size: 30px;" />
+          <ion-icon :icon="distanceIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -71,7 +71,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-           <ion-icon :icon="iconName" style="font-size: 30px;" />
+           <ion-icon :icon="durationIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -96,7 +96,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-          <ion-icon :icon="iconName" style="font-size: 30px;" />
+          <ion-icon :icon="violationIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -122,7 +122,7 @@
 
       <div class="left-section">
         <div class="icon-box">
-           <ion-icon :icon="iconName" style="font-size: 30px;" />
+           <ion-icon :icon="fuelIcon" style="font-size: 30px;" />
         </div>
 
         <div class="text-container">
@@ -149,7 +149,8 @@
 <script>
 import { ref, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { addCircleOutline } from 'ionicons/icons';
+import { timeOutline, warningOutline, waterOutline } from 'ionicons/icons';
+import { distanceRouteIcon } from "@/common/customIcons";
 import {   IonContent,IonIcon,IonCol,IonRow,IonItem,IonList,IonGrid,  loadingController, 
   IonCard,IonCardContent,
 } from '@ionic/vue';
@@ -632,7 +633,10 @@ datasets: [
     barChart,
     clickForDatePage,
     openGroup,
-    iconName: addCircleOutline, // replace with your desired icon
+    distanceIcon: distanceRouteIcon,
+    durationIcon: timeOutline,
+    violationIcon: warningOutline,
+    fuelIcon: waterOutline,
     Distance_tot,
     Distance_per,
     movingDuration1,
@@ -675,6 +679,26 @@ datasets: [
 </script>
 
 <style scoped>
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 20px 8px;
+}
+
+.overview-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+
+.overview-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+ 
 
 .custom-metric-card {
   margin: 10px;

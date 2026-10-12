@@ -48,13 +48,13 @@
           <!-- Version -->
           <div class="info-row">
             <span class="label">App Version</span>
-            <span class="value">1.2.5</span>
+            <span class="value">1.2.6</span>
           </div>
 
           <!-- Build Date -->
           <div class="info-row">
             <span class="label">Build Date</span>
-            <span class="value">21/03/2026</span>
+            <span class="value">11/08/2026</span>
           </div>
 
         </ion-card-content>

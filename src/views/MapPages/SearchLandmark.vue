@@ -142,6 +142,7 @@ const lng = landmark.geometry.lng;
 
 
     onMounted(() => {
+      
       initNetworkListener();
     });
 

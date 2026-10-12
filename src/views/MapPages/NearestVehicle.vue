@@ -315,14 +315,14 @@ export default defineComponent({
 
     });
 
-    const navigateToPage = (veh) => {
+    const navigateToPage = async (veh) => {
       console.log("displaydata",veh);
       // router.replace({
       //   name: 'map',  // Parent page route name
       //   params: { vehLat: veh.lat, vehLon: veh.lon }  // Passing the selected lat/lon as query parameters
       // });      
 
-      storage.set('NearestVeh',JSON.stringify(veh));
+      await storage.set('NearestVeh',JSON.stringify(veh));
 
       router.go(-2); // Go back two steps in the navigation history
       

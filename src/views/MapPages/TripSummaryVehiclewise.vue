@@ -171,7 +171,7 @@ import { addIcons } from 'ionicons';
 import Constants from "@/common/constants";
 import { fetchData } from "@/services/ApiService";
 import { Network } from '@capacitor/network';
-import { showToast } from '@/services/toast'; // Import toast utility function
+import { showToast,showToastMessage } from '@/services/toast'; // Import toast utility function
 import router from '@/router/index'; // Assuming your router file is named router.js
     import storage from "@/services/storagefile";
 
@@ -385,6 +385,8 @@ export default {
                       }));
                     
             
+
+
                       router.replace({
                       name: 'map',  // Parent page route name
                       params: { vehLat: 0, vehLon: 0,arrayData:JSON.stringify(historyarray.value) }  // Passing the selected lat/lon as query parameters

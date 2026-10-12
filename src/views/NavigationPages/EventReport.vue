@@ -75,8 +75,8 @@
                        
                         <div class="location" style="margin-top: 5px;">
                           
-                          <img src="/ic_gps.png" alt="location icon" class="icon-img" />
-                          <span class="text-item"style="color: black;">{{ vehicle.location }}</span>
+                          <ion-icon :icon="locationSharp" style="font-size: 24px; min-width: 24px; flex-shrink: 0; color: #4CAF50; margin-right: 8px;"></ion-icon>
+                          <span class="text-item" style="color: black;">{{ vehicle.location }}</span>
 
                         </div>
                         <div v-if="vehicle.eotherdet" class="text-row" style="margin-top: 5px;">
@@ -121,7 +121,7 @@ import {
   useBackButton,
 } from '@ionic/vue';
 
-import { close } from 'ionicons/icons';
+import { close, locationSharp } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { onMounted, onUnmounted, ref } from 'vue';
 import router from '@/router/index'; // Assuming your router file is named router.js
@@ -485,6 +485,7 @@ let selectedEvents;
       FromDateAPI,
       ToDateAPI,
       items,
+      locationSharp,
     };
   },
 };

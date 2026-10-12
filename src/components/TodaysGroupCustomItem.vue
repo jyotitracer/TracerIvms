@@ -46,7 +46,7 @@
 
         <div class="info-col with-border">
           <div class="info-item">
-            <ion-icon :icon="iconName" class="icon-style" />
+            <ion-icon :icon="distanceIcon" class="icon-style" />
 
             <div class="text-container">
               <p class="text2">{{ item.distance1 }}</p>
@@ -57,7 +57,7 @@
 
         <div class="info-col">
           <div class="info-item">
-            <ion-icon :icon="iconName" class="icon-style" />
+            <ion-icon :icon="violationIcon" class="icon-style" />
 
             <div class="text-container">
               <p class="text2">{{ item.vio1 }}</p>
@@ -73,7 +73,7 @@
 
         <div class="info-col with-border">
           <div class="info-item">
-            <ion-icon :icon="iconName" class="icon-style" />
+            <ion-icon :icon="durationIcon" class="icon-style" />
 
             <div class="text-container">
               <p class="text2">{{ item.moving1 }}</p>
@@ -84,7 +84,7 @@
 
         <div class="info-col">
           <div class="info-item">
-            <ion-icon :icon="iconName" class="icon-style" />
+            <ion-icon :icon="fuelIcon" class="icon-style" />
 
             <div class="text-container">
               <p class="text2">{{ item.fuel1 }}</p>
@@ -102,7 +102,8 @@
 <script>
 import PieChart from '@/components/PieChartView.vue';
 import { IonItem, IonCol, IonRow, IonGrid, IonIcon } from '@ionic/vue';
-import { addCircleOutline } from 'ionicons/icons';
+import { warningOutline, timeOutline, waterOutline } from 'ionicons/icons';
+import { distanceRouteIcon } from "@/common/customIcons";
 import storage from "@/services/storagefile";
 import Constants from '@/common/constants';
 
@@ -119,7 +120,10 @@ export default {
   },
   data() {
     return {
-      iconName: addCircleOutline, // Icon used in ion-item
+      distanceIcon: distanceRouteIcon,
+      violationIcon: warningOutline,
+      durationIcon: timeOutline,
+      fuelIcon: waterOutline,
       moving_color: '',  // To store the dynamic color
       stopped_color: '',
       offline_color: '',
