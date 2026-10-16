@@ -9,7 +9,7 @@ http://ionicframework.com/docs/theming/ */
 
   --ion-font-family: 'Inter', sans-serif;
 
-  --ion-background-color: #f3faff;
+  --ion-background-color: #F0F6FA;
   --ion-text-color: #000000;
 
   /** primary **/
@@ -95,7 +95,7 @@ http://ionicframework.com/docs/theming/ */
   --ion-font-family: 'Inter', sans-serif;
 
   /* Dark mode styles */
-  --ion-background-color: #f3faff;
+  --ion-background-color: #F0F6FA;
   --ion-text-color: #000000;
 }
 
@@ -107,7 +107,7 @@ http://ionicframework.com/docs/theming/ */
     --ion-font-family: 'Inter', sans-serif;
 
 
-    --ion-background-color: #f3faff;
+    --ion-background-color: #F0F6FA;
     /* Background color ion-color-purplishGrey */
     --ion-text-color: #000000;
     /* Text color  pinkishGrey*/
@@ -193,7 +193,7 @@ http://ionicframework.com/docs/theming/ */
    */
 
   .ios body {
-    --ion-background-color: #f3faff;
+    --ion-background-color: #F0F6FA;
     --ion-background-color-rgb: 0, 0, 0;
 
     --ion-text-color: #000000;
@@ -237,7 +237,7 @@ http://ionicframework.com/docs/theming/ */
    */
 
   .md body {
-    --ion-background-color: #f3faff;
+    --ion-background-color: #F0F6FA;
     --ion-background-color-rgb: 255, 255, 255;
 
     --ion-text-color: #000000;

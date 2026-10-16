@@ -3,21 +3,21 @@
     <ion-menu content-id="main-content" 
             style="background-color: white;">
       <ion-header translucent>
-        <ion-toolbar style="--background: var(-ion-background-color);">
+        <ion-toolbar style="--background: #ffffff; background: #ffffff;">
                 <div class="ion-text-center">
                 <ion-img
                     src="/new_logo.png"
                     class="menu-logo">
                   </ion-img>
-                <ion-label style="font-size:16px; font-weight: normal;color: white;">Welcome {{ username1 }}</ion-label>
+                <ion-label style="font-size:16px; font-weight: 700; color: #006837;">Welcome {{ username1 }}</ion-label>
                 </div>
         </ion-toolbar>
       </ion-header>
-      <ion-content fullscreen class="menu-content safe-bottom">
-        <ion-list>
+      <ion-content fullscreen class="menu-content safe-bottom" style="--background: #ffffff; background: #ffffff;">
+        <ion-list style="--background: #ffffff; background: #ffffff;">
           <ion-item v-for="(page, index) in filteredPages" :key="index" @click="navigateToPage(page.route, page.title,page.pageid)">
             <!-- <ion-icon slot="start" :ios="page.iosIcon" :md="page.mdIcon"></ion-icon> -->
-            <ion-label style="font-weight: bold; font-size: 16px; color:var(--ion-color-primary)">{{ page.title }}</ion-label>
+            <ion-label style="font-weight: bold; font-size: 16px; color: #0f2438">{{ page.title }}</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>

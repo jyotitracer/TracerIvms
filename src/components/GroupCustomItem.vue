@@ -2,7 +2,7 @@
 
 
   <!-- 📊 Status Row -->
-  <ion-item class="custom-item" @click="handleClick">
+  <div class="custom-card-wrapper" @click="handleClick">
 
   <!-- 🔵 Pie Chart (CENTER) -->
   <div class="chart-section">
@@ -39,72 +39,57 @@
     </div>
   </div>
 
-</ion-item>
+</div>
 </template>
 
 
 
 <style scoped>
-/* 🔥 Override Ionic */
-.custom-item::part(native) {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;   /* 🔥 important (not center) */
+.custom-card-wrapper {
+  background: #ffffff;
+  border-radius: 20px;
+  margin: 14px 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 20px rgba(0, 30, 60, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s ease;
 }
 
-ion-item {
-  --inner-border-width: 0px;
-  --border-width: 0px;
-  --padding-start: 0px;
-  --inner-padding-end: 0px;
+.custom-card-wrapper:active {
+  transform: scale(0.99);
 }
 
-/* Card style */
-.custom-item {
-  border-radius: 16px;
-  background: white;
-  margin: 10px 20px;
-  padding: 10px;
-  border: none;
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
-}
-
-/* Chart center */
 .chart-section {
   display: flex;
   justify-content: center;
-  margin-bottom: 5px;
-  margin-top: 5px;
+  margin-bottom: 8px;
+  margin-top: 4px;
 }
 
-/* Group name LEFT */
 .group-name {
   font-family: 'Manrope', sans-serif;
   font-size: 1.125rem;
   font-weight: 700;
   color: #021f29;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   text-align: left;
 }
 
-/* Status container */
 .status-row {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
-/* Each row */
 .status-item {
   display: flex;
   align-items: center;
-    font-size: 14px;
-
-  justify-content: space-between; /* 🔥 value to right */
+  font-size: 14px;
+  justify-content: space-between;
 }
 
-/* Left part (dot + label) */
 .status-label {
   flex: 1;
   margin-left: 8px;
@@ -112,16 +97,15 @@ ion-item {
   font-family: 'Inter', sans-serif;
 }
 
-/* Dot */
 .status-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
 }
 
-/* Value (right) */
 .status-value {
   font-weight: 600;
+  color: #0f2438;
 }
 </style>
 
