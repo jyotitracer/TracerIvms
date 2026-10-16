@@ -307,7 +307,7 @@ const handleBackButton = async () => {
   cursor: pointer;
   position: relative;
   font-size: 12px;
-  color: #fff; /* Optional: Change color to indicate interactivity */
+  color: #006837; font-weight: 600; /* Optional: Change color to indicate interactivity */
   margin-top: 8px; /* Adjust as necessary for spacing */
 }
 

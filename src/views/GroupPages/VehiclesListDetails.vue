@@ -10,7 +10,7 @@
          <!-- 🔥 RIGHT FILTER BUTTON -->
     <ion-buttons slot="end">
       <ion-button @click="isFilterOpen = true">
-        <ion-icon :icon="filterOutline" style="color: white; height: 24px; width: 24px;"></ion-icon>
+        <ion-icon :icon="filterOutline" style="color: #006837; height: 24px; width: 24px;"></ion-icon>
       </ion-button>
     </ion-buttons>
       </ion-toolbar>

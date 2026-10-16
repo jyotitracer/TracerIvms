@@ -203,7 +203,7 @@
         <div class="second-div">
   
           <div class="label-and-range">
-            <ion-label style="width: 60px;   color: white; font-size: 14px;">Progress</ion-label>
+            <ion-label style="width: 60px;   color: #006837; font-size: 14px; font-weight: 600;">Progress</ion-label>
   
          
         
@@ -221,7 +221,7 @@
           </div>
   
           <div class="label-and-range">
-            <ion-label style="width: 60px; color: white; font-size: 14px;">Speed</ion-label>
+            <ion-label style="width: 60px; color: #006837; font-size: 14px; font-weight: 600;">Speed</ion-label>
            
             <ion-range class="progress-bar"
               min="1"
@@ -234,12 +234,12 @@
         </div>
   
         <div class="trip-info-section">
-          <ion-label style="margin-right: 5px; color: white;font-size: 14px;">Summary</ion-label>
+          <ion-label style="margin-right: 5px; color: #006837; font-size: 14px; font-weight: 600;">Summary</ion-label>
           <ion-checkbox v-model="isSummaryChecked" style="margin-top: 10px;"/>
   
           <!-- Trip Information Checkbox below Summary -->
           <div class="trip-info">
-            <ion-label style="margin-right: 5px; color: white; font-size: 14px;">Trip Info</ion-label>
+            <ion-label style="margin-right: 5px; color: #006837; font-size: 14px; font-weight: 600;">Trip Info</ion-label>
             <ion-checkbox v-model="isTripInfoChecked"/>
           </div>
         </div>

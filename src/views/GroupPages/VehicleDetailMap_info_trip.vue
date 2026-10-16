@@ -8,7 +8,7 @@
            <ion-buttons slot="start">
           <!-- Custom Back Button -->
           <ion-button @click="goBack" fill="clear">
-          <ion-icon :icon="arrowBack" slot="icon-only" style="color: white;"></ion-icon>
+          <ion-icon :icon="arrowBack" slot="icon-only" style="color: #006837;"></ion-icon>
           </ion-button>
         </ion-buttons>
           <ion-title>{{ vehicleName }}</ion-title>
