@@ -15,9 +15,14 @@
       </ion-header>
       <ion-content fullscreen class="menu-content safe-bottom" style="--background: #ffffff; background: #ffffff;">
         <ion-list style="--background: #ffffff; background: #ffffff;">
-          <ion-item v-for="(page, index) in filteredPages" :key="index" @click="navigateToPage(page.route, page.title,page.pageid)">
+          <ion-item 
+            v-for="(page, index) in filteredPages" 
+            :key="index" 
+            @click="navigateToPage(page.route, page.title,page.pageid)"
+            style="--background: #ffffff; background: #ffffff; --border-color: #f1f5f9; --inner-border-width: 0 0 1px 0; border-bottom: 1px solid #f1f5f9;"
+          >
             <!-- <ion-icon slot="start" :ios="page.iosIcon" :md="page.mdIcon"></ion-icon> -->
-            <ion-label style="font-weight: bold; font-size: 16px; color: #0f2438">{{ page.title }}</ion-label>
+            <ion-label style="font-weight: 600; font-size: 15px; color: #006837;">{{ page.title }}</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>
