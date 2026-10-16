@@ -76,29 +76,28 @@ ion-footer ion-toolbar {
   border: none;
 }
 
-  ion-header, ion-header ion-toolbar
-  {
-    --background: var(--ion-color-primary); /* Set the background color of the header */
-  }
+  ion-header, ion-header ion-toolbar {
+  --background: #ffffff !important;
+  background: #ffffff !important;
+  --color: #006837 !important;
+  color: #006837 !important;
+  border-bottom: 1px solid #f1f5f9;
+}
 
- 
-  ion-item,ion-grid{
-    --background: white;
-     --border-width: 0;          /* remove outer line */
-  --inner-border-width: 0;    /* remove inner divider */
-  }
+ion-title {
+  --color: #006837 !important;
+  color: #006837 !important;
+  font-weight: 700 !important;
+}
 
-  ion-title {
-    --color: white !important; /* Set the text color of the title */
-  }
-  
-  ion-buttons ion-back-button {
-    --color: white; /* Set the color of the back button */
-  }
-  
-  ion-buttons ion-menu-button {
-    --color: white; /* Set the color of the menu button */
-  }
+ion-buttons ion-back-button,
+ion-buttons ion-menu-button,
+ion-buttons ion-button,
+ion-buttons ion-icon,
+ion-toolbar ion-icon {
+  --color: #006837 !important;
+  color: #006837 !important;
+}
 
   ion-toggle {
    /* OFF state (default) */
