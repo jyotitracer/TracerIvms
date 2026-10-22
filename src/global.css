@@ -241,3 +241,57 @@ ion-searchbar {
   --icon-color: #006837 !important;
   --clear-button-color: #006837 !important;
 }
+
+
+/* ==========================================================
+   2026 MODERN APP DESIGN SYSTEM ENHANCEMENTS
+   ========================================================== */
+
+/* Modern Card Surfaces: Clean 20px radius, subtle border & shadow */
+.custom-card,
+.custom-card-wrapper,
+.home-card {
+  border-radius: 20px !important;
+  box-shadow: 0px 4px 20px rgba(0, 30, 60, 0.04) !important;
+  border: 1px solid rgba(226, 232, 240, 0.7) !important;
+  background: #ffffff !important;
+}
+
+/* Touch Targets >= 44px */
+ion-button,
+ion-item,
+ion-menu-button,
+ion-back-button {
+  min-height: 44px;
+}
+
+/* Modern Tab Bar */
+ion-tab-bar {
+  --background: #ffffff !important;
+  background: #ffffff !important;
+  border-top: 1px solid #f1f5f9 !important;
+  height: 58px;
+}
+
+ion-tab-button {
+  --color: #94a3b8;
+  --color-selected: #006837 !important;
+  color: #94a3b8;
+}
+
+ion-tab-button.tab-selected {
+  color: #006837 !important;
+}
+
+/* Modern Rounded Searchbars */
+ion-searchbar {
+  --border-radius: 16px !important;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+  --placeholder-color: #94a3b8 !important;
+}
+
+/* Font Rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
