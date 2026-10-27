@@ -5,7 +5,7 @@
      <div v-if="isConnected && showReconnectedMessage" class="network-status-bar connected">
        Connected to Network
      </div> -->
-<ion-content fullscreen class="safe-bottom padding-class">
+<ion-content fullscreen class="safe-bottom">
   
    <div class="month-below1">
      <div class="month-total date" @click="clickForDatePage">
@@ -22,7 +22,7 @@
    </div>
 
    <div class="overview-header">
-  <div class="Precision Overview">Precision Overview</div>
+  <div class="overview-title">Precision Overview</div>
   <div class="overview-time">
     Updated {{ lastUpdatedText }}
   </div>
@@ -212,10 +212,9 @@
   margin: 10px;
   border-radius: 16px;
 
-  background: #e6f6ff; /* surface-container-low */
-  border: 1px solid rgba(255, 255, 255, 0.5);
-
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0px 4px 18px rgba(0, 30, 60, 0.04);
 }
 
 /* hover effect */
@@ -523,30 +522,32 @@
 
 
 .month-below1 {
- display: flex;
- align-items: center;
- position: relative;
- /* background-color: #f3faff; */
- padding: 10px;
- margin-top: 10px;
- font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin: 12px 16px 8px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .month-total.date {
- position: absolute;
- left: 50%;
- transform: translateX(-50%);
- color: var(--ion-color-primary);
- font-size: 16px;
-
+  color: #006837;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .right-group {
- display: flex;
- align-items: center;
- color: var(--ion-color-primary);
-
- margin-left: auto; /* Pushes the right-group to the right side */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #006837;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .icon-arrow {

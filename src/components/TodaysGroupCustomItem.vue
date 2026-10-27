@@ -174,10 +174,11 @@ export default {
 /* CARD */
 .custom-card {
   background: white;
-  border-radius: 16px;
-  margin: 20px;
-  padding-bottom: 10px;
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  border-radius: 18px;
+  margin: 14px 16px;
+  padding-bottom: 8px;
+  box-shadow: 0px 4px 20px rgba(0, 30, 60, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   overflow: hidden;
 }
 
@@ -285,12 +286,12 @@ export default {
 
 /* RIGHT BORDER */
 .with-border {
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #f1f5f9;
 }
 
 /* BOTTOM BORDER */
 .border-bottom {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 /* INFO ITEM */
