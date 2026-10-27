@@ -668,22 +668,23 @@ export default defineComponent({
 
 /* 🔹 Default (Deselected) */
 .button-group ion-button {
-  --background: #e6f6ff;        /* surface-container-low */
-  --border-radius: 9999px;
+  --background: #f1f5f9;
+  --color: #475569;
+  --border-radius: 20px;
   --box-shadow: none;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 600;
+  margin: 0 4px;
 }
 
-/* 🔥 Hover effect (like Tailwind) */
 .button-group ion-button:hover {
-  --background: #d1ecfa;        /* surface-container-high */
+  --background: #e2e8f0;
 }
 
-/* 🔥 Active (Selected) */
 .button-group ion-button.selected {
-  --background: #006b47;        /* primary */
-  --color: #ffffff;             /* on-primary */
+  --background: #006837;
+  --color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 104, 55, 0.25);
 }
 
 
@@ -691,10 +692,11 @@ export default defineComponent({
 
 .item {
   margin-bottom: 10px;
-  border-radius: 16px;
-  background: white;
-  margin: 10px 20px;
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  border-radius: 18px;
+  background: #ffffff;
+  margin: 10px 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
   overflow: hidden;
 }
 
@@ -702,10 +704,11 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #e6f6ff;
-  padding: 10px;
-  border: none;
-  font-weight: bold;
+  background-color: #f8fafc;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  padding: 10px 14px;
+  font-weight: 700;
+  color: #006837;
 }
 
 .item-details {
@@ -804,7 +807,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   width: 100%;
-  background-color: #4d4d4d;
+  background-color: #0f172a; border-radius: 16px; margin: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   position: relative;
   padding: 15px 10px 10px;
 }

@@ -9,8 +9,8 @@
           </div>  
         </div>
         <div class="custom-card">
-          <span style="font-weight: bold; font-size: 14px;">Fleet Status Overview</span>
-          <span style="font-weight: 200; font-size: 12px;">Monthly Vehicle Count By Date</span>
+          <span style="font-weight: 700; font-size: 15px; color: #006837;">Fleet Status Overview</span>
+          <span style="font-size: 12px; color: #64748b; margin-top: 2px; margin-bottom: 8px;">Monthly Vehicle Count By Date</span>
 
         <div class="custom-legend ">
           
@@ -701,18 +701,17 @@ datasets: [
  
 
 .custom-metric-card {
-  margin: 10px;
+  margin: 10px 14px;
   border-radius: 16px;
-
-  background: #e6f6ff; /* surface-container-low */
-  border: 1px solid rgba(255, 255, 255, 0.5);
-
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* hover effect */
 .custom-metric-card:hover {
-  background: #d8f2ff;
+  background: #fafdfa;
+  box-shadow: 0 6px 20px rgba(0, 104, 55, 0.08);
 }
 
 .custom-metric-card:hover .right-icon {

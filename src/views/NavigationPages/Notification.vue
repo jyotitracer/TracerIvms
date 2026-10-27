@@ -260,7 +260,7 @@ export default defineComponent({
   justify-content: center;    /* ✅ CENTER BOTH BUTTONS */
   align-items: center;
   gap: 12px;
-  background: var(--ion-color-primary);
+  background: #006837; box-shadow: 0 -4px 18px rgba(0, 30, 60, 0.08); padding: 8px 12px;
   z-index: 100;
 }
 
@@ -297,10 +297,13 @@ export default defineComponent({
 }
 
 .notification-card {
-  margin: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Card shadow for better appearance */
-  border-radius: 10px; /* Rounded corners */
-  padding: 0px;
+  margin: 10px 14px;
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  padding: 4px;
+  overflow: hidden;
 }
 
 .item-content {
@@ -323,7 +326,7 @@ color: black;
 .separator {
   width: 100%;
   height: 1px;
-  background-color: #ccc; /* Line color */
+  background-color: rgba(226, 232, 240, 0.85); /* Line color */
 }
 
 .action-buttons {

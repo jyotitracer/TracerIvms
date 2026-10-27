@@ -609,16 +609,20 @@ onIonViewWillLeave(async () => {
   font-weight: 500;
 }
 ion-content {
-  --background: #f3faff;
+  --background: #f8fafc;
 }
 
 .custom-item {
-  border-radius: 16px;
-  background: white;
-  margin: 10px 20px;
-  padding: 5px;
-  border: none;
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  border-radius: 18px;
+  background: #ffffff;
+  margin: 10px 14px;
+  padding: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.custom-item:hover {
+  box-shadow: 0 6px 20px rgba(0, 104, 55, 0.08);
 }
 
 .custom-divider {
@@ -670,16 +674,16 @@ ion-list {
   align-items: center;
   padding: 12px;
   border-radius: 10px;
-  background: #e6f6ff;
+  background: #f8fafc; border: 1px solid #e2e8f0;
   font-weight: 500;
 }
 
 .filter-item:active {
-  background: #e6f4ea;
+  background: #f0fdf4; border-color: rgba(0, 104, 55, 0.2);
 }
 
 .check-icon {
-  color: var(--ion-color-primary);
+  color: #006837;
   font-weight: bolder;
   font-size: 24px;
 }

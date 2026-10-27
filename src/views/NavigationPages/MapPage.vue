@@ -483,7 +483,7 @@ ion-fab-button {
     margin-left: 5px;          /* Space between icon and label */
     font-size: 14px;
     color: white;
-    background-color:rgb(45, 44, 44);
+    background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
     padding: 4px 4px 4px 4px;
     border-radius: 4px;
     white-space: nowrap;       /* Prevent the label from breaking into a new line */
@@ -511,7 +511,7 @@ ion-fab-button {
   
   .data-section {
     padding: 10px;
-    background-color: #f8f8f8;
+    background-color: #ffffff; border-radius: 16px; margin: 8px 12px; border: 1px solid rgba(226, 232, 240, 0.9); box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
   }
   
   .vehicle-info {

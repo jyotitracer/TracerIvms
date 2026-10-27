@@ -531,7 +531,7 @@ color: var(--ion-color-primary);
   width: 70px;
   color: white;
   --background: var(--ion-color-primary); /* Change the background color to blue */
-  --border-radius: 0px; /* Set custom border radius */
+  --border-radius: 20px; box-shadow: 0 2px 6px rgba(0, 104, 55, 0.2); font-weight: 600; /* Set custom border radius */
   --height: 30px; /* Set custom height */
   height: 30px; /* Ensure height is applied as fallback */
   min-height: unset; /* Remove default min-height */
@@ -663,7 +663,7 @@ cursor: pointer;
 .circle {
 width: 40px;
 height: 40px;
-background-color:#00875A; /* Green background color */
+background-color: #006837; /* Green background color */
 border-radius: 50%;
 display: flex;
 justify-content: center;

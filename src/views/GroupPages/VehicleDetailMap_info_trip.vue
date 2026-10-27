@@ -201,18 +201,17 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
-
 /* iOS tab bar container */
 .ios-tab-bar {
   padding-bottom: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
 }
 
 /* Default tab style */
 ion-tab-button {
-  --color: #8e8e93;              /* iOS gray */
-  --color-selected: var(--ion-color-primary);     /* iOS blue */
+  --color: #64748b;
+  --color-selected: #006837;
   font-size: 11px;
 }
 
@@ -230,26 +229,19 @@ ion-tab-button ion-label {
 /* Selected tab */
 .tab-selected ion-icon,
 .tab-selected ion-label {
-  color: var(--ion-color-primary) !important; /* iOS native blue */
-}
-
-
-.tab-selected ion-icon,
-.tab-selected ion-label {
-  color: var(--ion-color-primary) !important; /* Set selected tab icon and label to red */
+  color: #006837 !important;
+  font-weight: 700;
 }
 
 .network-status-bar {
-  background-color:#00875A;
+  background-color: #006837;
   color: white;
   text-align: center;
   padding: 5px;
   font-size: 14px;
 }
 
-
 .network-status-bar.connected {
-  background-color: green;
+  background-color: #006837;
 }
-
 </style>

@@ -234,37 +234,52 @@ const statusColors = {
 </script>
 
 <style scoped>
-
 /* Layout */
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .row-between {
   display: flex;
   justify-content: space-between;
-  align-items:  center;
+  align-items: center;
+  width: 100%;
 }
 
-/* Title */
-.title {
-  font-size: 22px;
-  font-weight: bold;
-}
-.subtitle {
-  font-size: 14px;
-  color: gray;
+ion-card {
+  border-radius: 18px;
+  margin: 12px 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
+  background: #ffffff;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* ✅ ICON BACKGROUND FIX */
+ion-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 104, 55, 0.08);
+}
+
+ion-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+ion-card-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Icon Box */
 .icon-box {
-  width: 42px;
-  height: 42px;
-  background: rgba(16, 185, 129, 0.1);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 104, 55, 0.08);
   border-radius: 12px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -272,11 +287,12 @@ const statusColors = {
 
 .icon-box ion-icon {
   font-size: 22px;
-  color: var(--ion-color-primary);
+  color: #006837;
 }
 
-.forword_icon{
-  font-size: 30px;
+.forword_icon {
+  font-size: 22px;
+  color: #94a3b8;
 }
 
 /* Status Grid */
@@ -298,20 +314,12 @@ const statusColors = {
   margin: auto;
 }
 
-
-.add {
-  border: 1px dashed gray;
-  padding: 10px;
-}
-
-/* Chips */
 .chip-container {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-/* Home Scroll */
 .home-scroll {
   display: flex;
   gap: 10px;
@@ -321,21 +329,24 @@ const statusColors = {
 .home-card {
   min-width: 120px;
   height: 80px;
-  background: #eee;
-  border-radius: 10px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  color: #475569;
 }
 
 .home-card.active {
-  border: 2px solid var(--ion-color-primary);
+  border: 2px solid #006837;
+  color: #006837;
+  background: #f0fdf4;
 }
 
-/* Logout */
 .logout {
   text-align: center;
   margin-top: 20px;
 }
-
 </style>

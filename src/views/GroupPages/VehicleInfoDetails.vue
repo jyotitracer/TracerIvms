@@ -233,7 +233,7 @@
 
 <style>
 .dashboard-content {
-  --background: #f3faff;
+  --background: #f8fafc;
   padding: 8px;
   font-family: 'Inter', sans-serif;
 }
@@ -260,7 +260,7 @@
 
 /* CHIP */
 .chip {
-  background: #e6f6ff;
+  background: #f0fdf4; border: 1px solid rgba(0, 104, 55, 0.15); color: #006837;
   padding: 8px 12px;
   border-radius: 12px;
   display: flex;
@@ -279,10 +279,11 @@
 }
 
 .metric-card {
-  background: white;
-  padding: 16px;
+  background: #ffffff;
+  padding: 14px 16px;
   border-radius: 16px;
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
 }
 
 .metric-header {
@@ -298,7 +299,7 @@
 ion-icon{
   height: 24px;
   width: 24px;
-  color: var(--ion-color-primary);
+  color: #006837;
 }
 .metric-value {
   font-size: 20px;
@@ -317,7 +318,7 @@ ion-icon{
 
 /* 🔹 CALENDAR */
 .calendar-card {
-  background: #e6f6ff;
+  background: #f0fdf4; border: 1px solid rgba(0, 104, 55, 0.15); color: #006837;
   padding: 10px;
   border-radius: 16px;
   margin: 10px;

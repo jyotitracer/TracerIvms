@@ -100,14 +100,11 @@ export default {
 </script>
 
 <style scoped>
-
-
 .custom-item {
   width: 100%;
   padding: 0;
   margin: 0;
 }
-
 .info-item {
   display: flex;
   align-items: center;
@@ -115,37 +112,39 @@ export default {
   padding: 10px 0;
   margin: 0;
 }
-
 ion-row,
 ion-col {
   padding: 0 !important;
   margin: 0 !important;
 }
 
-
-
 /* 🔥 CARD STYLE */
 .custom-card {
-  background: white;
-  border-radius: 16px;
-  margin: 10px;
-
-  /* soft shadow like your HTML */
-  box-shadow: 0px 12px 32px rgba(2, 31, 41, 0.06);
-
+  background: #ffffff;
+  border-radius: 18px;
+  margin: 10px 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 18px rgba(0, 30, 60, 0.04);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  padding: 14px 10px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-
+.custom-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 104, 55, 0.08);
+}
 
 /* Group name style */
 .group-name {
-  font-weight: bold;
-  margin-bottom: 10px;
-  margin-left: 5px;
-  padding-top: 5px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #006837;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  width: 100%;
 }
 
 /* Text container styling */
@@ -158,22 +157,30 @@ ion-col {
 .text2 {
   margin: 0;
   padding: 0;
-  font-size: 12px;
-  color: #5d5b5b;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 /* Month total styling */
 .month-below {
   display: flex;
-  padding: 10px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 8px 4px;
   align-content: center;
   flex-direction: column;
   align-items: center;
 }
 
 .month-total {
-  font-size: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 /* Centered content with a border */
@@ -183,17 +190,18 @@ ion-col {
 }
 
 .with-border {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid rgba(226, 232, 240, 0.85);
 }
 
 /* Bottom border for separating rows */
 .border-bottom {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
 }
 
 /* Icon styling */
 .icon-style {
-  font-size: 30px;
+  font-size: 24px;
   margin-right: 10px;
+  color: #006837;
 }
 </style>

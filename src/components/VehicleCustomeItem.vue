@@ -410,22 +410,11 @@ async getLastStatusUpdate(inputDate) {
 
 
 <style scoped>
-
-
 .vehicle-item {
   position: relative;
-  --padding-start: 5px; 
-  --inner-padding-end: 5px;   
-
-}
-
-.vehicle-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
+  --background: transparent;
+  --padding-start: 4px;
+  --inner-padding-end: 4px;
 }
 
 .header {
@@ -440,12 +429,13 @@ async getLastStatusUpdate(inputDate) {
   display: flex;
   align-items: center;
   font-size: 16px;
-  color: gray;
+  color: #64748b;
 }
 
 .vehicle-id .icon-img-star {
-  margin-right: 5px;
-  height: 16px;
+  margin-right: 8px;
+  height: 18px;
+  cursor: pointer;
 }
 
 .vehicle-details {
@@ -454,8 +444,9 @@ async getLastStatusUpdate(inputDate) {
 }
 
 .vehicle-number {
-  font-weight: bold;
-  color: #313131;
+  font-weight: 700;
+  color: #006837;
+  letter-spacing: 0.01em;
 }
 
 .driver-status {
@@ -464,32 +455,36 @@ async getLastStatusUpdate(inputDate) {
   justify-content: flex-end;
   text-align: right;
   flex: 1;
-  font-size: 14px;
-  font-weight: bold;
-  color: gray;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .driver-status .icon-img-people {
   margin-right: 5px;
-  height: 30px;
-  margin-left: 20px;
+  height: 28px;
+  margin-left: 16px;
 }
 
 .label {
   font-size: 12px;
+  font-weight: 600;
 }
 
 .location {
   display: flex;
   align-items: center;
-  color: #313131;
-  font-size: 14px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 6px; /* space between dot and text */
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .dot_color {
@@ -498,47 +493,41 @@ async getLastStatusUpdate(inputDate) {
   border-radius: 50%;
 }
 
-
-/* .location .icon-img {
-  margin-right: 10px;
-  height: 30px;
-} */
-
-.location .icon-img{
-    height: 30px;
-    width: 30px;
-    color: var(--ion-color-primary);
-
+.location .icon-img {
+  height: 24px;
+  width: 24px;
+  color: #006837;
 }
+
 .fuel {
   display: flex;
   align-items: center;
-  color: gray;
+  color: #64748b;
   flex-direction: column;
   font-size: 12px;
 }
 
 .status-update {
   text-align: right;
-  color: gray;
+  color: #64748b;
 }
 
 .last-status-update {
-  color: gray;
-  font-size: 10px;
+  color: #94a3b8;
+  font-size: 11px;
   font-style: oblique;
   margin-top: 0;
-
 }
+
 .status-row-align {
-  align-items: center; /* vertical center */
+  align-items: center;
 }
 
 .btn-row {
   display: flex;
-  justify-content: flex-end; /* 🔥 push button to right */
+  justify-content: flex-end;
+  margin-top: 6px;
 }
-
 
 .icons-row {
   margin-top: 0;
@@ -550,8 +539,8 @@ async getLastStatusUpdate(inputDate) {
   flex-direction: column;
   align-items: center;
   font-size: 10px;
-  color: gray;
-  font-weight: bold;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .custom-grid {
@@ -559,20 +548,21 @@ async getLastStatusUpdate(inputDate) {
   padding-right: 0;
   margin: 0;
 }
+
 .track-btn {
-  --background: var(--ion-background-color);        /* emerald-50 */
-  --color: var(--ion-color-primary);             /* emerald-800 */
-  --border-radius: 9999px;      /* full rounded */
-
+  --background: #006837;
+  --color: #ffffff;
+  --border-radius: 20px;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.5px;
-  padding: 0px 5px 0px 5px;
+  font-size: 11px;
+  padding: 0 8px;
+  box-shadow: 0 2px 6px rgba(0, 104, 55, 0.2);
+  transition: all 0.2s ease;
 }
 
-/* Hover effect */
 .track-btn:hover {
-  --background: #d1fae5;        /* emerald-100 */
+  --background: #00502a;
 }
-
 </style>

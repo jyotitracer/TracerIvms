@@ -17,13 +17,13 @@
        <div v-if="showTooltip" class="tooltip">
         <div class="tooltip-section" @click="takeTour(pageId)">
           <!-- Icon from Code -->
-          <ion-icon :icon="trailSignOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
+          <ion-icon :icon="trailSignOutline" style="font-size: 24px; color: #006837;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Take a Tour</span>
         </div>
         <div class="tooltip-section" @click="shareScreen">
           <!-- Icon from Code -->
-          <ion-icon :icon="shareSocialOutline" style="font-size: 24px; color: #D32F2F;" class="tooltip-icon"></ion-icon>
+          <ion-icon :icon="shareSocialOutline" style="font-size: 24px; color: #006837;" class="tooltip-icon"></ion-icon>
           <!-- Text -->
           <span class="tooltip-text">Share Screen</span>
         </div>
@@ -107,7 +107,7 @@
   cursor: pointer;
   font-size: 14px;
   color:#00875A; /* Text color */
-  background-color: #DFF4FF; /* Background for the text */
+  background-color: #f0fdf4; color: #006837; /* Background for the text */
 }
 
 .tooltip-section:hover {
